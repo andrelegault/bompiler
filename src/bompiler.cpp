@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
     }
     Parser parser("data/test.src");
     while (!parser.done) {
-        std::cout << parser.next_token() << std::endl;
+        std::cout << parser.next_token();
     }
     return 0;
 }
