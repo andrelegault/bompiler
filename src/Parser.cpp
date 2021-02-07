@@ -13,7 +13,113 @@ Parser::~Parser() {
     handler.close();
 }
 
+bool Parser::is_blank(char& c) {
+    if (c == '\n' || c == '\r') { // assumes there's \n comes after \r
+        if (c == '\r')
+            handler.get(c);
+        line++;
+        return true;
+    }
+    else return c == ' ' || c == '\t';
+}
+
 Token Parser::next_token() {
+    /// uses buffer to analyze token by token
+    std::string token;
+    char c;
+    handler.get(c);
+    while (!done && is_blank(c)) {
+        std::cout << "skipping one" << std::endl;
+        done = handler.eof();
+        handler.get(c);
+    }
+    token += c;
+    if (c == '=') { // = or ==
+        handler.get(c);
+        done = handler.eof();
+        if (c == '=') {
+            done = handler.eof();
+            return { "eq", "==", line };
+        }
+        else {
+            handler.unget();
+            done = handler.eof();
+            return { "assign", "=", line };
+        }
+    }
+    else if (c == '<') { // < or <> or <=
+        handler.get(c);
+        done = handler.eof();
+        if (c == '>') {
+            return { "noteq", "<>", line };
+        }
+        else if (c == '=') {
+            return { "leq", "<=", line };
+        }
+        else {
+            handler.unget();
+            done = handler.eof();
+            return { "lt", "<", line };
+        }
+    }
+    else if (c == '>') { // > or >=
+        handler.get(c);
+        done = handler.eof();
+        if (c == '=') {
+            return { "geq", ">=", line };
+        }
+        else {
+            handler.unget();
+            done = handler.eof();
+            return { "gt", ">", line };
+        }
+    }
+    else if (c == '/') {
+        int starting_line = line;
+        handler.get(c);
+        if (c == '/') {
+            token += c;
+            handler.get(c);
+            while (c != '\n' && !done) {
+                token += c;
+                handler.get(c);
+                done = handler.eof();
+            }
+            line++;
+            return { "inlinecmt", token, starting_line };
+        }
+        else if (c == '*') {
+            token = +c;
+            handler.get(c);
+            while (!done && c != '*') {
+                handler.get(c);
+                if (c == '\n') {
+                    line++;
+                    token += "\\n";
+                }
+                else
+                    token += c;
+                done = handler.eof();
+            }
+            token +=c;
+            while (!done && c != '/') {
+                handler.get(c);
+                if (c == '\n') {
+                    line++;
+                    token += "\\n";
+                }
+                else
+                    token += c;
+                done = handler.eof();
+            }
+            return { "blockcmt", token, starting_line };
+        }
+    }
+    done = handler.get() == -1;
+    return { "invalidword", token, line };
+}
+
+Token Parser::next_token_regex() {
     // TODO: skip comments (keep in mind multi-line comments)
     std::string current;
     // skip empty lines

@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
             << bompiler_VERSION_MINOR << "." << bompiler_VERSION_PATCH << std::endl;
         std::cout << "Usage: " << argv[0] << " number" << std::endl;
     }
-    Parser parser("data/lexpositivegrading.src");
+    Parser parser("data/test.src");
     while (!parser.done) {
         std::cout << parser.next_token() << std::endl;
     }
