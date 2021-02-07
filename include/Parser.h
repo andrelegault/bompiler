@@ -18,4 +18,7 @@ private:
     std::regex RGX{ "[a-zA-Z]([a-zA-Z]|\\d|_)*" };
     std::ifstream handler;
     Token process(const std::string& str);
+    bool is_alphanumeric(const int& d);
+    bool is_digit(const int& d);
+    bool is_letter(const int& d);
 };

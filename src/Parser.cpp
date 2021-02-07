@@ -7,6 +7,13 @@
 
 Parser::Parser(const std::string& src) {
     handler.open(src);
+
+    reserved_words = {
+        "if", "then", "else", "integer", "float",
+        "string", "void", "public", "private", "func",
+        "var", "class", "while", "read", "write", "return",
+        "main", "inherits", "break", "continue"
+    };
 }
 
 Parser::~Parser() {
@@ -23,18 +30,43 @@ bool Parser::is_blank(char& c) {
     else return c == ' ' || c == '\t';
 }
 
+bool Parser::is_alphanumeric(const int& d) {
+    /// is it a letter, digit, or an underscore.
+    return is_letter(d) || is_digit(d) || d == 95;
+}
+
+bool Parser::is_letter(const int& d) {
+    /// is it a letter
+    return d >= 65 && d <= 122;
+}
+
+bool Parser::is_digit(const int& d) {
+    /// is it a digit
+    return is_nonzero(d) || d == 48;
+}
 Token Parser::next_token() {
     /// uses buffer to analyze token by token
     std::string token;
     char c;
     handler.get(c);
     while (!done && is_blank(c)) {
-        std::cout << "skipping one" << std::endl;
+        std::cout << c;
         done = handler.eof();
         handler.get(c);
     }
     token += c;
-    if (c == '=') { // = or ==
+    if (is_letter((int)c)) {
+        handler.get(c);
+        while (is_alphanumeric((int)c)) {
+            token += c;
+            handler.get(c);
+        }
+        handler.unget();
+        if (reserved_words.find(token) != reserved_words.end())
+            return { token, token, line };
+        else
+            return { "id", token, line };
+    }
         handler.get(c);
         done = handler.eof();
         if (c == '=') {
