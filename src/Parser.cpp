@@ -44,8 +44,13 @@ bool Parser::is_digit(const int& d) {
     /// is it a digit
     return is_nonzero(d) || d == 48;
 }
+
+bool Parser::is_nonzero(const int& d) {
+    return d >= 49 && d <= 57;
+}
+
 Token Parser::next_token() {
-    /// uses buffer to analyze token by token
+    /// holy shit
     std::string token;
     char c;
     handler.get(c);
@@ -67,6 +72,8 @@ Token Parser::next_token() {
         else
             return { "id", token, line };
     }
+        handler.get(c);
+    else if (c == '=') { // = or ==
         handler.get(c);
         done = handler.eof();
         if (c == '=') {
@@ -117,12 +124,14 @@ Token Parser::next_token() {
                 handler.get(c);
                 done = handler.eof();
             }
+            handler.unget();
             line++;
             return { "inlinecmt", token, starting_line };
         }
         else if (c == '*') {
-            token = +c;
+            token += c;
             handler.get(c);
+            token += c;
             while (!done && c != '*') {
                 handler.get(c);
                 if (c == '\n') {
@@ -133,7 +142,7 @@ Token Parser::next_token() {
                     token += c;
                 done = handler.eof();
             }
-            token +=c;
+            token += c;
             while (!done && c != '/') {
                 handler.get(c);
                 if (c == '\n') {
@@ -146,6 +155,69 @@ Token Parser::next_token() {
             }
             return { "blockcmt", token, starting_line };
         }
+        else {
+            handler.unget(); // if this is part of another token, unget
+            return { "div", "/", line };
+        }
+    }
+    else if (c == ':') {
+        handler.get(c);
+        if (c == ':') {
+            return { "coloncolon", "::", line };
+        }
+        else {
+            handler.unget();
+            return { "colon", ":", line };
+        }
+    }
+    // maybe refactor to use a hashmap from char to string to remove those below
+    else if (c == '+') {
+        return { "plus", "+", line };
+    }
+    else if (c == '-') {
+        return { "minus", "-", line };
+    }
+    else if (c == '*') { // this is for sure a mult, otherwise comment block check failed
+        return { "mult", "*", line };
+    }
+    else if (c == '|') {
+        return { "or", "|", line };
+    }
+    else if (c == '&') {
+        return { "and", "&", line };
+    }
+    else if (c == '!') {
+        return { "not", "!", line };
+    }
+    else if (c == '?') {
+        return { "qmark", "?", line };
+    }
+    else if (c == '(') {
+        return { "openpar", "(", line };
+    }
+    else if (c == ')') {
+        return { "closepar", ")", line };
+    }
+    else if (c == '{') {
+        return { "opencubr", "{", line };
+    }
+    else if (c == '}') {
+        return { "closecubr", "}", line };
+    }
+    else if (c == '[') {
+        return { "opensqbr", "[", line };
+    }
+    else if (c == ']') {
+        return { "closesqbr", "]", line };
+    }
+    else if (c == ';') {
+        return { "semi", ";", line };
+    }
+    else if (c == ',') {
+        return { "comma", ",", line };
+    }
+    else if (c == '"') {
+        return { "comma", ",", line };
     }
     done = handler.get() == -1;
     return { "invalidword", token, line };

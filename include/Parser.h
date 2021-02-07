@@ -3,6 +3,7 @@
 #include <string>
 #include <fstream>
 #include <regex>
+#include <unordered_set>
 
 class Parser {
 public:
@@ -18,7 +19,9 @@ private:
     std::regex RGX{ "[a-zA-Z]([a-zA-Z]|\\d|_)*" };
     std::ifstream handler;
     Token process(const std::string& str);
+    std::unordered_set<std::string> reserved_words;
     bool is_alphanumeric(const int& d);
-    bool is_digit(const int& d);
     bool is_letter(const int& d);
+    bool is_digit(const int& d);
+    bool is_nonzero(const int& d);
 };
