@@ -56,7 +56,7 @@ bool Parser::is_alphanumeric(const int& d) {
 
 bool Parser::is_letter(const int& d) {
     /// is it a letter
-    return d >= 65 && d <= 122;
+    return (d >= 65 && d <= 90) || (d >= 97 && d <= 122);
 }
 
 bool Parser::is_digit(const int& d) {
