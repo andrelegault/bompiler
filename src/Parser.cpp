@@ -377,7 +377,6 @@ Token Parser::next_token() {
                 done = handler.eof();
             }
             handler.unget();
-            line++;
             return { "inlinecmt", token, starting_line };
         }
         else if (c == '*') {
