@@ -102,6 +102,19 @@ Token Parser::next_token() {
                                 handler.unget();
                                 return { "floatnum", token, line };
                             }
+                            else {
+                                return { "invalidnum", token, line };
+                            }
+                        }
+                        else if (is_nonzero((int)c)) {
+                            token += c;
+                            handler.get(c);
+                            while (is_digit((int)c)) {
+                                token += c;
+                                handler.get(c);
+                            }
+                            handler.unget();
+                            return { "floatnum", token, line };
                         }
                     }
                     else if (is_digit((int)c)) { // 0.0<digit>
@@ -269,7 +282,6 @@ Token Parser::next_token() {
                                 token += c;
                                 handler.get(c);
                                 if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
-                                    token += c;
                                     while (is_digit((int)c)) {
                                         token += c;
                                         handler.get(c);
