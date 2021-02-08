@@ -389,7 +389,6 @@ Token Parser::next_token() {
                     token += c;
                 done = handler.eof();
             }
-            token += c;
             while (!done && c != '/') {
                 handler.get(c);
                 if (c == '\n') {
