@@ -85,14 +85,16 @@ Token Parser::next_token() {
                     if (c == 'e') { // 0.0e
                         token += c;
                         handler.get(c);
-                        if (c == '+' || c == '-') {
+                        if (c == '-') {
                             token += c;
                             handler.get(c);
                             if (c == '0') {
                                 token += c;
+                                return { "invalidnum", token, line };
                             }
                             else if (is_nonzero((int)c)) {
                                 token += c;
+                                handler.get(c);
                                 while (is_digit((int)c)) {
                                     token += c;
                                     handler.get(c);
@@ -119,11 +121,12 @@ Token Parser::next_token() {
                             if (c == 'e') { // 0.0e
                                 token += c;
                                 handler.get(c);
-                                if (c == '+' || c == '-') {
+                                if (c == '-') {
                                     token += c;
                                     handler.get(c);
                                     if (c == '0') {
                                         token += c;
+                                        return { "invalidnum", token, line };
                                     }
                                     else if (is_nonzero((int)c)) { // 0.0<digit>*<nonzero>e[+/-]<nonzero><digit>*
                                         token += c;
@@ -134,6 +137,31 @@ Token Parser::next_token() {
                                         }
                                         handler.unget();
                                         return { "floatnum", token, line };
+                                    }
+                                }
+                                else if (is_digit((int)c)) {
+                                    token += c;
+                                    handler.get(c);
+                                    if (c == '0') {
+                                        token += c;
+                                        return { "floatnum", token, line };
+                                    }
+                                    else {
+                                        while (is_digit((int)c)) {
+                                            token += c;
+                                            handler.get(c);
+                                        }
+                                        handler.unget();
+                                        handler.unget();
+                                        handler.get(c);
+                                        if (c == '0') {
+                                            token.pop_back();
+                                            handler.unget();
+                                            return { "floatnum", token, line };
+                                        }
+                                        else {
+                                            return { "floatnum", token, line };
+                                        }
                                     }
                                 }
                             }
@@ -162,14 +190,27 @@ Token Parser::next_token() {
                         if (c == 'e') { // 0.<digit>*<nonzero>e
                             token += c;
                             handler.get(c);
-                            if (c == '+' || c == '-') { // 0.<digit>*<nonzero>e[+/-]
+                            if (c == '-') { // <digits>*<nonzero>.<digit>*<nonzero>e[+/-]
                                 token += c;
                                 handler.get(c);
-                                if (c == '0') {
+                                if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     token += c;
+                                    while (is_digit((int)c)) {
+                                        token += c;
+                                        handler.get(c);
+                                    }
+                                    handler.unget();
                                     return { "floatnum", token, line };
                                 }
-                                else if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
+                                else {
+                                    return { "invalidnum", token, line };
+                                }
+                            }
+                            else if (is_digit((int)c)) {
+                                if (c == '0') {
+                                    return { "floatnum", token, line };
+                                }
+                                else if (is_nonzero((int)c)) {
                                     token += c;
                                     handler.get(c);
                                     while (is_digit((int)c)) {
@@ -207,6 +248,7 @@ Token Parser::next_token() {
             handler.unget();
             handler.get(c);
             if (c == '.') { // <integer>
+                token += c;
                 handler.get(c);
                 if (is_digit((int)c)) {
                     handler.get(c);
@@ -223,15 +265,29 @@ Token Parser::next_token() {
                         if (c == 'e') { // <digits>*nonzero.<digit>*<nonzero>e
                             token += c;
                             handler.get(c);
-                            if (c == '+' || c == '-') { // <digits>*<nonzero>.<digit>*<nonzero>e[+/-]
+                            if (c == '-') { // <digits>*<nonzero>.<digit>*<nonzero>e[+/-]
                                 token += c;
                                 handler.get(c);
-                                if (c == '0') {
+                                if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     token += c;
+                                    while (is_digit((int)c)) {
+                                        token += c;
+                                        handler.get(c);
+                                    }
+                                    handler.unget();
                                     return { "floatnum", token, line };
                                 }
-                                else if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
+                                else {
+                                    return { "invalidnum", token, line };
+                                }
+                            }
+                            else if (is_digit((int)c)) {
+                                if (c == '0') {
+                                    return { "floatnum", token, line };
+                                }
+                                else if (is_nonzero((int)c)) {
                                     token += c;
+                                    handler.get(c);
                                     while (is_digit((int)c)) {
                                         token += c;
                                         handler.get(c);
