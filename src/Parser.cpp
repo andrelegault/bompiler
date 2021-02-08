@@ -14,6 +14,25 @@ Parser::Parser(const std::string& src) {
         "var", "class", "while", "read", "write", "return",
         "main", "inherits", "break", "continue"
     };
+
+    chars = {
+        {'+', "plus"},
+        {'-', "minus"},
+        {'*', "mult"},
+        {'|', "or"},
+        {'&', "and"},
+        {'!', "not"},
+        {'?', "qmark"},
+        {'(', "openpar"},
+        {')', "closepar"},
+        {'{', "opencubr"},
+        {'}', "closecubr"},
+        {'[', "opensqbr"},
+        {']', "closesqbr"},
+        {';', "semi"},
+        {',', "comma"},
+        {'"', "qmark"}
+    };
 }
 
 Parser::~Parser() {
@@ -434,54 +453,15 @@ Token Parser::next_token() {
             return { "colon", ":", line };
         }
     }
+    else if (chars.find(c) != chars.end()) {
+        auto test = chars.find(c);
+        std::string temp{ c };
+        return { test->second, temp, line };
+    }
     // maybe refactor to use a hashmap from char to string to remove those below
-    else if (c == '+') {
-        return { "plus", "+", line };
-    }
-    else if (c == '-') {
-        return { "minus", "-", line };
-    }
-    else if (c == '*') { // this is for sure a mult, otherwise comment block check failed
-        return { "mult", "*", line };
-    }
-    else if (c == '|') {
-        return { "or", "|", line };
-    }
-    else if (c == '&') {
-        return { "and", "&", line };
-    }
-    else if (c == '!') {
-        return { "not", "!", line };
-    }
-    else if (c == '?') {
-        return { "qmark", "?", line };
-    }
-    else if (c == '(') {
-        return { "openpar", "(", line };
-    }
-    else if (c == ')') {
-        return { "closepar", ")", line };
-    }
-    else if (c == '{') {
-        return { "opencubr", "{", line };
-    }
-    else if (c == '}') {
-        return { "closecubr", "}", line };
-    }
-    else if (c == '[') {
-        return { "opensqbr", "[", line };
-    }
-    else if (c == ']') {
-        return { "closesqbr", "]", line };
-    }
-    else if (c == ';') {
-        return { "semi", ";", line };
-    }
-    else if (c == ',') {
-        return { "comma", ",", line };
-    }
-    else if (c == '"') {
-        return { "comma", ",", line };
+    else {
+        done = handler.get() == -1;
+        return { "invalidchar", token, line };
     }
     done = handler.get() == -1;
     return { "invalidword", token, line };

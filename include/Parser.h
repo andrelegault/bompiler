@@ -4,6 +4,7 @@
 #include <fstream>
 #include <regex>
 #include <unordered_set>
+#include <unordered_map>
 
 class Parser {
 public:
@@ -20,6 +21,7 @@ private:
     std::ifstream handler;
     Token process(const std::string& str);
     std::unordered_set<std::string> reserved_words;
+    std::unordered_map<char, std::string> chars;
     bool is_alphanumeric(const int& d);
     bool is_letter(const int& d);
     bool is_digit(const int& d);
