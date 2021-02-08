@@ -39,11 +39,12 @@ Parser::~Parser() {
     handler.close();
 }
 
-bool Parser::is_blank(char& c) {
-    if (c == '\n' || c == '\r') { // assumes there's \n comes after \r
+bool Parser::is_blank(char& c, bool increase_line) {
+    if (c == '\n' || c == '\r') { // assumes a \n comes after \r
         if (c == '\r')
             handler.get(c);
-        line++;
+        if (increase_line)
+            line++;
         return true;
     }
     else return c == ' ' || c == '\t';
@@ -76,8 +77,8 @@ void Parser::process_remaining_digits(std::string& token, char& c) {
     handler.unget();
 }
 
-void Parser::process_until_blank(std::string& token, char& c) {
-    while (!is_blank(c)) {
+void Parser::process_until_blank(std::string& token, char& c, bool save_changes) {
+    while (!is_blank(c, save_changes)) {
         token += c;
         handler.get(c);
     }
@@ -89,7 +90,7 @@ Token Parser::next_token() {
     std::string token;
     char c;
     handler.get(c);
-    while (!done && is_blank(c)) {
+    while (!done && is_blank(c, true)) {
         std::cout << c;
         done = handler.eof();
         handler.get(c);
@@ -311,7 +312,7 @@ Token Parser::next_token() {
                         }
                     }
                     else {
-                        process_until_blank(token, c);
+                        process_until_blank(token, c, false);
                         return { "invalidnumtest", token, line };
                     }
                 }
