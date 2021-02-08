@@ -26,4 +26,6 @@ private:
     bool is_letter(const int& d);
     bool is_digit(const int& d);
     bool is_nonzero(const int& d);
+    void process_remaining_digits(std::string& token, char& c);
+    void process_until_blank(std::string& token, char& c);
 };
