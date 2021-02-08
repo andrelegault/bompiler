@@ -272,7 +272,7 @@ Token Parser::next_token() {
                     token.pop_back();
                     handler.unget();
                     handler.get(c);
-                    if (is_nonzero((int)c)) {
+                    if (is_nonzero((int)c)) { // [1..9].<digit>*<nonzero>
                         token += c;
                         handler.get(c);
                         if (c == 'e') { // <digits>*nonzero.<digit>*<nonzero>e
@@ -301,9 +301,13 @@ Token Parser::next_token() {
                                 }
                             }
                         }
-                        else {
+                        else if (c == '0') { // [1..9].<digit>*0
                             process_until_blank(token, c);
                             return { "invalidnumok", token, line };
+                        }
+                        else { // [1..9].<digit>*<not-0>
+                            handler.unget();
+                            return { "floatnum", token, line };
                         }
                     }
                     else {
@@ -314,7 +318,8 @@ Token Parser::next_token() {
                 else {
                     return { "invalidnum", token, line };
                 }
-            } else {
+            }
+            else {
                 handler.unget();
                 return { "integer", token, line };
             }
