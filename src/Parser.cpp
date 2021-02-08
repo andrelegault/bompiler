@@ -314,6 +314,9 @@ Token Parser::next_token() {
                 else {
                     return { "invalidnum", token, line };
                 }
+            } else {
+                handler.unget();
+                return { "integer", token, line };
             }
         }
     }
