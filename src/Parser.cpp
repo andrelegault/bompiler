@@ -85,14 +85,14 @@ Token Parser::next_token() {
                     if (c == 'e') { // 0.0e
                         token += c;
                         handler.get(c);
-                        if (c == '-') {
+                        if (c == '-') { // 0.0e-
                             token += c;
                             handler.get(c);
-                            if (c == '0') {
+                            if (c == '0') { // 0.0e-0
                                 token += c;
                                 return { "invalidnum", token, line };
                             }
-                            else if (is_nonzero((int)c)) {
+                            else if (is_nonzero((int)c)) { // 0.0e-<1..9>
                                 token += c;
                                 handler.get(c);
                                 while (is_digit((int)c)) {
@@ -102,14 +102,14 @@ Token Parser::next_token() {
                                 handler.unget();
                                 return { "floatnum", token, line };
                             }
-                            else {
+                            else { // 0.0e-<not-a-digit>
                                 return { "invalidnum", token, line };
                             }
                         }
-                        else if (is_nonzero((int)c)) {
+                        else if (is_nonzero((int)c)) { // 0.0<1..9>
                             token += c;
                             handler.get(c);
-                            while (is_digit((int)c)) {
+                            while (is_digit((int)c)) { // 0.0<1..9><digit>
                                 token += c;
                                 handler.get(c);
                             }
@@ -207,7 +207,6 @@ Token Parser::next_token() {
                                 token += c;
                                 handler.get(c);
                                 if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
-                                    token += c;
                                     while (is_digit((int)c)) {
                                         token += c;
                                         handler.get(c);
@@ -264,12 +263,14 @@ Token Parser::next_token() {
                 token += c;
                 handler.get(c);
                 if (is_digit((int)c)) {
+                    token += c;
                     handler.get(c);
                     while (is_digit((int)c)) {
                         token += c;
                         handler.get(c);
                     }
                     handler.unget();
+                    token.pop_back();
                     handler.unget();
                     handler.get(c);
                     if (is_nonzero((int)c)) {
@@ -310,19 +311,28 @@ Token Parser::next_token() {
                             }
                         }
                         else {
-                            token.pop_back();
-                            return { "floatnum", token, line };
+                            while (!is_blank(c)) {
+                                token += c;
+                                handler.get(c);
+                            }
+                            return { "invalidnumok", token, line };
                         }
                     }
                     else {
-                        handler.unget();
-                        return { "integer", token, line };
+                        while (!is_blank(c)) {
+                            token += c;
+                            handler.get(c);
+                        }
+                        return { "invalidnumtest", token, line };
                     }
                 }
                 else {
+                    while (!is_blank(c)) {
+                        token += c;
+                        handler.get(c);
+                    }
                     handler.unget();
-                    token.pop_back();
-                    return { "integer", token, line };
+                    return { "invalidnum", token, line };
                 }
             }
         }
