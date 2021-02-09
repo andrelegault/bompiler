@@ -260,7 +260,8 @@ Token* Parser::next_token() {
                         handler.unget();
                         t = new Token("floatnum", token, line);
                     }
-                } else {
+                }
+                else {
                     process_until_blank(token, c, false);
                     t = new Token("invalidnum", token, line);
                 }
@@ -464,7 +465,6 @@ Token* Parser::next_token() {
         handler.unget();
         t = new Token("invalidchar", token, line);
     }
-    // done = handler.get() == -1;
     if (t == nullptr)
         t = new Token("invalidword", token, line);
     out_tokens << *t;

@@ -9,7 +9,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(BOMPILER_SOURCE_DIR src)
 set(BOMPILER_INCLUDE_DIR include)
 set(BOMPILER_LIBS_DIR libs)
-set(BOMPILER_MAIN bompiler.cpp)
+set(BOMPILER_MAIN Driver.cpp)
 #set(BOMPILER_LIBRARIES gtest)
 
 configure_file(${BOMPILER_INCLUDE_DIR}/bompilerConfig.h.in ${BOMPILER_INCLUDE_DIR}/bompilerConfig.h)
@@ -18,7 +18,7 @@ foreach(LIBRARY ${BOMPILER_LIBRARIES})
     add_subdirectory(${BOMPILER_LIBS_DIR}/${LIBRARY})
 endforeach(LIBRARY)
 
-# generate an executable called ``bompiler`` that's based off ``bompiler.cpp``
+# generate an executable called ``bompiler`` that's based off ``Driver.cpp``
 add_executable(bompiler ${BOMPILER_SOURCE_DIR}/${BOMPILER_MAIN} ${BOMPILER_SOURCE_DIR}/Parser.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
 
 # propagate that this project needs the gtest library (optional)
