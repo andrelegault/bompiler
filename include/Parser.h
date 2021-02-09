@@ -14,12 +14,11 @@ public:
     Token next_token_regex();
     bool done{ false };
 private:
-    bool is_blank(char &c, bool increase_line);
+    bool is_blank(char& c, bool increase_line);
     int line{ 1 };
     // std::regex RGX{ "([a-zA-Z]([a-zA-Z]|\\d|_)*)|^([1-9]\\d*|0)$)|(^([1-9]\\d*|0).((\\d*[1-9])|0)((e[+|-])?([1-9]\\d*|0))*$)" };
     std::regex RGX{ "[a-zA-Z]([a-zA-Z]|\\d|_)*" };
     std::ifstream handler;
-    Token process(const std::string& str);
     std::unordered_set<std::string> reserved_words;
     std::unordered_map<char, std::string> chars;
     bool is_alphanumeric(const int& d);
@@ -27,5 +26,5 @@ private:
     bool is_digit(const int& d);
     bool is_nonzero(const int& d);
     void process_remaining_digits(std::string& token, char& c);
-    void process_until_blank(std::string& token, char& c, bool save_changes=true);
+    void process_until_blank(std::string& token, char& c, bool save_changes = true);
 };
