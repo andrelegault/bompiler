@@ -35,7 +35,9 @@ int main(int argc, char* argv[]) {
     }
     Parser parser("data/lexnegativegrading.src");
     while (!parser.done) {
-        std::cout << parser.next_token();
+        Token *t = parser.next_token();
+        std::cout << *(t);
+        delete t;
     }
     return 0;
 }
