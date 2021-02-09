@@ -30,8 +30,7 @@ Parser::Parser(const std::string& src) {
         {'[', "opensqbr"},
         {']', "closesqbr"},
         {';', "semi"},
-        {',', "comma"},
-        {'"', "qmark"}
+        {',', "comma"}
     };
 }
 
@@ -419,6 +418,33 @@ Token Parser::next_token() {
         else {
             handler.unget();
             return { "colon", ":", line };
+        }
+    }
+    else if (c == '"') {
+        handler.get(c);
+        if (is_blank(c, false)) { // "(\r|\t|\n|<space>)
+            handler.unget();
+            return { "qmark", token, line };
+        }
+        else { // "<something that's not blank>
+            while (c != '\n' && c != '"') { // until either end of line or another "
+                token += c;
+                handler.get(c);
+            }
+            handler.unget(); // check whatever was the last char
+            handler.get(c);
+            if (c == '"') { // "<someting>"
+                token.erase(0, 1);
+                return { "stringlit", token, line };
+            }
+            else {
+                while (token.size() > 1) {
+                    token.pop_back();
+                    handler.unget();
+                }
+                handler.unget();
+                return { "qmark", token, line };
+            }
         }
     }
     else if (chars.find(c) != chars.end()) {
