@@ -150,6 +150,9 @@ Token* Parser::next_token() {
                             process_remaining_digits(token, c);
                             t = new Token("floatnum", token, line);
                         }
+                        else {
+                            t = new Token("invalidnum", token, line);
+                        }
                     }
                     else if (is_digit((int)c)) { // 0.0<digit>
                         token += c;
@@ -257,6 +260,9 @@ Token* Parser::next_token() {
                         handler.unget();
                         t = new Token("floatnum", token, line);
                     }
+                } else {
+                    process_until_blank(token, c, false);
+                    t = new Token("invalidnum", token, line);
                 }
             }
             else {
