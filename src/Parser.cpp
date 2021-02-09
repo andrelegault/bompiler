@@ -304,7 +304,7 @@ Token Parser::next_token() {
                         }
                         else if (c == '0') { // [1..9].<digit>*0
                             process_until_blank(token, c);
-                            return { "invalidnumok", token, line };
+                            return { "invalidnum", token, line };
                         }
                         else { // [1..9].<digit>*<not-0>
                             handler.unget();
@@ -313,7 +313,7 @@ Token Parser::next_token() {
                     }
                     else {
                         process_until_blank(token, c, false);
-                        return { "invalidnumtest", token, line };
+                        return { "invalidnum", token, line };
                     }
                 }
                 else {
@@ -455,6 +455,7 @@ Token Parser::next_token() {
     }
     else {
         done = handler.get() == -1;
+        handler.unget();
         return { "invalidchar", token, line };
     }
     done = handler.get() == -1;
