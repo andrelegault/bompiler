@@ -291,6 +291,7 @@ Token Parser::next_token() {
                             }
                             else if (is_digit((int)c)) {
                                 if (c == '0') {
+                                    token += c;
                                     return { "floatnum", token, line };
                                 }
                                 else if (is_nonzero((int)c)) {
