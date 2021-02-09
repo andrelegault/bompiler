@@ -16,3 +16,12 @@ std::vector<std::string> Utils::split_string(const std::string& i_str, const std
         result.push_back(std::string(i_str.begin() + startIndex, i_str.end()));
     return result;
 }
+
+std::string Utils::get_before_ext(const std::string &filename) {
+    const int dot = filename.rfind('.');
+    if (dot != std::string::npos) {
+        return filename.substr(0, dot);
+    } else {
+        return filename;
+    }
+}

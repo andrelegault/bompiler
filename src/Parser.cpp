@@ -7,8 +7,9 @@
 
 Parser::Parser(const std::string& src) {
     handler.open(src);
-    out_tokens.open("data/results.outlextokens", std::ios_base::out);
-    out_errors.open("data/results.outlexerrors", std::ios_base::out);
+    std::string basename = Utils::get_before_ext(src);
+    out_tokens.open(basename + ".outlextokens", std::ios_base::out);
+    out_errors.open(basename + ".outlexerrors", std::ios_base::out);
 
     reserved_words = {
         "if", "then", "else", "integer", "float",
