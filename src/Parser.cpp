@@ -34,7 +34,8 @@ Parser::Parser(const std::string& src) {
         {'[', "opensqbr"},
         {']', "closesqbr"},
         {';', "semi"},
-        {',', "comma"}
+        {',', "comma"},
+        {'.', "dot"}
     };
 }
 
