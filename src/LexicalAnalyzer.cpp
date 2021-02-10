@@ -45,38 +45,8 @@ LexicalAnalyzer::~LexicalAnalyzer() {
     out_errors.close();
 }
 
-bool LexicalAnalyzer::is_blank(char& c, bool increase_line) {
-    if (c == '\n' || c == '\r') { // assumes a \n comes after \r
-        if (c == '\r')
-            handler.get(c);
-        if (increase_line)
-            line++;
-        return true;
-    }
-    else return c == ' ' || c == '\t';
-}
-
-bool LexicalAnalyzer::is_alphanumeric(const int& d) {
-    /// is it a letter, digit, or an underscore.
-    return is_letter(d) || is_digit(d) || d == 95;
-}
-
-bool LexicalAnalyzer::is_letter(const int& d) {
-    /// is it a letter
-    return (d >= 65 && d <= 90) || (d >= 97 && d <= 122);
-}
-
-bool LexicalAnalyzer::is_digit(const int& d) {
-    /// is it a digit
-    return is_nonzero(d) || d == 48;
-}
-
-bool LexicalAnalyzer::is_nonzero(const int& d) {
-    return d >= 49 && d <= 57;
-}
-
 void LexicalAnalyzer::process_remaining_digits(std::string& token, char& c) {
-    while (is_digit((int)c)) {
+    while (Utils::is_digit((int)c)) {
         token += c;
         handler.get(c);
     }
@@ -84,7 +54,7 @@ void LexicalAnalyzer::process_remaining_digits(std::string& token, char& c) {
 }
 
 void LexicalAnalyzer::process_until_blank(std::string& token, char& c, bool save_changes) {
-    while (!is_blank(c, save_changes)) {
+    while (!Utils::is_blank(c, line, handler, save_changes)) {
         token += c;
         handler.get(c);
     }
@@ -98,16 +68,16 @@ Token* LexicalAnalyzer::next_token() {
     std::ostringstream str_stream;
     char c;
     handler.get(c);
-    while (!done && is_blank(c, true)) {
+    while (!done && Utils::is_blank(c, line, handler, true)) {
         std::cout << c;
         out_tokens << c;
         done = handler.eof();
         handler.get(c);
     }
     token += c;
-    if (is_letter((int)c)) {
+    if (Utils::is_letter((int)c)) {
         handler.get(c);
-        while (is_alphanumeric((int)c)) {
+        while (Utils::is_alphanumeric((int)c)) {
             token += c;
             handler.get(c);
         }
@@ -117,7 +87,7 @@ Token* LexicalAnalyzer::next_token() {
         else
             t = new Token("id", token, line);
     }
-    else if (is_digit((int)c)) { // 0..9
+    else if (Utils::is_digit((int)c)) { // 0..9
         // either .0 or .digit*nonzero
         if (c == '0') { // digit
             handler.get(c);
@@ -137,7 +107,7 @@ Token* LexicalAnalyzer::next_token() {
                                 token += c;
                                 t = new ErrorToken("float", token, line);
                             }
-                            else if (is_nonzero((int)c)) { // 0.0e-<1..9>
+                            else if (Utils::is_nonzero((int)c)) { // 0.0e-<1..9>
                                 token += c;
                                 handler.get(c);
                                 process_remaining_digits(token, c);
@@ -147,7 +117,7 @@ Token* LexicalAnalyzer::next_token() {
                                 t = new ErrorToken("float", token, line);
                             }
                         }
-                        else if (is_nonzero((int)c)) { // 0.0e<1..9>
+                        else if (Utils::is_nonzero((int)c)) { // 0.0e<1..9>
                             token += c;
                             handler.get(c);
                             process_remaining_digits(token, c);
@@ -157,14 +127,14 @@ Token* LexicalAnalyzer::next_token() {
                             t = new ErrorToken("float", token, line);
                         }
                     }
-                    else if (is_digit((int)c)) { // 0.0<digit>
+                    else if (Utils::is_digit((int)c)) { // 0.0<digit>
                         token += c;
                         handler.get(c);
                         process_remaining_digits(token, c);
                         handler.unget();
                         token.pop_back();
                         handler.get(c);
-                        if (is_nonzero((int)c)) { // 0.0<digit>*<nonzero>
+                        if (Utils::is_nonzero((int)c)) { // 0.0<digit>*<nonzero>
                             token += c;
                             handler.get(c);
                             if (c == 'e') { // 0.0e
@@ -177,14 +147,14 @@ Token* LexicalAnalyzer::next_token() {
                                         token += c;
                                         t = new ErrorToken("float", token, line);
                                     }
-                                    else if (is_nonzero((int)c)) { // 0.0<digit>*<nonzero>e[+/-]<nonzero><digit>*
+                                    else if (Utils::is_nonzero((int)c)) { // 0.0<digit>*<nonzero>e[+/-]<nonzero><digit>*
                                         token += c;
                                         handler.get(c);
                                         process_remaining_digits(token, c);
                                         t = new Token("float", token, line);
                                     }
                                 }
-                                else if (is_digit((int)c)) {
+                                else if (Utils::is_digit((int)c)) {
                                     token += c;
                                     handler.get(c);
                                     if (c == '0') {
@@ -217,15 +187,15 @@ Token* LexicalAnalyzer::next_token() {
                         }
                     }
                 }
-                else if (is_digit((int)c)) { // 0.<digit>
-                    while (is_digit((int)c)) {
+                else if (Utils::is_digit((int)c)) { // 0.<digit>
+                    while (Utils::is_digit((int)c)) {
                         token += c;
                         handler.get(c);
                     }
                     handler.unget();
                     handler.unget();
                     handler.get(c);
-                    if (is_nonzero((int)c)) { // 0.digit*nonzero
+                    if (Utils::is_nonzero((int)c)) { // 0.digit*nonzero
                         token += c;
                         handler.get(c);
                         if (c == 'e') { // 0.<digit>*<nonzero>e
@@ -234,7 +204,7 @@ Token* LexicalAnalyzer::next_token() {
                             if (c == '-') { // <digits>*<nonzero>.<digit>*<nonzero>e[+/-]
                                 token += c;
                                 handler.get(c);
-                                if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
+                                if (Utils::is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     process_remaining_digits(token, c);
                                     t = new Token("float", token, line);
                                 }
@@ -242,11 +212,11 @@ Token* LexicalAnalyzer::next_token() {
                                     t = new ErrorToken("float", token, line);
                                 }
                             }
-                            else if (is_digit((int)c)) {
+                            else if (Utils::is_digit((int)c)) {
                                 if (c == '0') {
                                     t = new Token("float", token, line);
                                 }
-                                else if (is_nonzero((int)c)) {
+                                else if (Utils::is_nonzero((int)c)) {
                                     token += c;
                                     handler.get(c);
                                     process_remaining_digits(token, c);
@@ -282,14 +252,14 @@ Token* LexicalAnalyzer::next_token() {
             if (c == '.') { // [1..9].
                 token += c;
                 handler.get(c);
-                if (is_digit((int)c)) { // [1..9].<digit>
+                if (Utils::is_digit((int)c)) { // [1..9].<digit>
                     token += c;
                     handler.get(c);
                     process_remaining_digits(token, c);
                     token.pop_back();
                     handler.unget();
                     handler.get(c);
-                    if (is_nonzero((int)c)) { // [1..9].<digit>*<nonzero>
+                    if (Utils::is_nonzero((int)c)) { // [1..9].<digit>*<nonzero>
                         token += c;
                         handler.get(c);
                         if (c == 'e') { // <digits>*nonzero.<digit>*<nonzero>e
@@ -298,7 +268,7 @@ Token* LexicalAnalyzer::next_token() {
                             if (c == '-') { // <digits>*<nonzero>.<digit>*<nonzero>e[+/-]
                                 token += c;
                                 handler.get(c);
-                                if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
+                                if (Utils::is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     process_remaining_digits(token, c);
                                     t = new Token("float", token, line);
                                 }
@@ -306,12 +276,12 @@ Token* LexicalAnalyzer::next_token() {
                                     t = new ErrorToken("float", token, line);
                                 }
                             }
-                            else if (is_digit((int)c)) {
+                            else if (Utils::is_digit((int)c)) {
                                 if (c == '0') {
                                     token += c;
                                     t = new Token("float", token, line);
                                 }
-                                else if (is_nonzero((int)c)) {
+                                else if (Utils::is_nonzero((int)c)) {
                                     token += c;
                                     handler.get(c);
                                     process_remaining_digits(token, c);
@@ -433,7 +403,7 @@ Token* LexicalAnalyzer::next_token() {
     }
     else if (c == '"') {
         handler.get(c);
-        if (is_blank(c, false)) { // "(\r|\t|\n|<space>)
+        if (Utils::is_blank(c, line, handler, false)) { // "(\r|\t|\n|<space>)
             handler.unget();
             t = new Token("qmark", token, line);
         }

@@ -13,17 +13,12 @@ public:
     Token* next_token();
     bool done{ false };
 private:
-    bool is_blank(char& c, bool increase_line);
     int line{ 1 };
     std::ofstream out_tokens;
     std::ofstream out_errors;
     std::ifstream handler;
     std::unordered_set<std::string> reserved_words;
     std::unordered_map<char, std::string> chars;
-    bool is_alphanumeric(const int& d);
-    bool is_letter(const int& d);
-    bool is_digit(const int& d);
-    bool is_nonzero(const int& d);
     void process_remaining_digits(std::string& token, char& c);
     void process_until_blank(std::string& token, char& c, bool save_changes = true);
 };
