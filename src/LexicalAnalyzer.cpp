@@ -387,7 +387,10 @@ Token* LexicalAnalyzer::next_token() {
                     done = handler.eof();
                 }
             }
-            t = new Token("blockcmt", token, starting_line);
+            if (done)
+                t = new ErrorToken("blockcmt reached EOF", token, starting_line);
+            else
+                t = new Token("blockcmt", token, starting_line);
         }
         else {
             handler.unget(); // if this is part of another token, unget
