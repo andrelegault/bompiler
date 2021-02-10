@@ -6,10 +6,10 @@
 #include <unordered_set>
 #include <unordered_map>
 
-class Parser {
+class LexicalAnalyzer {
 public:
-    Parser(const std::string& src);
-    ~Parser();
+    LexicalAnalyzer(const std::string& src);
+    ~LexicalAnalyzer();
     Token* next_token();
     Token next_token_regex();
     bool done{ false };

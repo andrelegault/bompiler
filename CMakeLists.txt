@@ -19,7 +19,7 @@ foreach(LIBRARY ${BOMPILER_LIBRARIES})
 endforeach(LIBRARY)
 
 # generate an executable called ``bompiler`` that's based off ``Driver.cpp``
-add_executable(bompiler ${BOMPILER_SOURCE_DIR}/${BOMPILER_MAIN} ${BOMPILER_SOURCE_DIR}/Parser.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
+add_executable(bompiler ${BOMPILER_SOURCE_DIR}/${BOMPILER_MAIN} ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
 
 # propagate that this project needs the gtest library (optional)
 #target_link_libraries(bompiler PUBLIC gtest)

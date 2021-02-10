@@ -1,4 +1,4 @@
-#include "Parser.h"
+#include "LexicalAnalyzer.h"
 #include "Utils.h"
 #include <sstream>
 #include <fstream>
@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-Parser::Parser(const std::string& src) {
+LexicalAnalyzer::LexicalAnalyzer(const std::string& src) {
     handler.open(src);
     std::string basename = Utils::get_before_ext(src);
     out_tokens.open(basename + ".outlextokens", std::ios_base::out);
@@ -39,13 +39,13 @@ Parser::Parser(const std::string& src) {
     };
 }
 
-Parser::~Parser() {
+LexicalAnalyzer::~LexicalAnalyzer() {
     handler.close();
     out_tokens.close();
     out_errors.close();
 }
 
-bool Parser::is_blank(char& c, bool increase_line) {
+bool LexicalAnalyzer::is_blank(char& c, bool increase_line) {
     if (c == '\n' || c == '\r') { // assumes a \n comes after \r
         if (c == '\r')
             handler.get(c);
@@ -56,26 +56,26 @@ bool Parser::is_blank(char& c, bool increase_line) {
     else return c == ' ' || c == '\t';
 }
 
-bool Parser::is_alphanumeric(const int& d) {
+bool LexicalAnalyzer::is_alphanumeric(const int& d) {
     /// is it a letter, digit, or an underscore.
     return is_letter(d) || is_digit(d) || d == 95;
 }
 
-bool Parser::is_letter(const int& d) {
+bool LexicalAnalyzer::is_letter(const int& d) {
     /// is it a letter
     return (d >= 65 && d <= 90) || (d >= 97 && d <= 122);
 }
 
-bool Parser::is_digit(const int& d) {
+bool LexicalAnalyzer::is_digit(const int& d) {
     /// is it a digit
     return is_nonzero(d) || d == 48;
 }
 
-bool Parser::is_nonzero(const int& d) {
+bool LexicalAnalyzer::is_nonzero(const int& d) {
     return d >= 49 && d <= 57;
 }
 
-void Parser::process_remaining_digits(std::string& token, char& c) {
+void LexicalAnalyzer::process_remaining_digits(std::string& token, char& c) {
     while (is_digit((int)c)) {
         token += c;
         handler.get(c);
@@ -83,7 +83,7 @@ void Parser::process_remaining_digits(std::string& token, char& c) {
     handler.unget();
 }
 
-void Parser::process_until_blank(std::string& token, char& c, bool save_changes) {
+void LexicalAnalyzer::process_until_blank(std::string& token, char& c, bool save_changes) {
     while (!is_blank(c, save_changes)) {
         token += c;
         handler.get(c);
@@ -91,7 +91,7 @@ void Parser::process_until_blank(std::string& token, char& c, bool save_changes)
     handler.unget();
 }
 
-Token* Parser::next_token() {
+Token* LexicalAnalyzer::next_token() {
     /// holy shit
     Token* t{ nullptr };
     std::string token;
