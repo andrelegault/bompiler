@@ -46,17 +46,19 @@ LexicalAnalyzer::~LexicalAnalyzer() {
 }
 
 void LexicalAnalyzer::process_remaining_digits(std::string& token, char& c) {
-    while (Utils::is_digit((int)c)) {
+    while (!done && Utils::is_digit((int)c)) {
         token += c;
         handler.get(c);
+        done = handler.eof();
     }
     handler.unget();
 }
 
 void LexicalAnalyzer::process_until_blank(std::string& token, char& c, bool save_changes) {
-    while (!Utils::is_blank(c, line, handler, save_changes)) {
+    while (!done && !Utils::is_blank(c, line, handler, save_changes)) {
         token += c;
         handler.get(c);
+        done = handler.eof();
     }
     handler.unget();
 }
@@ -77,9 +79,10 @@ Token* LexicalAnalyzer::next_token() {
     token += c;
     if (Utils::is_letter((int)c)) {
         handler.get(c);
-        while (Utils::is_alphanumeric((int)c)) {
+        while (!done && Utils::is_alphanumeric((int)c)) {
             token += c;
             handler.get(c);
+            done = handler.eof();
         }
         handler.unget();
         if (reserved_words.find(token) != reserved_words.end())
@@ -188,9 +191,10 @@ Token* LexicalAnalyzer::next_token() {
                     }
                 }
                 else if (Utils::is_digit((int)c)) { // 0.<digit>
-                    while (Utils::is_digit((int)c)) {
+                    while (!done && Utils::is_digit((int)c)) {
                         token += c;
                         handler.get(c);
+                        done = handler.eof();
                     }
                     handler.unget();
                     handler.unget();
@@ -418,9 +422,10 @@ Token* LexicalAnalyzer::next_token() {
                 t = new Token("stringlit", token, line);
             }
             else {
-                while (token.size() > 1) {
+                while (!done && token.size() > 1) {
                     token.pop_back();
                     handler.unget();
+                    done = handler.eof();
                 }
                 handler.unget();
                 t = new Token("qmark", token, line);
