@@ -353,7 +353,8 @@ Token* LexicalAnalyzer::next_token() {
     else if (c == '/') {
         int starting_line = line;
         handler.get(c);
-        if (c == '/') {
+        done = handler.eof();
+        if (!done && c == '/') {
             token += c;
             handler.get(c);
             while (c != '\n' && !done) {
@@ -364,7 +365,7 @@ Token* LexicalAnalyzer::next_token() {
             handler.unget();
             t = new Token("inlinecmt", token, starting_line);
         }
-        else if (c == '*') {
+        else if (!done && c == '*') {
             token += c;
             handler.get(c);
             token += c;
