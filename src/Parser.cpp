@@ -135,26 +135,26 @@ Token* Parser::next_token() {
                             handler.get(c);
                             if (c == '0') { // 0.0e-0
                                 token += c;
-                                t = new ErrorToken("invalidnum", token, line);
+                                t = new ErrorToken("float", token, line);
                             }
                             else if (is_nonzero((int)c)) { // 0.0e-<1..9>
                                 token += c;
                                 handler.get(c);
                                 process_remaining_digits(token, c);
-                                t = new Token("floatnum", token, line);
+                                t = new Token("float", token, line);
                             }
                             else { // 0.0e-<not-a-digit>
-                                t = new ErrorToken("invalidnum", token, line);
+                                t = new ErrorToken("float", token, line);
                             }
                         }
                         else if (is_nonzero((int)c)) { // 0.0e<1..9>
                             token += c;
                             handler.get(c);
                             process_remaining_digits(token, c);
-                            t = new Token("floatnum", token, line);
+                            t = new Token("float", token, line);
                         }
                         else {
-                            t = new ErrorToken("invalidnum", token, line);
+                            t = new ErrorToken("float", token, line);
                         }
                     }
                     else if (is_digit((int)c)) { // 0.0<digit>
@@ -175,13 +175,13 @@ Token* Parser::next_token() {
                                     handler.get(c);
                                     if (c == '0') {
                                         token += c;
-                                        t = new ErrorToken("invalidnum", token, line);
+                                        t = new ErrorToken("float", token, line);
                                     }
                                     else if (is_nonzero((int)c)) { // 0.0<digit>*<nonzero>e[+/-]<nonzero><digit>*
                                         token += c;
                                         handler.get(c);
                                         process_remaining_digits(token, c);
-                                        t = new Token("floatnum", token, line);
+                                        t = new Token("float", token, line);
                                     }
                                 }
                                 else if (is_digit((int)c)) {
@@ -189,7 +189,7 @@ Token* Parser::next_token() {
                                     handler.get(c);
                                     if (c == '0') {
                                         token += c;
-                                        t = new Token("floatnum", token, line);
+                                        t = new Token("float", token, line);
                                     }
                                     else {
                                         process_remaining_digits(token, c);
@@ -198,22 +198,22 @@ Token* Parser::next_token() {
                                         if (c == '0') {
                                             token.pop_back();
                                             handler.unget();
-                                            t = new Token("floatnum", token, line);
+                                            t = new Token("float", token, line);
                                         }
                                         else {
-                                            t = new Token("floatnum", token, line);
+                                            t = new Token("float", token, line);
                                         }
                                     }
                                 }
                             }
                             else { // 0.0<digit>*<nonzero><something-not-e>
                                 handler.unget();
-                                t = new Token("floatnum", token, line);
+                                t = new Token("float", token, line);
                             }
                         } // 0.0<digit>*<!nonzero>
                         else {
                             handler.unget();
-                            t = new Token("floatnum", token, line);
+                            t = new Token("float", token, line);
                         }
                     }
                 }
@@ -236,37 +236,37 @@ Token* Parser::next_token() {
                                 handler.get(c);
                                 if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     process_remaining_digits(token, c);
-                                    t = new Token("floatnum", token, line);
+                                    t = new Token("float", token, line);
                                 }
                                 else {
-                                    t = new ErrorToken("invalidnum", token, line);
+                                    t = new ErrorToken("float", token, line);
                                 }
                             }
                             else if (is_digit((int)c)) {
                                 if (c == '0') {
-                                    t = new Token("floatnum", token, line);
+                                    t = new Token("float", token, line);
                                 }
                                 else if (is_nonzero((int)c)) {
                                     token += c;
                                     handler.get(c);
                                     process_remaining_digits(token, c);
-                                    t = new Token("floatnum", token, line);
+                                    t = new Token("float", token, line);
                                 }
                             }
                         }
                         else {
                             handler.unget();
-                            t = new Token("floatnum", token, line);
+                            t = new Token("float", token, line);
                         }
                     }
                     else {
                         handler.unget();
-                        t = new Token("floatnum", token, line);
+                        t = new Token("float", token, line);
                     }
                 }
                 else {
                     process_until_blank(token, c, false);
-                    t = new ErrorToken("invalidnum", token, line);
+                    t = new ErrorToken("float", token, line);
                 }
             }
             else {
@@ -300,41 +300,41 @@ Token* Parser::next_token() {
                                 handler.get(c);
                                 if (is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     process_remaining_digits(token, c);
-                                    t = new Token("floatnum", token, line);
+                                    t = new Token("float", token, line);
                                 }
                                 else {
-                                    t = new ErrorToken("invalidnum", token, line);
+                                    t = new ErrorToken("float", token, line);
                                 }
                             }
                             else if (is_digit((int)c)) {
                                 if (c == '0') {
                                     token += c;
-                                    t = new Token("floatnum", token, line);
+                                    t = new Token("float", token, line);
                                 }
                                 else if (is_nonzero((int)c)) {
                                     token += c;
                                     handler.get(c);
                                     process_remaining_digits(token, c);
-                                    t = new Token("floatnum", token, line);
+                                    t = new Token("float", token, line);
                                 }
                             }
                         }
                         else if (c == '0') { // [1..9].<digit>*0
                             process_until_blank(token, c);
-                            t = new ErrorToken("invalidnum", token, line);
+                            t = new ErrorToken("float", token, line);
                         }
                         else { // [1..9].<digit>*<not-0>
                             handler.unget();
-                            t = new Token("floatnum", token, line);
+                            t = new Token("float", token, line);
                         }
                     }
                     else {
                         process_until_blank(token, c, false);
-                        t = new ErrorToken("invalidnum", token, line);
+                        t = new ErrorToken("float", token, line);
                     }
                 }
                 else {
-                    t = new ErrorToken("invalidnum", token, line);
+                    t = new ErrorToken("float", token, line);
                 }
             }
             else {
@@ -466,10 +466,10 @@ Token* Parser::next_token() {
     else {
         done = handler.get() == -1;
         handler.unget();
-        t = new ErrorToken("invalidchar", token, line);
+        t = new ErrorToken("char", token, line);
     }
     if (t == nullptr)
-        t = new ErrorToken("invalidword", token, line);
+        t = new ErrorToken("word", token, line);
 
     t->process(out_tokens, out_errors);
     return t;

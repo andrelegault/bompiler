@@ -13,8 +13,12 @@ void Token::process(std::ofstream& out_tokens, std::ofstream& out_errors) const 
 
 ErrorToken::ErrorToken(const std::string& type, const std::string& lexeme, const int& line) : Token(type, lexeme, line) {}
 
+std::ostream& operator<<(std::ostream& os, const ErrorToken& token) {
+    os << "[invalid" << token.type << ", " << token.lexeme << ", " << token.line << "]";
+    return os;
+}
+
 void ErrorToken::process(std::ofstream& out_tokens, std::ofstream& out_errors) const {
-    std::cout << "from error" << std::endl;
     out_errors << "Lexical error: Invalid " + type + ": \"" + lexeme + "\": line " + std::to_string(line) << std::endl;
-    Token::process(out_tokens, out_tokens);
+    out_tokens << *this;
 }
