@@ -2,6 +2,7 @@
 #include "Utils.h"
 #include <sstream>
 #include <fstream>
+#include "Token.h"
 #include <vector>
 #include <string>
 
@@ -133,7 +134,7 @@ Token* Parser::next_token() {
                             handler.get(c);
                             if (c == '0') { // 0.0e-0
                                 token += c;
-                                t = new Token("invalidnum", token, line);
+                                t = new ErrorToken("invalidnum", token, line);
                             }
                             else if (is_nonzero((int)c)) { // 0.0e-<1..9>
                                 token += c;
@@ -142,7 +143,7 @@ Token* Parser::next_token() {
                                 t = new Token("floatnum", token, line);
                             }
                             else { // 0.0e-<not-a-digit>
-                                t = new Token("invalidnum", token, line);
+                                t = new ErrorToken("invalidnum", token, line);
                             }
                         }
                         else if (is_nonzero((int)c)) { // 0.0e<1..9>
@@ -152,7 +153,7 @@ Token* Parser::next_token() {
                             t = new Token("floatnum", token, line);
                         }
                         else {
-                            t = new Token("invalidnum", token, line);
+                            t = new ErrorToken("invalidnum", token, line);
                         }
                     }
                     else if (is_digit((int)c)) { // 0.0<digit>
@@ -173,7 +174,7 @@ Token* Parser::next_token() {
                                     handler.get(c);
                                     if (c == '0') {
                                         token += c;
-                                        t = new Token("invalidnum", token, line);
+                                        t = new ErrorToken("invalidnum", token, line);
                                     }
                                     else if (is_nonzero((int)c)) { // 0.0<digit>*<nonzero>e[+/-]<nonzero><digit>*
                                         token += c;
@@ -237,7 +238,7 @@ Token* Parser::next_token() {
                                     t = new Token("floatnum", token, line);
                                 }
                                 else {
-                                    t = new Token("invalidnum", token, line);
+                                    t = new ErrorToken("invalidnum", token, line);
                                 }
                             }
                             else if (is_digit((int)c)) {
@@ -264,7 +265,7 @@ Token* Parser::next_token() {
                 }
                 else {
                     process_until_blank(token, c, false);
-                    t = new Token("invalidnum", token, line);
+                    t = new ErrorToken("invalidnum", token, line);
                 }
             }
             else {
@@ -301,7 +302,7 @@ Token* Parser::next_token() {
                                     t = new Token("floatnum", token, line);
                                 }
                                 else {
-                                    t = new Token("invalidnum", token, line);
+                                    t = new ErrorToken("invalidnum", token, line);
                                 }
                             }
                             else if (is_digit((int)c)) {
@@ -319,7 +320,7 @@ Token* Parser::next_token() {
                         }
                         else if (c == '0') { // [1..9].<digit>*0
                             process_until_blank(token, c);
-                            t = new Token("invalidnum", token, line);
+                            t = new ErrorToken("invalidnum", token, line);
                         }
                         else { // [1..9].<digit>*<not-0>
                             handler.unget();
@@ -328,11 +329,11 @@ Token* Parser::next_token() {
                     }
                     else {
                         process_until_blank(token, c, false);
-                        t = new Token("invalidnum", token, line);
+                        t = new ErrorToken("invalidnum", token, line);
                     }
                 }
                 else {
-                    t = new Token("invalidnum", token, line);
+                    t = new ErrorToken("invalidnum", token, line);
                 }
             }
             else {
@@ -464,10 +465,11 @@ Token* Parser::next_token() {
     else {
         done = handler.get() == -1;
         handler.unget();
-        t = new Token("invalidchar", token, line);
+        t = new ErrorToken("invalidchar", token, line);
     }
     if (t == nullptr)
-        t = new Token("invalidword", token, line);
-    out_tokens << *t;
+        t = new ErrorToken("invalidword", token, line);
+
+    t->process(out_tokens, out_errors);
     return t;
 }
