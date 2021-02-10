@@ -19,7 +19,7 @@ foreach(LIBRARY ${BOMPILER_LIBRARIES})
 endforeach(LIBRARY)
 
 # generate an executable called ``bompiler`` that's based off ``Driver.cpp``
-add_executable(bompiler ${BOMPILER_SOURCE_DIR}/${BOMPILER_MAIN} ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
+add_executable(lexdriver ${BOMPILER_SOURCE_DIR}/${BOMPILER_MAIN} ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
 
 # propagate that this project needs the gtest library (optional)
 #target_link_libraries(bompiler PUBLIC gtest)
@@ -28,17 +28,17 @@ add_executable(bompiler ${BOMPILER_SOURCE_DIR}/${BOMPILER_MAIN} ${BOMPILER_SOURC
 include_directories(${PROJECT_SOURCE_DIR}/${BOMPILER_INCLUDE_DIR})
 
 # make the bompiler's binary dir visible
-target_include_directories(bompiler PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(lexdriver PUBLIC "${PROJECT_BINARY_DIR}")
 
 # redirect built thing to /bin
-install(TARGETS bompiler DESTINATION bin)
+install(TARGETS lexdriver DESTINATION bin)
 
 # redirect required headers to /include
 install(FILES ${PROJECT_BINARY_DIR}/${BOMPILER_INCLUDE_DIR}/bompilerConfig.h DESTINATION include)
 
 enable_testing()
 find_package(GTest REQUIRED)
-target_link_libraries(bompiler GTest::GTest GTest::Main)
+target_link_libraries(lexdriver GTest::GTest GTest::Main)
 
 # create platform-specific installers (w/ ``cpack``)
 include(InstallRequiredSystemLibraries)
