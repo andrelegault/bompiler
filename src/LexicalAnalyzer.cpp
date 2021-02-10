@@ -364,25 +364,24 @@ Token* LexicalAnalyzer::next_token() {
             token += c;
             handler.get(c);
             token += c;
-            while (!done && c != '*') {
-                handler.get(c);
-                if (c == '\n') {
-                    line++;
-                    token += "\\n";
+            bool closed = false;
+            while (!done && !closed) {
+                while (!done && c != '*') {
+                    handler.get(c);
+                    if (c == '\n') {
+                        line++;
+                        token += "\\n";
+                    }
+                    else
+                        token += c;
+                    done = handler.eof();
                 }
-                else
+                if (!done) {
+                    handler.get(c);
+                    closed = c == '/';
                     token += c;
-                done = handler.eof();
-            }
-            while (!done && c != '/') {
-                handler.get(c);
-                if (c == '\n') {
-                    line++;
-                    token += "\\n";
+                    done = handler.eof();
                 }
-                else
-                    token += c;
-                done = handler.eof();
             }
             t = new Token("blockcmt", token, starting_line);
         }
