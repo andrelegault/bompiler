@@ -434,13 +434,11 @@ Token* LexicalAnalyzer::next_token() {
         t = new Token(test->second, temp, line);
     }
     else {
-        done = handler.get() == -1;
         handler.unget();
         t = new ErrorToken("char", token, line);
     }
-    if (t == nullptr)
-        t = new ErrorToken("word", token, line);
-
+    done = handler.get() == -1;
+    handler.unget();
     t->process(out_tokens, out_errors);
     return t;
 }
