@@ -367,25 +367,37 @@ Token* LexicalAnalyzer::next_token() {
         }
         else if (!done && c == '*') {
             token += c;
-            handler.get(c);
-            token += c;
-            bool closed = false;
-            while (!done && !closed) {
+            int num_open = 1;
+            bool prevent_double_check = false;
+            while (!done && num_open > 0) {
+                handler.get(c);
+                done = handler.eof();
                 while (!done && c != '*') {
-                    handler.get(c);
                     if (c == '\n') {
                         line++;
                         token += "\\n";
                     }
                     else
                         token += c;
-                    done = handler.eof();
-                }
-                if (!done) {
                     handler.get(c);
-                    closed = c == '/';
-                    token += c;
                     done = handler.eof();
+                    prevent_double_check = false;
+                }
+                token += c;
+                if (!done) {
+                    if (!prevent_double_check && token.at(token.size() - 2) == '/')
+                        num_open++;
+                    else {
+                        handler.get(c);
+                        done = handler.eof();
+                        if (c == '/') {
+                            num_open--;
+                            token += c;
+                            prevent_double_check = true;
+                        }
+                        else
+                            handler.unget();
+                    }
                 }
             }
             if (done)
