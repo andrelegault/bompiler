@@ -415,24 +415,22 @@ Token* LexicalAnalyzer::next_token() {
             t = new Token("qmark", token, line);
         }
         else { // "<something that's not blank>
-            while (c != '\n' && c != '"') { // until either end of line or another "
+            // TODO: match only alphanum or space
+            while (c != '"' && (Utils::is_alphanumeric(c) || c == ' ')) { // until either end of line or another "
                 token += c;
                 handler.get(c);
             }
             handler.unget(); // check whatever was the last char
             handler.get(c);
+
             if (c == '"') { // "<someting>"
                 token.erase(0, 1);
                 t = new Token("stringlit", token, line);
             }
             else {
-                while (!done && token.size() > 1) {
-                    token.pop_back();
+                if (c == '\n')
                     handler.unget();
-                    done = handler.eof();
-                }
-                handler.unget();
-                t = new Token("qmark", token, line);
+                t = new ErrorToken("stringlit", token, line);
             }
         }
     }
