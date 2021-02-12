@@ -71,7 +71,6 @@ Token* LexicalAnalyzer::next_token() {
     char c;
     handler.get(c);
     while (!done && Utils::is_blank(c, line, handler, true)) {
-        std::cout << c;
         out_tokens << c;
         done = handler.eof();
         handler.get(c);

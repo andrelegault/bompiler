@@ -7,12 +7,16 @@ int main(int argc, char* argv[]) {
         // report version
         std::cout << argv[0] << "Version " << bompiler_VERSION_MAJOR << "."
             << bompiler_VERSION_MINOR << "." << bompiler_VERSION_PATCH << std::endl;
-        std::cout << "Usage: " << argv[0] << " number" << std::endl;
+        std::cout << "Usage: lexdriver" << " <path-to-source-file>" << std::endl;
     }
-    LexicalAnalyzer parser("data/test.src");
-    while (!parser.done) {
-        Token* t = parser.next_token();
-        std::cout << *(t);
-        delete t;
+    else {
+        const std::string& source = argv[1];
+        LexicalAnalyzer parser(source);
+        std::cout << "Data file: " << source << std::endl;
+        while (!parser.done) {
+            Token* t = parser.next_token();
+            delete t;
+        }
+        std::cout << "Finished" << std::endl;
     }
 }
