@@ -450,8 +450,11 @@ Token* LexicalAnalyzer::next_token() {
                 t = new Token("stringlit", token, line);
             }
             else {
-                if (c == '\n')
+                token += c;
+                if (c == '\n') {
+                    token.pop_back();
                     handler.unget();
+                }
                 t = new ErrorToken("stringlit", token, line);
             }
         }
