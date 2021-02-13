@@ -37,8 +37,8 @@ install(TARGETS lexdriver DESTINATION bin)
 install(FILES ${PROJECT_BINARY_DIR}/${BOMPILER_INCLUDE_DIR}/bompilerConfig.h DESTINATION include)
 
 enable_testing()
-find_package(GTest REQUIRED)
-target_link_libraries(lexdriver GTest::GTest GTest::Main)
+# find_package(GTest REQUIRED)
+# target_link_libraries(lexdriver GTest::GTest GTest::Main)
 
 # create platform-specific installers (w/ ``cpack``)
 include(InstallRequiredSystemLibraries)
