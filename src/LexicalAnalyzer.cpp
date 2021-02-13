@@ -312,6 +312,7 @@ Token* LexicalAnalyzer::next_token() {
                     }
                 }
                 else {
+                    handler.unget();
                     t = new ErrorToken("float", token, line);
                 }
             }
