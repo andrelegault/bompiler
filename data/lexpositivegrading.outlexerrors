@@ -1,1 +1,3 @@
- 
+Lexical error: Invalid float: "120.340e10": line 22
+Lexical error: Invalid char: "
+": line 43

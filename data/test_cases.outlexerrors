@@ -1,0 +1,29 @@
+Lexical error: Invalid float: "1.30": line 21
+Lexical error: Invalid float: "1.30": line 28
+Lexical error: Invalid char: "_": line 32
+Lexical error: Invalid char: "\": line 33
+Lexical error: Invalid char: "_": line 33
+Lexical error: Invalid float: "1.230": line 48
+Lexical error: Invalid float: "1.230e99": line 49
+Lexical error: Invalid float: "1.230e099": line 50
+Lexical error: Invalid float: "1.230e099": line 51
+Lexical error: Invalid float: "120.340e10": line 54
+Lexical error: Invalid float: "1234.20e10": line 57
+Lexical error: Invalid float: "1.20": line 58
+Lexical error: Invalid stringlit: ""unterminated": line 61
+Lexical error: Invalid char: "\": line 69
+Lexical error: Invalid char: "\": line 70
+Lexical error: Invalid char: "_": line 70
+Lexical error: Invalid char: "_": line 76
+Lexical error: Invalid char: "\": line 80
+Lexical error: Invalid char: "\": line 81
+Lexical error: Invalid stringlit: ""unterminated": line 86
+Lexical error: Invalid stringlit: ""unterminated\": line 87
+Lexical error: Invalid float: "0.": line 94
+Lexical error: Invalid float: "1.": line 95
+Lexical error: Invalid float: "0.lkjsdlkf": line 96
+Lexical error: Invalid float: "1.ffflll": line 97
+Lexical error: Invalid stringlit: ""test !": line 101
+Lexical error: Invalid stringlit: ""unterminated": line 102
+Lexical error: Invalid char: "_": line 107
+Lexical error: Invalid blockcmt reached EOF: "/* never finishes*\nhelloooooooooooo": line 110

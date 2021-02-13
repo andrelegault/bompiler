@@ -1,0 +1,111 @@
+==	+	|	(	;	if 	public	read
+<>	-	&	)	,	then	private	write
+<	*	!	{	.	else	func	return
+>	/	?	}	:	integer	var	main
+<=	=		[	::	float	class	inherits
+>=			]		string	while	break
+					void		continue
+	
+// inline
+/* this is a single line block comment */
+/* this is a
+multiple line
+block comment 
+*/
+/* /*this is a 
+nested 
+block comment that does ends*/*/
+/*/*/*/*another nested block cmt*/*/*/*/
+// 1.39e299 testing hello world
+helo// some inline cmt
+1.30// inline
+1.3e0000399//inline
+1.2// inline
+344//hello world
+
+/* 1.39e299 testing hello world */
+henlo/* block*/
+1.30/* block */
+1.3e0000399/*block/**/*/
+1.2/* inline */
+344/*hello world*/
+_//hello
+\/*hello/*#####*/*/_
+" unterminated with invalid /* chars */
+" terminated with invalid /* chars */ "
+
+0
+1
+10
+12
+123
+12345
+01234
+0123450
+
+01.23
+01.23e99
+1.230
+1.230e99
+1.230e099
+01.230e099
+1.23
+12.34
+120.340e10
+12345.6789e-123
+1234e10
+1234.20e10
+1.20
+1.398204f9398
+
+"unterminated
+u_nderscore
+d1g1t
+abc
+abc1
+a1bc
+abc_1abc
+test
+test\i_ng
+test\_ing
+1.3e399some_id_after_some_float
+42some_id_after_some_int
+
+42void
+void_keyword
+void _ if
+vo!d void3 void
+publictest
+!public
+\public
+\public3
+1.399fvoid
+1.39e09fvoid
+1.39e9void
+1.39e9"void"
+1.39e09"unterminated
+1.39e09"unterminated\
+
+test
+//
+/* this is a test */
+*/
+*
+0.
+1.
+0.lkjsdlkf
+1.ffflll
+1.399fsdlkj
+0.3983glkg
+
+"test ! shouldbe wrong"
+"unterminated
+""
+"hello world"
+ifabc
+/* test /* another */ */
+_idwithinvalidfirst
+i398398digitafterfirstletter
+i_underscore
+/* never finishes*
+hellooooooooooo
