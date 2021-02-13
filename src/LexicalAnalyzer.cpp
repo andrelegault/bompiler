@@ -451,7 +451,6 @@ Token* LexicalAnalyzer::next_token() {
         t = new Token(test->second, temp, line);
     }
     else {
-        handler.unget();
         t = new ErrorToken("char", token, line);
     }
     done = handler.get() == -1;
