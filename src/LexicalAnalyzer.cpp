@@ -302,7 +302,12 @@ Token* LexicalAnalyzer::next_token() {
                         }
                     }
                     else {
-                        process_until_blank(token, c, false);
+                        while (!done && Utils::is_alphanumeric(c)) {
+                            token += c;
+                            handler.get(c);
+                            done = handler.eof();
+                        }
+                        handler.unget();
                         t = new ErrorToken("float", token, line);
                     }
                 }
