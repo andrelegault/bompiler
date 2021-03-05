@@ -6,11 +6,15 @@
 #include <vector>
 #include <string>
 
-LexicalAnalyzer::LexicalAnalyzer(const std::string& src) {
+using std::string;
+using std::ostringstream;
+using std::ios_base;
+
+LexicalAnalyzer::LexicalAnalyzer(const string& src) {
     handler.open(src);
-    std::string basename = Utils::get_before_ext(src);
-    out_tokens.open(basename + ".outlextokens", std::ios_base::out);
-    out_errors.open(basename + ".outlexerrors", std::ios_base::out);
+    string basename = Utils::get_before_ext(src);
+    out_tokens.open(basename + ".outlextokens", ios_base::out);
+    out_errors.open(basename + ".outlexerrors", ios_base::out);
 
     reserved_words = {
         "if", "then", "else", "integer", "float",
@@ -45,7 +49,7 @@ LexicalAnalyzer::~LexicalAnalyzer() {
     out_errors.close();
 }
 
-void LexicalAnalyzer::process_remaining_digits(std::string& lexeme, char& c) {
+void LexicalAnalyzer::process_remaining_digits(string& lexeme, char& c) {
     while (!done && Utils::is_digit((int)c)) {
         lexeme += c;
         handler.get(c);
@@ -54,7 +58,7 @@ void LexicalAnalyzer::process_remaining_digits(std::string& lexeme, char& c) {
     handler.unget();
 }
 
-void LexicalAnalyzer::process_until_blank(std::string& lexeme, char& c, bool save_changes) {
+void LexicalAnalyzer::process_until_blank(string& lexeme, char& c, bool save_changes) {
     while (!done && !Utils::is_blank(c, line, handler, save_changes)) {
         lexeme += c;
         handler.get(c);
@@ -65,8 +69,8 @@ void LexicalAnalyzer::process_until_blank(std::string& lexeme, char& c, bool sav
 
 Token* LexicalAnalyzer::next_token() {
     Token* t{ nullptr };
-    std::string lexeme;
-    std::ostringstream str_stream;
+    string lexeme;
+    ostringstream str_stream;
     char c;
     handler.get(c);
     while (!done && Utils::is_blank(c, line, handler, true)) {
@@ -460,7 +464,7 @@ Token* LexicalAnalyzer::next_token() {
     }
     else if (chars.find(c) != chars.end()) {
         auto test = chars.find(c);
-        std::string temp{ c };
+        string temp{ c };
         t = new Token(test->second, temp, line);
     }
     else {
