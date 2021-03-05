@@ -49,11 +49,6 @@ bool Utils::is_letter(const int& d) {
     return (d >= 65 && d <= 90) || (d >= 97 && d <= 122);
 }
 
-bool Utils::is_digit(const int& d) {
-    /// is it a digit
-    return is_nonzero(d) || d == 48;
-}
-
 bool Utils::is_nonzero(const int& d) {
     return d >= 49 && d <= 57;
 }
