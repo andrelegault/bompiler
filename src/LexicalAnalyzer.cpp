@@ -1,5 +1,6 @@
 #include "LexicalAnalyzer.h"
 #include "Utils.h"
+#include <locale>
 #include <sstream>
 #include <fstream>
 #include "Token.h"
@@ -79,9 +80,9 @@ Token* LexicalAnalyzer::next_token() {
         handler.get(c);
     }
     lexeme += c;
-    if (Utils::is_letter((int)c)) {
+    if (std::isalpha((int)c)) {
         handler.get(c);
-        while (!done && Utils::is_alphanumeric((int)c)) {
+        while (!done && Utils::is_alphanum_or_underscore((int)c)) {
             lexeme += c;
             handler.get(c);
             done = handler.eof();
@@ -305,7 +306,7 @@ Token* LexicalAnalyzer::next_token() {
                         }
                     }
                     else {
-                        while (!done && Utils::is_alphanumeric(c)) {
+                        while (!done && Utils::is_alphanum_or_underscore(c)) {
                             lexeme += c;
                             handler.get(c);
                             done = handler.eof();
@@ -315,7 +316,7 @@ Token* LexicalAnalyzer::next_token() {
                     }
                 }
                 else {
-                    while (!done && Utils::is_alphanumeric(c)) {
+                    while (!done && Utils::is_alphanum_or_underscore(c)) {
                         lexeme += c;
                         handler.get(c);
                         done = handler.eof();
@@ -441,7 +442,7 @@ Token* LexicalAnalyzer::next_token() {
         }
         else { // "<something that's not blank>
             // TODO: match only alphanum or space
-            while (c != '"' && (Utils::is_alphanumeric(c) || c == ' ')) { // until either end of line or another "
+            while (c != '"' && (Utils::is_alphanum_or_underscore(c) || c == ' ')) { // until either end of line or another "
                 lexeme += c;
                 handler.get(c);
             }

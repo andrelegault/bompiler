@@ -1,4 +1,5 @@
 #include "Utils.h"
+#include <locale>
 
 // from https://stackoverflow.com/a/57346888/7705786
 std::vector<std::string> Utils::split_string(const std::string& i_str, const std::string& i_delim) {
@@ -38,9 +39,9 @@ bool Utils::is_blank(char& c, int& line, std::ifstream& handler, bool increase_l
     else return c == ' ' || c == '\t';
 }
 
-bool Utils::is_alphanumeric(const int& d) {
+bool Utils::is_alphanum_or_underscore(const int& d) {
     /// is it a letter, digit, or an underscore.
-    return is_letter(d) || is_digit(d) || d == 95;
+    return std::isalnum(d) || d == 95;
 }
 
 bool Utils::is_letter(const int& d) {
