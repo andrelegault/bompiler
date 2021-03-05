@@ -51,7 +51,7 @@ LexicalAnalyzer::~LexicalAnalyzer() {
 }
 
 void LexicalAnalyzer::process_remaining_digits(string& lexeme, char& c) {
-    while (!done && Utils::is_digit((int)c)) {
+    while (!done && std::isdigit((int)c)) {
         lexeme += c;
         handler.get(c);
         done = handler.eof();
@@ -93,7 +93,7 @@ Token* LexicalAnalyzer::next_token() {
         else
             t = new Token("id", lexeme, line);
     }
-    else if (Utils::is_digit((int)c)) { // 0..9
+    else if (std::isdigit((int)c)) { // 0..9
         // either .0 or .digit*nonzero
         if (c == '0') { // digit
             handler.get(c);
@@ -133,7 +133,7 @@ Token* LexicalAnalyzer::next_token() {
                             t = new ErrorToken("float", lexeme, line);
                         }
                     }
-                    else if (Utils::is_digit((int)c)) { // 0.0<digit>
+                    else if (std::isdigit((int)c)) { // 0.0<digit>
                         lexeme += c;
                         handler.get(c);
                         process_remaining_digits(lexeme, c);
@@ -160,7 +160,7 @@ Token* LexicalAnalyzer::next_token() {
                                         t = new Token("float", lexeme, line);
                                     }
                                 }
-                                else if (Utils::is_digit((int)c)) {
+                                else if (std::isdigit((int)c)) {
                                     lexeme += c;
                                     handler.get(c);
                                     if (c == '0') {
@@ -193,8 +193,8 @@ Token* LexicalAnalyzer::next_token() {
                         }
                     }
                 }
-                else if (Utils::is_digit((int)c)) { // 0.<digit>
-                    while (!done && Utils::is_digit((int)c)) {
+                else if (std::isdigit((int)c)) { // 0.<digit>
+                    while (!done && std::isdigit((int)c)) {
                         lexeme += c;
                         handler.get(c);
                         done = handler.eof();
@@ -219,7 +219,7 @@ Token* LexicalAnalyzer::next_token() {
                                     t = new ErrorToken("float", lexeme, line);
                                 }
                             }
-                            else if (Utils::is_digit((int)c)) {
+                            else if (std::isdigit((int)c)) {
                                 if (c == '0') {
                                     t = new Token("float", lexeme, line);
                                 }
@@ -259,7 +259,7 @@ Token* LexicalAnalyzer::next_token() {
             if (c == '.') { // [1..9].
                 lexeme += c;
                 handler.get(c);
-                if (Utils::is_digit((int)c)) { // [1..9].<digit>
+                if (std::isdigit((int)c)) { // [1..9].<digit>
                     lexeme += c;
                     handler.get(c);
                     process_remaining_digits(lexeme, c);
@@ -283,7 +283,7 @@ Token* LexicalAnalyzer::next_token() {
                                     t = new ErrorToken("float", lexeme, line);
                                 }
                             }
-                            else if (Utils::is_digit((int)c)) {
+                            else if (std::isdigit((int)c)) {
                                 if (c == '0') {
                                     lexeme += c;
                                     t = new Token("float", lexeme, line);

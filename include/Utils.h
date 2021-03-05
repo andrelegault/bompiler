@@ -9,6 +9,5 @@ namespace Utils {
     bool is_blank(char& c, int& line, std::ifstream& handler, bool increase_line);
     bool is_alphanum_or_underscore(const int& d);
     bool is_letter(const int& d);
-    bool is_digit(const int& d);
     bool is_nonzero(const int& d);
 }
