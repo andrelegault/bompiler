@@ -12,7 +12,7 @@ using std::ostringstream;
 using std::ios_base;
 
 LexicalAnalyzer::LexicalAnalyzer(const string& src) {
-    handler.open(src);
+    handler.open(src, ios_base::in);
     string basename = Utils::get_before_ext(src);
     out_tokens.open(basename + ".outlextokens", ios_base::out);
     out_errors.open(basename + ".outlexerrors", ios_base::out);
@@ -31,13 +31,13 @@ LexicalAnalyzer::LexicalAnalyzer(const string& src) {
         {'|', "or"},
         {'&', "and"},
         {'!', "not"},
-        {'?', "qmark"},
-        {'(', "openpar"},
-        {')', "closepar"},
-        {'{', "opencubr"},
-        {'}', "closecubr"},
-        {'[', "opensqbr"},
-        {']', "closesqbr"},
+        {'?', "qm"},
+        {'(', "lpar"},
+        {')', "rpat"},
+        {'{', "lcurbr"},
+        {'}', "rcurbr"},
+        {'[', "lsqbr"},
+        {']', "rsqbr"},
         {';', "semi"},
         {',', "comma"},
         {'.', "dot"}
@@ -111,26 +111,26 @@ Token* LexicalAnalyzer::next_token() {
                             handler.get(c);
                             if (c == '0') { // 0.0e-0
                                 lexeme += c;
-                                t = new ErrorToken("float", lexeme, line);
+                                t = new ErrorToken("floatLit", lexeme, line);
                             }
                             else if (Utils::is_nonzero((int)c)) { // 0.0e-<1..9>
                                 lexeme += c;
                                 handler.get(c);
                                 process_remaining_digits(lexeme, c);
-                                t = new Token("float", lexeme, line);
+                                t = new Token("floatLit", lexeme, line);
                             }
                             else { // 0.0e-<not-a-digit>
-                                t = new ErrorToken("float", lexeme, line);
+                                t = new ErrorToken("floatLit", lexeme, line);
                             }
                         }
                         else if (Utils::is_nonzero((int)c)) { // 0.0e<1..9>
                             lexeme += c;
                             handler.get(c);
                             process_remaining_digits(lexeme, c);
-                            t = new Token("float", lexeme, line);
+                            t = new Token("floatLit", lexeme, line);
                         }
                         else {
-                            t = new ErrorToken("float", lexeme, line);
+                            t = new ErrorToken("floatLit", lexeme, line);
                         }
                     }
                     else if (std::isdigit((int)c)) { // 0.0<digit>
@@ -151,13 +151,13 @@ Token* LexicalAnalyzer::next_token() {
                                     handler.get(c);
                                     if (c == '0') {
                                         lexeme += c;
-                                        t = new ErrorToken("float", lexeme, line);
+                                        t = new ErrorToken("floatLit", lexeme, line);
                                     }
                                     else if (Utils::is_nonzero((int)c)) { // 0.0<digit>*<nonzero>e[+/-]<nonzero><digit>*
                                         lexeme += c;
                                         handler.get(c);
                                         process_remaining_digits(lexeme, c);
-                                        t = new Token("float", lexeme, line);
+                                        t = new Token("floatLit", lexeme, line);
                                     }
                                 }
                                 else if (std::isdigit((int)c)) {
@@ -165,7 +165,7 @@ Token* LexicalAnalyzer::next_token() {
                                     handler.get(c);
                                     if (c == '0') {
                                         lexeme += c;
-                                        t = new Token("float", lexeme, line);
+                                        t = new Token("floatLit", lexeme, line);
                                     }
                                     else {
                                         process_remaining_digits(lexeme, c);
@@ -174,22 +174,22 @@ Token* LexicalAnalyzer::next_token() {
                                         if (c == '0') {
                                             lexeme.pop_back();
                                             handler.unget();
-                                            t = new Token("float", lexeme, line);
+                                            t = new Token("floatLit", lexeme, line);
                                         }
                                         else {
-                                            t = new Token("float", lexeme, line);
+                                            t = new Token("floatLit", lexeme, line);
                                         }
                                     }
                                 }
                             }
                             else { // 0.0<digit>*<nonzero><something-not-e>
                                 handler.unget();
-                                t = new Token("float", lexeme, line);
+                                t = new Token("floatLit", lexeme, line);
                             }
                         } // 0.0<digit>*<!nonzero>
                         else {
                             handler.unget();
-                            t = new Token("float", lexeme, line);
+                            t = new Token("floatLit", lexeme, line);
                         }
                     }
                 }
@@ -213,42 +213,42 @@ Token* LexicalAnalyzer::next_token() {
                                 handler.get(c);
                                 if (Utils::is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     process_remaining_digits(lexeme, c);
-                                    t = new Token("float", lexeme, line);
+                                    t = new Token("floatLit", lexeme, line);
                                 }
                                 else {
-                                    t = new ErrorToken("float", lexeme, line);
+                                    t = new ErrorToken("floatLit", lexeme, line);
                                 }
                             }
                             else if (std::isdigit((int)c)) {
                                 if (c == '0') {
-                                    t = new Token("float", lexeme, line);
+                                    t = new Token("floatLit", lexeme, line);
                                 }
                                 else if (Utils::is_nonzero((int)c)) {
                                     lexeme += c;
                                     handler.get(c);
                                     process_remaining_digits(lexeme, c);
-                                    t = new Token("float", lexeme, line);
+                                    t = new Token("floatLit", lexeme, line);
                                 }
                             }
                         }
                         else {
                             handler.unget();
-                            t = new Token("float", lexeme, line);
+                            t = new Token("floatLit", lexeme, line);
                         }
                     }
                     else {
                         handler.unget();
-                        t = new Token("float", lexeme, line);
+                        t = new Token("floatLit", lexeme, line);
                     }
                 }
                 else {
                     process_until_blank(lexeme, c, false);
-                    t = new ErrorToken("float", lexeme, line);
+                    t = new ErrorToken("floatLit", lexeme, line);
                 }
             }
             else {
                 handler.unget();
-                t = new Token("integer", "0", line);
+                t = new Token("intLit", "0", line);
             }
         }
         else { // 1..9
@@ -277,32 +277,32 @@ Token* LexicalAnalyzer::next_token() {
                                 handler.get(c);
                                 if (Utils::is_nonzero((int)c)) { // 0.<digit>*<nonzero>e[+/-]<integer>
                                     process_remaining_digits(lexeme, c);
-                                    t = new Token("float", lexeme, line);
+                                    t = new Token("floatLit", lexeme, line);
                                 }
                                 else {
-                                    t = new ErrorToken("float", lexeme, line);
+                                    t = new ErrorToken("floatLit", lexeme, line);
                                 }
                             }
                             else if (std::isdigit((int)c)) {
                                 if (c == '0') {
                                     lexeme += c;
-                                    t = new Token("float", lexeme, line);
+                                    t = new Token("floatLit", lexeme, line);
                                 }
                                 else if (Utils::is_nonzero((int)c)) {
                                     lexeme += c;
                                     handler.get(c);
                                     process_remaining_digits(lexeme, c);
-                                    t = new Token("float", lexeme, line);
+                                    t = new Token("floatLit", lexeme, line);
                                 }
                             }
                         }
                         else if (c == '0') { // [1..9].<digit>*0
                             process_until_blank(lexeme, c);
-                            t = new ErrorToken("float", lexeme, line);
+                            t = new ErrorToken("floatLit", lexeme, line);
                         }
                         else { // [1..9].<digit>*<not-0>
                             handler.unget();
-                            t = new Token("float", lexeme, line);
+                            t = new Token("floatLit", lexeme, line);
                         }
                     }
                     else {
@@ -312,7 +312,7 @@ Token* LexicalAnalyzer::next_token() {
                             done = handler.eof();
                         }
                         handler.unget();
-                        t = new ErrorToken("float", lexeme, line);
+                        t = new ErrorToken("floatLit", lexeme, line);
                     }
                 }
                 else {
@@ -322,12 +322,12 @@ Token* LexicalAnalyzer::next_token() {
                         done = handler.eof();
                     }
                     handler.unget();
-                    t = new ErrorToken("float", lexeme, line);
+                    t = new ErrorToken("floatLit", lexeme, line);
                 }
             }
             else {
                 handler.unget();
-                t = new Token("integer", lexeme, line);
+                t = new Token("intLit", lexeme, line);
             }
         }
     }
@@ -344,7 +344,7 @@ Token* LexicalAnalyzer::next_token() {
     else if (c == '<') { // < or <> or <=
         handler.get(c);
         if (c == '>') {
-            t = new Token("noteq", "<>", line);
+            t = new Token("neq", "<>", line);
         }
         else if (c == '=') {
             t = new Token("leq", "<=", line);
@@ -427,7 +427,7 @@ Token* LexicalAnalyzer::next_token() {
     else if (c == ':') {
         handler.get(c);
         if (c == ':') {
-            t = new Token("coloncolon", "::", line);
+            t = new Token("sr", "::", line);
         }
         else {
             handler.unget();
@@ -451,7 +451,7 @@ Token* LexicalAnalyzer::next_token() {
 
             if (c == '"') { // "<someting>"
                 lexeme.erase(0, 1);
-                t = new Token("stringlit", lexeme, line);
+                t = new Token("stringLit", lexeme, line);
             }
             else {
                 lexeme += c;
@@ -459,7 +459,7 @@ Token* LexicalAnalyzer::next_token() {
                     lexeme.pop_back();
                     handler.unget();
                 }
-                t = new ErrorToken("stringlit", lexeme, line);
+                t = new ErrorToken("stringLit", lexeme, line);
             }
         }
     }
