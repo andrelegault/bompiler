@@ -438,7 +438,7 @@ Token* LexicalAnalyzer::next_token() {
         handler.get(c);
         if (Utils::is_blank(c, line, handler, false)) { // "(\r|\t|\n|<space>)
             handler.unget();
-            t = new Token("qmark", lexeme, line);
+            t = new ErrorToken("stringLit", lexeme, line);
         }
         else { // "<something that's not blank>
             // TODO: match only alphanum or space
