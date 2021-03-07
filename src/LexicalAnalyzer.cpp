@@ -1,9 +1,9 @@
 #include "LexicalAnalyzer.h"
+#include "Token.h"
 #include "Utils.h"
 #include <locale>
 #include <sstream>
 #include <fstream>
-#include "Token.h"
 #include <vector>
 #include <string>
 
