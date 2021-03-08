@@ -17,9 +17,9 @@ public:
     LexicalAnalyzer(const string& src);
     ~LexicalAnalyzer();
     Token* next_token();
-    bool done{ false };
+    bool done = false;
 private:
-    int line{ 1 };
+    int line = 1;
     ofstream out_tokens;
     ofstream out_errors;
     ifstream handler;
