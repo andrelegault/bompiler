@@ -21,4 +21,5 @@ class Parser {
         ofstream out_derivation;
         ofstream out_ast;
         ofstream out_errors;
+        const vector<string> EPSILON_VECTOR{"epsilon"};
 };

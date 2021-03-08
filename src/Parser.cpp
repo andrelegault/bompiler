@@ -5,6 +5,7 @@
 #include <stack>
 #include <string>
 #include <fstream>
+#include <vector>
 
 using std::stack;
 using std::string;
@@ -12,6 +13,7 @@ using std::ios_base;
 using std::to_string;
 using std::endl;
 using std::ofstream;
+using std::vector;
 
 Parser::Parser(Grammar *grammar, LexicalAnalyzer *analyzer, const string &filename): grammar(grammar), analyzer(analyzer) {
     source.open(filename, ios_base::in); 
@@ -54,13 +56,23 @@ bool Parser::parse() {
                 error = true;
             }
         } else {
-            if (grammar->translation_table.find(x) != grammar->translation_table.end()) {
-                if (grammar->translation_table[x].find(a->type) != grammar->translation_table[x].end()) {
+            auto string_to_rule_map = grammar->translation_table.find(x);
+            if (string_to_rule_map != grammar->translation_table.end()) {
+                auto rule = string_to_rule_map->second.find(a->type);
+                if (rule != string_to_rule_map->second.end()) {
                     tokens.pop();
+                    vector<string> form = rule->second->sentential_form;
+                    if (form == EPSILON_VECTOR) {
                     vector<string> form = grammar->translation_table[x][a->type]->sentential_form;
+                        continue;
+                    }
                     auto it = form.rbegin();
                     for (; it != form.rend(); ++it)
+                        if (*it != "epsilon") {
                         tokens.push(*it);
+                }
+                        cout << endl;
+                    }
                 }
                 else {
                     skip_errors(tokens, a);
