@@ -69,6 +69,8 @@ void LexicalAnalyzer::process_until_blank(string& lexeme, char& c, bool save_cha
 }
 
 Token* LexicalAnalyzer::next_token() {
+    if (done)
+        return new Token("EOF", "$", line);
     Token* t{ nullptr };
     string lexeme;
     ostringstream str_stream;
