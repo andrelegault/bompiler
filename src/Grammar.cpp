@@ -41,7 +41,7 @@ Rule* Rule::from_line(const string &line) {
         string temp = parts[i];
         // only trim <words-like-this>
         // not 'these-words'
-        if (temp[0] != '\'')
+        if (temp[0] == '<')
             temp = Utils::trim_around(parts[i]);
         sentential_form.push_back(Utils::to_lower(temp));
     }
@@ -161,7 +161,7 @@ Grammar* Grammar::from_file(const string &filename) {
             {"id", rules[7]}, {"lpar", rules[7]}, {"minus", rules[7]}, {"plus", rules[7]}, {"intlit", rules[7]}, {"qm", rules[7]}, {"not", rules[7]}, {"stringlit", rules[7]}, {"floatlit", rules[7]}
         }},
         {"arithexprtail", {
-            {"semi", rules[9]}, {"rsqbr", rules[9]}, {"minus", rules[8]}, {"minus", rules[8]}, {"geq", rules[9]}, {"leq", rules[9]}, {"gt", rules[9]}, {"lt", rules[9]}, {"neq", rules[9]}, {"eq", rules[9]}, {"comma", rules[9]}, {"rsqbr", rules[9]}, {"colon", rules[9]}, {"or", rules[8]}
+            {"semi", rules[9]}, {"rpar", rules[9]}, {"minus", rules[8]}, {"plus", rules[8]}, {"geq", rules[9]}, {"leq", rules[9]}, {"gt", rules[9]}, {"lt", rules[9]}, {"neq", rules[9]}, {"eq", rules[9]}, {"comma", rules[9]}, {"rsqbr", rules[9]}, {"colon", rules[9]}, {"or", rules[8]}
         }},
         {"arraysizerept", {
             {"semi", rules[11]}, {"rpar", rules[11]}, {"comma", rules[11]}, {"lsqbr", rules[10]}

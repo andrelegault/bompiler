@@ -37,7 +37,7 @@ LexicalAnalyzer::LexicalAnalyzer(const string& src) {
         {'!', "not"},
         {'?', "qm"},
         {'(', "lpar"},
-        {')', "rpat"},
+        {')', "rpar"},
         {'{', "lcurbr"},
         {'}', "rcurbr"},
         {'[', "lsqbr"},
