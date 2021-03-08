@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <filesystem>
 
 using std::ios_base;
 using std::ifstream;
@@ -17,6 +18,9 @@ using std::string;
 using std::vector;
 using std::pair;
 using std::make_pair;
+using std::cout;
+using std::endl;
+using std::filesystem::exists;
 
 
 Rule::Rule(
@@ -53,13 +57,13 @@ Grammar::Grammar(const unordered_set<string> &terminals,
 }
 
 Grammar* Grammar::from_file(const string &filename) {
+    if (!exists(filename))
+        throw;
     ifstream input(filename, ios_base::in);
     vector<Rule*> rules;
     unordered_set<string> terminals;
     unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> non_terminals;
     unordered_map<string, map<string, Rule*>> translation_table;
-    string line;
-    
     
     non_terminals = {
         {"AddOp",                           make_pair<unordered_set<string>, unordered_set<string>>({"plus", "minus", "or"}, {"intLit", "floatLit", "stringLit", "lpar", "not", "qm", "id", "plus", "minus"})},
@@ -125,7 +129,7 @@ Grammar* Grammar::from_file(const string &filename) {
     // Stores all the seen symbols (terminal and non-terminal) in 2 sets.
     // Stores all the rules in a vector and refers back to them using their order, i.e., the order matters.
     // DO NOT CHANGE ``calgary.grm``
-    while (getline(input, line)) {
+    for(string line; getline(input, line);) {
         Rule *r = Rule::from_line(line);
         rules.push_back(r);
         for(const auto &symbol : r->sentential_form) {

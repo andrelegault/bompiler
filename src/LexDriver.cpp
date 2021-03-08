@@ -1,6 +1,6 @@
-#include <iostream>
 #include "bompilerConfig.h"
 #include "LexicalAnalyzer.h"
+#include <iostream>
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {

@@ -6,12 +6,16 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 using std::string;
 using std::ostringstream;
 using std::ios_base;
+using std::filesystem::exists;
 
 LexicalAnalyzer::LexicalAnalyzer(const string& src) {
+    if (!exists(src))
+        throw;
     handler.open(src, ios_base::in);
     string basename = Utils::get_before_ext(src);
     out_tokens.open(basename + ".outlextokens", ios_base::out);
@@ -70,7 +74,7 @@ void LexicalAnalyzer::process_until_blank(string& lexeme, char& c, bool save_cha
 
 Token* LexicalAnalyzer::next_token() {
     if (done)
-        return new Token("EOF", "$", line);
+        return new Token("$", "$", line);
     Token* t{ nullptr };
     string lexeme;
     ostringstream str_stream;
