@@ -37,9 +37,15 @@ Rule* Rule::from_line(const string &line) {
     auto parts = Utils::split_string(line, " ");
     vector<string> sentential_form;
     // starts at index 2 to ignore nonterminal and `::=`
-    for (int i = 2; i < parts.size(); ++i)
-        sentential_form.push_back(parts[i]);
-    return new Rule(line, parts[0], sentential_form);
+    for (int i = 2; i < parts.size(); ++i) {
+        string temp = parts[i];
+        // only trim <words-like-this>
+        // not 'these-words'
+        if (temp[0] != '\'')
+            temp = Utils::trim_around(parts[i]);
+        sentential_form.push_back(Utils::to_lower(temp));
+    }
+    return new Rule(line, Utils::to_lower(Utils::trim_around(parts[0])), sentential_form);
 }
 
 ostream& operator<<(ostream& stream, const Rule &rule) {
@@ -132,10 +138,12 @@ Grammar* Grammar::from_file(const string &filename) {
     for(string line; getline(input, line);) {
         Rule *r = Rule::from_line(line);
         rules.push_back(r);
-        for(const auto &symbol : r->sentential_form) {
-            const string trimmed = symbol.substr(1, symbol.size()-2);
-            if (symbol[0] == '\'')
+        for(int i = 0; i < r->sentential_form.size(); ++i) {
+            if (r->sentential_form[i][0] == '\'') {
+                const string trimmed = Utils::trim_around(r->sentential_form[i]);
+                r->sentential_form[i] = trimmed;
                 terminals.insert(trimmed);
+            }
         }
     }
 

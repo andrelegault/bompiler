@@ -34,7 +34,7 @@ bool Parser::parse() {
     stack<string> tokens;
     bool error = false;
     tokens.push("$");
-    tokens.push("START");
+    tokens.push("start");
     Token *a = analyzer->next_token();
     while (tokens.top() != "$") {
         const string x = tokens.top();
@@ -55,7 +55,7 @@ bool Parser::parse() {
             }
         } else {
             if (grammar->translation_table.find(x) != grammar->translation_table.end()) {
-                if (grammar->translation_table.find(a->type) != grammar->translation_table.end()) {
+                if (grammar->translation_table[x].find(a->type) != grammar->translation_table[x].end()) {
                     tokens.pop();
                     vector<string> form = grammar->translation_table[x][a->type]->sentential_form;
                     auto it = form.rbegin();
