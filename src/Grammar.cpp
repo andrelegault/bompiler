@@ -300,7 +300,7 @@ Grammar* Grammar::from_file(const string &filename) {
             {"dot", rules[109]}, {"rpar", rules[110]}
         }},
         {"Visibility", {
-            {"private", rules[112]}, {"public", rules[111]}, {"string", rules[114]}, {"float", rules[114]}, {"integer", rules[114]}, {"func", rules[114]}
+            {"private", rules[112]}, {"public", rules[111]}, {"string", rules[113]}, {"float", rules[113]}, {"integer", rules[113]}, {"func", rules[113]}
         }}
     };
     
