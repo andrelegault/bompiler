@@ -263,7 +263,7 @@ Grammar* Grammar::from_file(const string &filename) {
             {"lcurbr", rules[73]}, {"comma", rules[72]}
         }},
         {"prog", {
-            {"main", rules[74]}
+            {"main", rules[74]}, {"func", rules[74]}, {"class", rules[74]}
         }},
         {"relop", {
             {"geq", rules[80]}, {"leq", rules[79]}, {"gt", rules[78]}, {"lt", rules[77]}, {"neq", rules[76]}, {"eq", rules[75]}
