@@ -8,7 +8,7 @@
 <ArithExpr> ::= <Term> <ArithExprTail> 
 <ArithExprTail> ::= <AddOp> <Term> <ArithExprTail> 
 <ArithExprTail> ::= EPSILON 
-<ArraySizeRept> ::= 'lsqbr' <IntNum> 'rsqbr' <ArraySizeRept> 
+<ArraySizeRept> ::= 'lsqbr' <NumInt> 'rsqbr' <ArraySizeRept> 
 <ArraySizeRept> ::= EPSILON 
 <AssignOp> ::= 'assign' 
 <AssignStatTail> ::= <AssignOp> <Expr> 
@@ -61,8 +61,8 @@
 <IndiceRep> ::= EPSILON 
 <Inherit> ::= 'inherits' 'id' <NestedId> 
 <Inherit> ::= EPSILON 
-<IntNum> ::= 'intlit' 
-<IntNum> ::= EPSILON 
+<NumInt> ::= 'intlit' 
+<NumInt> ::= EPSILON 
 <MemberDecl> ::= <FuncDecl> 
 <MemberDecl> ::= <VarDecl> 
 <MethodBodyVar> ::= 'var' 'lcurbr' <VarDeclRep> 'rcurbr' 

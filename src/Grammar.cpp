@@ -96,7 +96,7 @@ Grammar* Grammar::from_file(const string &filename) {
         {"function",                        make_pair<unordered_set<string>, unordered_set<string>>({"func"}, {"main", "func"})},
         {"funchead",                        make_pair<unordered_set<string>, unordered_set<string>>({"func"}, {"lcurbr"})},
         {"inherit",                         make_pair<unordered_set<string>, unordered_set<string>>({"inherits", "epsilon"}, {"lcurbr"})},
-        {"intlit",                          make_pair<unordered_set<string>, unordered_set<string>>({"intlit", "epsilon"}, {"rcurbr"})},
+        {"numint",                          make_pair<unordered_set<string>, unordered_set<string>>({"numint", "epsilon"}, {"rcurbr"})},
         {"memberdecl",                      make_pair<unordered_set<string>, unordered_set<string>>({"func", "integer", "float", "string", "id"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"})},
         {"funcdecl",                        make_pair<unordered_set<string>, unordered_set<string>>({"func"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"})},
         {"methodbodyvar",                   make_pair<unordered_set<string>, unordered_set<string>>({"var", }, {"if", "while", "read", "write", "return", "break", "continue", "id", "rcurbr"})},
@@ -152,7 +152,7 @@ Grammar* Grammar::from_file(const string &filename) {
             {"minus", rules[5]}, {"plus", rules[4]}, {"or", rules[6]}
         }},
         {"aparams", {
-            {"id", rules[0]}, {"rpar", rules[1]}, {"lpar", rules[0]}, {"minus", rules[0]}, {"plus", rules[0]}, {"intlit", rules[0]}, {"?", rules[0]}, {"not", rules[0]}, {"stringlit", rules[0]}, {"floatlit", rules[0]} 
+            {"id", rules[0]}, {"rpar", rules[1]}, {"lpar", rules[0]}, {"minus", rules[0]}, {"plus", rules[0]}, {"intlit", rules[0]}, {"qm", rules[0]}, {"not", rules[0]}, {"stringlit", rules[0]}, {"floatlit", rules[0]} 
         }},
         {"aparamstail", {
             {"rpar", rules[3]}, {"comma", rules[2]}
@@ -242,12 +242,12 @@ Grammar* Grammar::from_file(const string &filename) {
             {"func", rules[58]}
         }},
         {"indicerep", {
-            {"dot", rules[60]}, {"semi", rules[60]}, {"rpar", rules[60]}, {"minus", rules[60]}, {"plus", rules[60]}, {"geq", rules[60]}, {"leq", rules[60]}, {"gt", rules[60]}, {"lt", rules[60]}, {"neq", rules[60]}, {"eq", rules[60]}, {"comma", rules[60]}, {"and", rules[60]}, {"div", rules[60]}, {"mult", rules[60]}, {"rsrbr", rules[60]}, {"lsqbr", rules[59]}, {"colon", rules[60]}, {"assign", rules[60]}, {"or", rules[60]}
+            {"dot", rules[60]}, {"semi", rules[60]}, {"rpar", rules[60]}, {"minus", rules[60]}, {"plus", rules[60]}, {"geq", rules[60]}, {"leq", rules[60]}, {"gt", rules[60]}, {"lt", rules[60]}, {"neq", rules[60]}, {"eq", rules[60]}, {"comma", rules[60]}, {"and", rules[60]}, {"div", rules[60]}, {"mult", rules[60]}, {"rsqbr", rules[60]}, {"lsqbr", rules[59]}, {"colon", rules[60]}, {"assign", rules[60]}, {"or", rules[60]}
         }},
         {"inherit", {
             {"lcurbr", rules[62]}, {"inherits", rules[61]}
         }},
-        {"intlit", {
+        {"numint", {
             {"intlit", rules[63]}, {"rsqbr", rules[64]}
         }},
         {"memberdecl", {
