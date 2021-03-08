@@ -192,6 +192,10 @@ Token* LexicalAnalyzer::next_token() {
                             t = new Token("floatLit", lexeme, line);
                         }
                     }
+                    else {
+                        handler.unget();
+                        t = new Token("floatLit", lexeme, line);
+                    }
                 }
                 else if (std::isdigit((int)c)) { // 0.<digit>
                     while (!done && std::isdigit((int)c)) {
