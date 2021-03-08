@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include <locale>
+#include <algorithm>
 
 // from https://stackoverflow.com/a/57346888/7705786
 std::vector<std::string> Utils::split_string(const std::string& i_str, const std::string& i_delim) {
@@ -51,4 +52,20 @@ bool Utils::is_letter(const int& d) {
 
 bool Utils::is_nonzero(const int& d) {
     return d >= 49 && d <= 57;
+}
+
+std::string Utils::to_lower(const std::string &src) {
+    // from https://stackoverflow.com/a/313990
+    std::string temp = src;
+    std::transform(temp.begin(), temp.end(), temp.begin(),
+        [](unsigned char c) {
+            return std::tolower(c);
+        }
+    );
+    
+    return temp;
+}
+
+std::string Utils::trim_around(const std::string &src) {
+    return src.substr(1, src.size()-2);
 }
