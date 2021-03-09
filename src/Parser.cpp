@@ -45,7 +45,6 @@ bool Parser::parse() {
     symbols.push(START);
     Token *lookahead = analyzer->next_token();
     while (symbols.top() != END) {
-		usleep(20000);
         const Symbol *x {symbols.top()};
         cout << *x << ",\t\t\t\t\t" << *lookahead << endl;
         if (lookahead->type == "inlinecmt" || lookahead->type == "blockcmt") {
@@ -60,7 +59,6 @@ bool Parser::parse() {
                 lookahead = analyzer->next_token();
             }
             else {
-                cout << "wrong1" << endl;
                 skip_errors(symbols, lookahead);
                 error = true;
             }
@@ -86,13 +84,11 @@ bool Parser::parse() {
 					}
                 }
                 else {
-                    cout << "wrong2" << endl;
                     skip_errors(symbols, lookahead);
                     error = true;
                 }
             }
             else {
-                cout << "wrong3" << endl;
                 skip_errors(symbols, lookahead);
                 error = true;
             }
@@ -105,58 +101,17 @@ void Parser::skip_errors(stack<Symbol*> &symbols, Token *lookahead) {
     out_errors << "syntax error at " + to_string(lookahead->line);
     unsigned int microseconds = 2000000;
 	usleep(microseconds);
-    if (symbols.top()->is_terminal == false) {
-        if (grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end()) {
-            symbols.pop();
-        }
-		else {
-			while (true) {
-				//delete lookahead;
-				lookahead = analyzer->next_token();
-				cout << *(symbols.top()) << *lookahead << endl;
-				if (grammar->non_terminals[symbols.top()->lhs].first.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].first.end())
-					break;
-
-				if (grammar->non_terminals[symbols.top()->lhs].first.find("epsilon") != grammar->non_terminals[symbols.top()->lhs].first.end() ||
-						grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end())
-					break;
-			}
-        }
-    }
+	if (lookahead->type == "$" || grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end()) {
+		symbols.pop();
+	}
 	else {
-		// i figured out the issue (i think)
-		// i shouldnt check for the follow set of the top() directly, I should check the non-terminal top() belongs to
-		// i basically have to link each token in the stack to its lhs 
-		while (true) {
-			//delete lookahead;
+		auto first_set = grammar->non_terminals[symbols.top()->lhs].first;
+		auto follow_set = grammar->non_terminals[symbols.top()->lhs].second;
+		do {
+			delete lookahead;
 			lookahead = analyzer->next_token();
-				cout << *(symbols.top()) << *lookahead << endl;
-			if (grammar->non_terminals[symbols.top()->lhs].first.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].first.end())
-				break;
-
-			if (grammar->non_terminals[symbols.top()->lhs].first.find("epsilon") != grammar->non_terminals[symbols.top()->lhs].first.end() ||
-					grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end())
-				break;
-					
-		}
-
-        // stop when first set includes lookahead AND (epsilon not in first set or follow set includes lookahead)
-		/*
-        while (symbols.top() != "$" && first_set.find(lookahead->type) == first_set.end() ||
-              (first_set.find("epsilon") == first_set.end() && follow_set.find(lookahead->type) == follow_set.end())) {
-            bool first = first_set.find(lookahead->type) == first_set.end();
-            bool second = first_set.find("epsilon") != first_set.end() && follow_set.find(lookahead->type) == follow_set.end();
-            bool result = first ^ second;
-            cout << "symbols.top() = " << symbols.top() << "| lookahead = " << *lookahead << " " << first << ", " << second << endl;
-            if (lookahead->type == "func" || lookahead->type == "main") {
-                if (first_set.find("func") != first_set.end()) {
-                    cout << "hello world" << endl;
-                }
-            }
-            lookahead = analyzer->next_token();
-            usleep(microseconds);
-        }
-		*/
-    }
+		} while (first_set.find(lookahead->type) == first_set.end() ||
+				(first_set.find("epsilon") != first_set.end() && follow_set.find(lookahead->type) != follow_set.end()));
+	}
 	usleep(microseconds);
 }
