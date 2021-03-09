@@ -2,6 +2,7 @@
 #include "Grammar.h"
 #include <fstream>
 #include <stack>
+#include <string>
 
 using std::string;
 using std::ifstream;
@@ -13,7 +14,7 @@ class Parser {
         Parser(Grammar *grammar, LexicalAnalyzer *analyzer, const string &filename);
         ~Parser();
         bool parse();
-        void skip_errors(stack<string> &tokens, Token* lookahead);
+        void skip_errors(stack<Symbol*> &symbols, Token* lookahead);
     private:
         Grammar *grammar = nullptr;
         LexicalAnalyzer *analyzer = nullptr;
@@ -21,5 +22,6 @@ class Parser {
         ofstream out_derivation;
         ofstream out_ast;
         ofstream out_errors;
-        const vector<string> EPSILON_VECTOR{"epsilon"};
+		Symbol *START = new Symbol(false, "start", "");
+		Symbol *END = new Symbol(false, "$", "");
 };

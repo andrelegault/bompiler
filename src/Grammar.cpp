@@ -22,30 +22,43 @@ using std::cout;
 using std::endl;
 using std::filesystem::exists;
 
+Symbol::Symbol(
+		const bool is_terminal,
+		const string &value,
+		const string &lhs):
+	is_terminal(is_terminal),
+	val(value),
+	lhs(lhs) {
+}
+
+Symbol* Symbol::from_string(const string &lhs, const string &str) {
+	string val(str);
+	bool is_terminal = true;
+	if (str[0] == '<')
+		is_terminal = false;
+	if (str[0] != 'E')
+		val = Utils::trim_around(val);
+	val = Utils::to_lower(val);
+	return new Symbol(is_terminal, val, lhs);
+}
 
 Rule::Rule(
     const string &original,
-    const string &symbol,
-    const vector<string> &sentential_form):
+    const vector<Symbol*> &sentential_form):
         original(original),
-        symbol(symbol),
         sentential_form(sentential_form) {
-
 }
 
 Rule* Rule::from_line(const string &line) {
     auto parts = Utils::split_string(line, " ");
-    vector<string> sentential_form;
+    vector<Symbol*> sentential_form;
+	const string lhs = Utils::to_lower(Utils::trim_around(parts[0]));
     // starts at index 2 to ignore nonterminal and `::=`
     for (int i = 2; i < parts.size(); ++i) {
-        string temp = parts[i];
-        // only trim <words-like-this>
-        // not 'these-words'
-        if (temp[0] == '<')
-            temp = Utils::trim_around(parts[i]);
-        sentential_form.push_back(Utils::to_lower(temp));
+		Symbol *s = Symbol::from_string(lhs, parts[i]);
+		sentential_form.push_back(s);
     }
-    return new Rule(line, Utils::to_lower(Utils::trim_around(parts[0])), sentential_form);
+    return new Rule(line, sentential_form);
 }
 
 ostream& operator<<(ostream& stream, const Rule &rule) {
@@ -53,10 +66,18 @@ ostream& operator<<(ostream& stream, const Rule &rule) {
     return stream;
 }
 
-Grammar::Grammar(const unordered_set<string> &terminals,
-                 const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
+ostream& operator<<(ostream& stream, const Symbol &symbol) {
+	string trm;
+	if (symbol.is_terminal == true)
+		trm = "yes";
+	else
+		trm = "no";
+    stream << "Symbol(is_terminal=" << trm << ", val=" << symbol.val << ", lhs=" << symbol.lhs << ")";
+    return stream;
+}
+
+Grammar::Grammar(const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
                  const unordered_map<string, map<string, Rule*>> &translation_table):
-    terminals(terminals),
     non_terminals(non_terminals),
     translation_table(translation_table) {
 
@@ -67,67 +88,66 @@ Grammar* Grammar::from_file(const string &filename) {
         throw;
     ifstream input(filename, ios_base::in);
     vector<Rule*> rules;
-    unordered_set<string> terminals;
     unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> non_terminals;
     unordered_map<string, map<string, Rule*>> translation_table;
     
     non_terminals = {
-        {"addop",                           make_pair<unordered_set<string>, unordered_set<string>>({"plus", "minus", "or"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"})},
-        {"aparamstail",                     make_pair<unordered_set<string>, unordered_set<string>>({"comma", "epsilon"}, {"rpar"})},
-        {"arithexprtail",                   make_pair<unordered_set<string>, unordered_set<string>>({"plus", "minus", "or", "epsilon"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "colon", "rsqbr", "rpar"})},
-        {"assignop",                        make_pair<unordered_set<string>, unordered_set<string>>({"assign"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"})},
-        {"classdeclbody",                   make_pair<unordered_set<string>, unordered_set<string>>({"public", "private", "func", "integer", "float", "string", "id", }, {"rcurbr"})},
-        {"exprtail",                        make_pair<unordered_set<string>, unordered_set<string>>({"eq", "neq", "lt", "gt", "leq", "geq", "epsilon"}, {"semi", "comma", "colon", "rsqbr", "rpar"})},
-        {"arithexpr",                       make_pair<unordered_set<string>, unordered_set<string>>({"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "colon", "rsqbr", "rpar"})},
-        {"fparamstail",                     make_pair<unordered_set<string>, unordered_set<string>>({"comma", "epsilon"}, {"rpar"})},
-        {"classmethod",                     make_pair<unordered_set<string>, unordered_set<string>>({"sr", "epsilon"}, {"lpar"})},
-        {"fparams",                         make_pair<unordered_set<string>, unordered_set<string>>({"integer", "float", "string", "id", "epsilon"}, {"rpar"})},
-        {"funcdecltail",                    make_pair<unordered_set<string>, unordered_set<string>>({"void", "integer", "float", "string", "id"}, {"lcurbr", "semi"})},
-        {"funcorassignstatidnestfunctail",  make_pair<unordered_set<string>, unordered_set<string>>({"dot", "epsilon"}, {"semi"})},
-        {"funcorassignstatidnestvartail",   make_pair<unordered_set<string>, unordered_set<string>>({"dot", "assign"}, {"semi"})},
-        {"funcorassignstatidnest",          make_pair<unordered_set<string>, unordered_set<string>>({"lpar", "lsqbr", "dot", "assign"}, {"semi"})},
-        {"assignstattail",                  make_pair<unordered_set<string>, unordered_set<string>>({"assign"}, {"semi"})},
-        {"funcorvar",                       make_pair<unordered_set<string>, unordered_set<string>>({"id"}, {"mult", "div", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"funcorvaridnesttail",             make_pair<unordered_set<string>, unordered_set<string>>({"dot", "epsilon"}, {"mult", "div", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"funcorvaridnest",                 make_pair<unordered_set<string>, unordered_set<string>>({"lpar", "lsqbr", "dot", "epsilon"}, {"mult", "div", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"aparams",                         make_pair<unordered_set<string>, unordered_set<string>>({"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus", "epsilon"}, {"rpar"})},
-        {"funcstattailidnest",              make_pair<unordered_set<string>, unordered_set<string>>({"id", "epsilon"}, {"semi"})},
-        {"funcstattail",                    make_pair<unordered_set<string>, unordered_set<string>>({"dot", "lpar", "lsqbr"}, {"semi"})},
-        {"function",                        make_pair<unordered_set<string>, unordered_set<string>>({"func"}, {"main", "func"})},
-        {"funchead",                        make_pair<unordered_set<string>, unordered_set<string>>({"func"}, {"lcurbr"})},
-        {"inherit",                         make_pair<unordered_set<string>, unordered_set<string>>({"inherits", "epsilon"}, {"lcurbr"})},
-        {"numint",                          make_pair<unordered_set<string>, unordered_set<string>>({"numint", "epsilon"}, {"rcurbr"})},
-        {"memberdecl",                      make_pair<unordered_set<string>, unordered_set<string>>({"func", "integer", "float", "string", "id"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"})},
-        {"funcdecl",                        make_pair<unordered_set<string>, unordered_set<string>>({"func"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"})},
-        {"methodbodyvar",                   make_pair<unordered_set<string>, unordered_set<string>>({"var", }, {"if", "while", "read", "write", "return", "break", "continue", "id", "rcurbr"})},
-        {"nestedid",                        make_pair<unordered_set<string>, unordered_set<string>>({"comma", }, {"lcurbr"})},
-        {"classdecl",                       make_pair<unordered_set<string>, unordered_set<string>>({"class", }, {"func", "main"})},
-        {"funcdef",                         make_pair<unordered_set<string>, unordered_set<string>>({"func", }, {"main"})},
-        {"funcbody",                        make_pair<unordered_set<string>, unordered_set<string>>({"lcurbr"}, {"main", "func"})},
-        {"relop",                           make_pair<unordered_set<string>, unordered_set<string>>({"eq", "neq", "lt", "gt", "leq", "geq"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"})},
-        {"sign",                            make_pair<unordered_set<string>, unordered_set<string>>({"plus", "minus"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"})},
-        {"start",                           make_pair<unordered_set<string>, unordered_set<string>>({"main", "class", "func"}, {})},
-        {"prog",                            make_pair<unordered_set<string>, unordered_set<string>>({"main", "class", "func"}, {})},
-        {"funcorassignstat",                make_pair<unordered_set<string>, unordered_set<string>>({"id"}, {"semi"})},
-        {"statblock",                       make_pair<unordered_set<string>, unordered_set<string>>({"lcurbr", "if", "while", "read", "write", "return", "break", "continue", "id", "epsilon"}, {"else", "semi"})},
-        {"expr",                            make_pair<unordered_set<string>, unordered_set<string>>({"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"semi", "comma", "colon", "rsqbr", "rpar"})},
-        {"statement",                       make_pair<unordered_set<string>, unordered_set<string>>({"if", "while", "read", "write", "return", "break", "continue", "id"}, {"if", "while", "read", "write", "return", "break", "continue", "id", "else", "semi", "rcurbr"})},
-        {"statementlist",                   make_pair<unordered_set<string>, unordered_set<string>>({"if", "while", "read", "write", "return", "break", "continue", "id", "epsilon"}, {"rcurbr"})},
-        {"term",                            make_pair<unordered_set<string>, unordered_set<string>>({"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"multop",                          make_pair<unordered_set<string>, unordered_set<string>>({"mult", "div", "and"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"})},
-        {"factor",                          make_pair<unordered_set<string>, unordered_set<string>>({"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"mult", "div", "and", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"termtail",                        make_pair<unordered_set<string>, unordered_set<string>>({"mult", "div", "and", }, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"type",                            make_pair<unordered_set<string>, unordered_set<string>>({"integer", "float", "string", "id"}, {"lcurbr", "semi", "id"})},
-        {"arraysizerept",                   make_pair<unordered_set<string>, unordered_set<string>>({"lsqbr", }, {"rpar", "comma", "semi"})},
-        {"vardecl",                         make_pair<unordered_set<string>, unordered_set<string>>({"integer", "float", "string", "id"}, {"public", "private", "func", "integer", "string", "id", "rcurbr"})},
-        {"vardeclrep",                      make_pair<unordered_set<string>, unordered_set<string>>({"integer", "float", "string", "id", "epsilon"}, {"rcurbr"})},
-        {"variable",                        make_pair<unordered_set<string>, unordered_set<string>>({"id"}, {"rpar"})},
-        {"indicerep",                       make_pair<unordered_set<string>, unordered_set<string>>({"lsqbr", }, {"mult", "div", "and", "semi", "asssign", "dot", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"})},
-        {"variableidnesttail",              make_pair<unordered_set<string>, unordered_set<string>>({"dot", }, {"rpar"})},
-        {"variableidnest",                  make_pair<unordered_set<string>, unordered_set<string>>({"lsqbr", "dot", }, {"rpar"})},
-        {"visibility",                      make_pair<unordered_set<string>, unordered_set<string>>({"public", "private", }, {"func", "integer", "float", "string", "id"})}
+        {"addop",                           {{"plus", "minus", "or"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}}},
+        {"aparamstail",                     {{"comma", "epsilon"}, {"rpar"}}},
+        {"arithexprtail",                   {{"plus", "minus", "or", "epsilon"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "colon", "rsqbr", "rpar"}}},
+        {"assignop",                        {{"assign"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}}},
+        {"classdeclbody",                   {{"public", "private", "func", "integer", "float", "string", "id", }, {"rcurbr"}}},
+        {"exprtail",                        {{"eq", "neq", "lt", "gt", "leq", "geq", "epsilon"}, {"semi", "comma", "colon", "rsqbr", "rpar"}}},
+        {"arithexpr",                       {{"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "colon", "rsqbr", "rpar"}}},
+        {"fparamstail",                     {{"comma", "epsilon"}, {"rpar"}}},
+        {"classmethod",                     {{"sr", "epsilon"}, {"lpar"}}},
+        {"fparams",                         {{"integer", "float", "string", "id", "epsilon"}, {"rpar"}}},
+        {"funcdecltail",                    {{"void", "integer", "float", "string", "id"}, {"lcurbr", "semi"}}},
+        {"funcorassignstatidnestfunctail",  {{"dot", "epsilon"}, {"semi"}}},
+        {"funcorassignstatidnestvartail",   {{"dot", "assign"}, {"semi"}}},
+        {"funcorassignstatidnest",          {{"lpar", "lsqbr", "dot", "assign"}, {"semi"}}},
+        {"assignstattail",                  {{"assign"}, {"semi"}}},
+        {"funcorvar",                       {{"id"}, {"mult", "div", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"funcorvaridnesttail",             {{"dot", "epsilon"}, {"mult", "div", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"funcorvaridnest",                 {{"lpar", "lsqbr", "dot", "epsilon"}, {"mult", "div", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"aparams",                         {{"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus", "epsilon"}, {"rpar"}}},
+        {"funcstattailidnest",              {{"id", "epsilon"}, {"semi"}}},
+        {"funcstattail",                    {{"dot", "lpar", "lsqbr"}, {"semi"}}},
+        {"function",                        {{"func"}, {"main", "func"}}},
+        {"funchead",                        {{"func"}, {"lcurbr"}}},
+        {"inherit",                         {{"inherits", "epsilon"}, {"lcurbr"}}},
+        {"numint",                          {{"numint", "epsilon"}, {"rcurbr"}}},
+        {"memberdecl",                      {{"func", "integer", "float", "string", "id"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"}}},
+        {"funcdecl",                        {{"func"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"}}},
+        {"methodbodyvar",                   {{"var", "epsilon"}, {"if", "while", "read", "write", "return", "break", "continue", "id", "rcurbr"}}},
+        {"nestedid",                        {{"comma", "epsilon"}, {"lcurbr"}}},
+        {"classdecl",                       {{"class", "epsilon"}, {"func", "main"}}},
+        {"funcdef",                         {{"func", "epsilon"}, {"main"}}},
+        {"funcbody",                        {{"lcurbr"}, {"main", "func"}}},
+        {"relop",                           {{"eq", "neq", "lt", "gt", "leq", "geq"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}}},
+        {"sign",                            {{"plus", "minus"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}}},
+        {"start",                           {{"main", "class", "func"}, {}}},
+        {"prog",                            {{"main", "class", "func"}, {}}},
+        {"funcorassignstat",                {{"id"}, {"semi"}}},
+        {"statblock",                       {{"lcurbr", "if", "while", "read", "write", "return", "break", "continue", "id", "epsilon"}, {"else", "semi"}}},
+        {"expr",                            {{"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"semi", "comma", "colon", "rsqbr", "rpar"}}},
+        {"statement",                       {{"if", "while", "read", "write", "return", "break", "continue", "id"}, {"if", "while", "read", "write", "return", "break", "continue", "id", "else", "semi", "rcurbr"}}},
+        {"statementlist",                   {{"if", "while", "read", "write", "return", "break", "continue", "id", "epsilon"}, {"rcurbr"}}},
+        {"term",                            {{"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"multop",                          {{"mult", "div", "and"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}}},
+        {"factor",                          {{"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}, {"mult", "div", "and", "semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"termtail",                        {{"mult", "div", "and", "epsilon"}, {"semi", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"type",                            {{"integer", "float", "string", "id"}, {"lcurbr", "semi", "id"}}},
+        {"arraysizerept",                   {{"lsqbr", "epsilon"}, {"rpar", "comma", "semi"}}},
+        {"vardecl",                         {{"integer", "float", "string", "id"}, {"public", "private", "func", "integer", "string", "id", "rcurbr"}}},
+        {"vardeclrep",                      {{"integer", "float", "string", "id", "epsilon"}, {"rcurbr"}}},
+        {"variable",                        {{"id"}, {"rpar"}}},
+        {"indicerep",                       {{"lsqbr", "epsilon"}, {"mult", "div", "and", "semi", "asssign", "dot", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "colon", "rsqbr", "rpar"}}},
+        {"variableidnesttail",              {{"dot", "epsilon"}, {"rpar"}}},
+        {"variableidnest",                  {{"lsqbr", "dot", "epsilon"}, {"rpar"}}},
+        {"visibility",                      {{"public", "private", "epsilon"}, {"func", "integer", "float", "string", "id"}}}
     };
-    
+
     // every nonterminal has a first and follow set composed of terminals
     // every rule has a nonterminal (symbol)
 
@@ -138,14 +158,13 @@ Grammar* Grammar::from_file(const string &filename) {
     for(string line; getline(input, line);) {
         Rule *r = Rule::from_line(line);
         rules.push_back(r);
-        for(int i = 0; i < r->sentential_form.size(); ++i) {
-            if (r->sentential_form[i][0] == '\'') {
-                const string trimmed = Utils::trim_around(r->sentential_form[i]);
-                r->sentential_form[i] = trimmed;
-                terminals.insert(trimmed);
-            }
-        }
     }
+
+	for(const auto &rule : rules) {
+		for(const auto &symbol : rule->sentential_form) {
+			//cout << *symbol << endl;
+		}
+	}
 
     translation_table = {
         {"addop", {
@@ -314,7 +333,7 @@ Grammar* Grammar::from_file(const string &filename) {
     
     input.close();
     
-    return new Grammar(terminals, non_terminals, translation_table);
+    return new Grammar(non_terminals, translation_table);
 }
 
 Grammar::~Grammar() {
