@@ -22,16 +22,68 @@ using std::cout;
 using std::endl;
 using std::filesystem::exists;
 
-Symbol::Symbol(
+Symbol::Symbol(const string &val, const string &lhs): val(val), lhs(lhs) { }
+
+ParsingSymbol::ParsingSymbol(
 		const bool is_terminal,
-		const string &value,
+		const string &val,
 		const string &lhs):
-	is_terminal(is_terminal),
-	val(value),
-	lhs(lhs) {
+	Symbol(val, lhs),
+	is_terminal(is_terminal) { }
+
+SemanticSymbol::SemanticSymbol(const string &val, const string &lhs) : Symbol(val, lhs) { }
+
+void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
+	cout << "semantic action processing" << endl;
 }
 
-Symbol* Symbol::from_string(const string &lhs, const string &str) {
+
+void ParsingSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
+	auto &symbols = parser->symbols;
+	if (this->is_terminal == true) {
+		if (this->val == lookahead->type) {
+			symbols.pop();
+			delete lookahead;
+			lookahead = analyzer->next_token();
+		}
+		else {
+			parser->skip_errors(lookahead);
+			error = true;
+		}
+	}
+	else {
+		if (grammar->translation_table.find(this->val) != grammar->translation_table.end()) {
+			if (grammar->translation_table[this->val].find(lookahead->type) != grammar->translation_table[this->val].end()) {
+				symbols.pop();
+				const vector<ParsingSymbol*> form = grammar->translation_table[this->val][lookahead->type]->sentential_form;
+				if (form.size() == 1 && form[0]->val == "epsilon") {
+					cout << "[" << this->val << "][" << lookahead->type << "]" << " -> EPSILON " << endl;
+				} else {
+					auto it = form.rbegin();
+					cout << "PUSHING -> ";
+					for (; it != form.rend(); ++it) {
+						ParsingSymbol *s = *it;
+						if (s->val != "epsilon") {
+							cout << s->val << ", ";
+							symbols.push(s);
+						}
+					}
+					cout << endl;
+				}
+			}
+			else {
+				parser->skip_errors(lookahead);
+				error = true;
+			}
+		}
+		else {
+			parser->skip_errors(lookahead);
+			error = true;
+		}
+	}
+}
+
+ParsingSymbol* ParsingSymbol::from_string(const string &lhs, const string &str) {
 	string val(str);
 	bool is_terminal = true;
 	if (str[0] == '<')
@@ -39,23 +91,24 @@ Symbol* Symbol::from_string(const string &lhs, const string &str) {
 	if (str[0] != 'E')
 		val = Utils::trim_around(val);
 	val = Utils::to_lower(val);
-	return new Symbol(is_terminal, val, lhs);
+	return new ParsingSymbol(is_terminal, val, lhs);
 }
+
 
 Rule::Rule(
     const string &original,
-    const vector<Symbol*> &sentential_form):
+    const vector<ParsingSymbol*> &sentential_form):
         original(original),
         sentential_form(sentential_form) {
 }
 
 Rule* Rule::from_line(const string &line) {
     auto parts = Utils::split_string(line, " ");
-    vector<Symbol*> sentential_form;
+    vector<ParsingSymbol*> sentential_form;
 	const string lhs = Utils::to_lower(Utils::trim_around(parts[0]));
     // starts at index 2 to ignore nonterminal and `::=`
     for (int i = 2; i < parts.size(); ++i) {
-		Symbol *s = Symbol::from_string(lhs, parts[i]);
+		ParsingSymbol *s = ParsingSymbol::from_string(lhs, parts[i]);
 		sentential_form.push_back(s);
     }
     return new Rule(line, sentential_form);
@@ -67,12 +120,17 @@ ostream& operator<<(ostream& stream, const Rule &rule) {
 }
 
 ostream& operator<<(ostream& stream, const Symbol &symbol) {
+    stream << "Symbol(val=" << symbol.val << ",lhs=" << symbol.lhs << ")";
+    return stream;
+}
+
+ostream& operator<<(ostream& stream, const ParsingSymbol &symbol) {
 	string trm;
 	if (symbol.is_terminal == true)
 		trm = "yes";
 	else
 		trm = "no";
-    stream << "Symbol(is_terminal=" << trm << ", val=" << symbol.val << ", lhs=" << symbol.lhs << ")";
+    stream << "ParsingSymbol(is_terminal=" << trm << ", val=" << symbol.val << ", lhs=" << symbol.lhs << ")";
     return stream;
 }
 
@@ -337,6 +395,8 @@ Grammar* Grammar::from_file(const string &filename) {
 }
 
 Grammar::~Grammar() {
+	delete START;
+	delete END;
     // for (auto &it : translation_table) {
     //     for(auto &it2 : it.second) {
     //         for (auto &vec : it2.second->sentential_form) {

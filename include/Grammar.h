@@ -1,4 +1,6 @@
 #pragma once
+#include <Parser.h>
+#include <LexicalAnalyzer.h>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -44,17 +46,28 @@ struct TerminalSymbol {
 */
 
 struct Symbol {
-	const bool is_terminal;
 	const string val;
 	const string lhs;
-	Symbol(const bool is_terminal, const string &value, const string &lhs);
-	static Symbol* from_string(const string &lhs, const string &str);
+	Symbol(const string &val, const string &lhs);
+	virtual void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) = 0;
+};
+
+struct ParsingSymbol : Symbol {
+	const bool is_terminal;
+	ParsingSymbol(const bool is_terminal, const string &value, const string &lhs);
+	static ParsingSymbol* from_string(const string &lhs, const string &str);
+	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
+};
+
+struct SemanticSymbol : Symbol {
+	SemanticSymbol(const string &val, const string &lhs);
+	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
 
 struct Rule {
     string original;
-    vector<Symbol*> sentential_form;
-    Rule(const string &original, const vector<Symbol*> &sentential_form);
+    vector<ParsingSymbol*> sentential_form;
+    Rule(const string &original, const vector<ParsingSymbol*> &sentential_form);
     static Rule* from_line(const string &line);
 };
 
@@ -67,8 +80,12 @@ public:
         const unordered_map<string, map<string, Rule*>> &translation_table);
     ~Grammar();
     static Grammar* from_file(const string &filename);
+	ParsingSymbol *START = new ParsingSymbol(false, "start", "");
+	ParsingSymbol *END = new ParsingSymbol(false, "$", "");
+
 };
 
 ostream& operator<<(ostream& stream, const Rule &rule);
 ostream& operator<<(ostream& stream, const Symbol &symbol);
+ostream& operator<<(ostream& stream, const ParsingSymbol &symbol);
 
