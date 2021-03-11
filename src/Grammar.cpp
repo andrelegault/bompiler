@@ -55,18 +55,20 @@ void ParsingSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *a
 		if (grammar->translation_table.find(this->val) != grammar->translation_table.end()) {
 			if (grammar->translation_table[this->val].find(lookahead->type) != grammar->translation_table[this->val].end()) {
 				symbols.pop();
+				cout << "[" << this->val << "][" << lookahead->type << "] -> ";
 				const vector<ParsingSymbol*> form = grammar->translation_table[this->val][lookahead->type]->sentential_form;
 				if (form.size() == 1 && form[0]->val == "epsilon") {
-					cout << "[" << this->val << "][" << lookahead->type << "]" << " -> EPSILON " << endl;
+					cout << "EPSILON " << endl;
 				} else {
 					auto it = form.rbegin();
-					cout << "PUSHING -> ";
 					for (; it != form.rend(); ++it) {
 						ParsingSymbol *s = *it;
-						if (s->val != "epsilon") {
-							cout << s->val << ", ";
-							symbols.push(s);
+						if (s->is_terminal == false) {
+							SemanticSymbol *sem_action = new SemanticSymbol(s->val + "(synthetized)", this->lhs +  " (synthetized)");
+							symbols.push(sem_action);
 						}
+						cout << s->val << ", ";
+						symbols.push(s);
 					}
 					cout << endl;
 				}
