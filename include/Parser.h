@@ -24,6 +24,7 @@ class Parser {
         ofstream out_ast;
         ofstream out_errors;
 		stack<Symbol*> symbols;
+		stack<string> attributes;
     private:
         Grammar *grammar = nullptr;
         LexicalAnalyzer *analyzer = nullptr;

@@ -34,12 +34,17 @@ ParsingSymbol::ParsingSymbol(
 SemanticSymbol::SemanticSymbol(const string &val, const string &lhs) : Symbol(val, lhs) { }
 
 void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
-	cout << "semantic action processing" << endl;
+	/* Creates a synthetized version for the right sibling's symbol. */
+	parser->symbols.pop();
+	parser->attributes.push(this->val);
+	// if is rightmost node, use make_family
+	// else, use make_node
 }
 
 
 void ParsingSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
 	auto &symbols = parser->symbols;
+	auto &attributes = parser->attributes;
 	if (this->is_terminal == true) {
 		if (this->val == lookahead->type) {
 			symbols.pop();
@@ -118,6 +123,12 @@ Rule* Rule::from_line(const string &line) {
 
 ostream& operator<<(ostream& stream, const Rule &rule) {
     stream << rule.original;
+    return stream;
+}
+
+ostream& operator<<(ostream& stream, const SemanticSymbol &symbol) {
+	string output = "SemanticSymbol(val=" + symbol.val + ",lhs=" + symbol.lhs + ",id=" + symbol.type + ")";
+    stream << output;
     return stream;
 }
 
@@ -219,12 +230,6 @@ Grammar* Grammar::from_file(const string &filename) {
         Rule *r = Rule::from_line(line);
         rules.push_back(r);
     }
-
-	for(const auto &rule : rules) {
-		for(const auto &symbol : rule->sentential_form) {
-			//cout << *symbol << endl;
-		}
-	}
 
     translation_table = {
         {"addop", {

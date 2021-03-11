@@ -60,6 +60,7 @@ struct ParsingSymbol : Symbol {
 };
 
 struct SemanticSymbol : Symbol {
+	string type;
 	SemanticSymbol(const string &val, const string &lhs);
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
@@ -87,5 +88,6 @@ public:
 
 ostream& operator<<(ostream& stream, const Rule &rule);
 ostream& operator<<(ostream& stream, const Symbol &symbol);
+ostream& operator<<(ostream& stream, const SemanticSymbol &symbol);
 ostream& operator<<(ostream& stream, const ParsingSymbol &symbol);
 
