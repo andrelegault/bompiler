@@ -1,6 +1,7 @@
 #pragma once
 #include "Grammar.h"
 #include "LexicalAnalyzer.h"
+#include "AST.h"
 #include <fstream>
 #include <stack>
 #include <string>
@@ -12,6 +13,7 @@ using std::stack;
 
 class Symbol;
 class ParsingSymbol;
+class SemanticSymbol;
 class Grammar;
 
 class Parser {
@@ -24,7 +26,7 @@ class Parser {
         ofstream out_ast;
         ofstream out_errors;
 		stack<Symbol*> symbols;
-		stack<string> attributes;
+		stack<ASTNode*> attributes;
     private:
         Grammar *grammar = nullptr;
         LexicalAnalyzer *analyzer = nullptr;

@@ -11,13 +11,15 @@
 using std::string;
 
 struct ASTNode {
-	const ASTNode *parent, *leftmost_child, *leftmost_sibling, *next;
+	ASTNode *parent, *leftmost_child, *leftmost_sibling, *right;
+	string value;
 	ASTNode();
+	ASTNode(string &value);
 	//ASTNode(ASTNode *parent, ASTNode *leftmost_child, ASTNode *leftmost_sibling, ASTNode *next);
 	ASTNode* make_siblings(ASTNode *y);
 	void adopt_children(ASTNode *y);
-	ASTNode* make_family(ASTNode *op, ASTNode *kid1, ASTNode *kid2);
+	ASTNode* make_family(string op, ASTNode *kid1, ASTNode *kid2);
+    static ASTNode* make_node();
+    static ASTNode* make_node(string type);
 };
 
-static ASTNode* make_node();
-static ASTNode* make_node(string type);

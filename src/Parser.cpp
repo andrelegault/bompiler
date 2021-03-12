@@ -101,7 +101,6 @@ bool Parser::parse() {
 }
 
 void Parser::skip_errors(Token *lookahead) {
-	cout << "lole" << endl;
     out_errors << "syntax error at " + to_string(lookahead->line);
 	if (lookahead->type == "$" || grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end()) {
 		symbols.pop();

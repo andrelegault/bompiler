@@ -9,6 +9,7 @@
 #include <iostream>
 #include <map>
 #include <set>
+#include <list>
 
 using std::string;
 using std::vector;
@@ -17,6 +18,7 @@ using std::unordered_map;
 using std::map;
 using std::ostream;
 using std::pair;
+using std::list;
 
 
 // fwd def
@@ -46,14 +48,14 @@ struct TerminalSymbol {
 */
 
 struct Symbol {
-	const string val;
-	const string lhs;
+	string val;
+	string lhs;
 	Symbol(const string &val, const string &lhs);
 	virtual void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) = 0;
 };
 
 struct ParsingSymbol : Symbol {
-	const bool is_terminal;
+	bool is_terminal;
 	ParsingSymbol(const bool is_terminal, const string &value, const string &lhs);
 	static ParsingSymbol* from_string(const string &lhs, const string &str);
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
@@ -69,6 +71,7 @@ struct Rule {
     string original;
     vector<ParsingSymbol*> sentential_form;
     Rule(const string &original, const vector<ParsingSymbol*> &sentential_form);
+	Rule();
     static Rule* from_line(const string &line);
 };
 
@@ -83,11 +86,10 @@ public:
     static Grammar* from_file(const string &filename);
 	ParsingSymbol *START = new ParsingSymbol(false, "start", "");
 	ParsingSymbol *END = new ParsingSymbol(false, "$", "");
-
+	list<Symbol*> derivation;
 };
 
 ostream& operator<<(ostream& stream, const Rule &rule);
 ostream& operator<<(ostream& stream, const Symbol &symbol);
 ostream& operator<<(ostream& stream, const SemanticSymbol &symbol);
 ostream& operator<<(ostream& stream, const ParsingSymbol &symbol);
-

@@ -1,4 +1,4 @@
-#include "bompilerConfig.h"
+#include "include/bompilerConfig.h"
 #include "Grammar.h"
 #include "LexicalAnalyzer.h"
 #include "Parser.h"
