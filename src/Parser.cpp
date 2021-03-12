@@ -101,7 +101,7 @@ bool Parser::parse() {
 }
 
 void Parser::skip_errors(Token *lookahead) {
-    out_errors << "syntax error at " + to_string(lookahead->line);
+    out_errors << "syntax error at " + to_string(lookahead->line) << endl;
 	if (lookahead->type == "$" || grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end()) {
 		symbols.pop();
 	}
@@ -111,8 +111,9 @@ void Parser::skip_errors(Token *lookahead) {
 		do {
 			delete lookahead;
 			lookahead = analyzer->next_token();
-		} while (first_set.find(lookahead->type) == first_set.end() ||
-				(first_set.find("epsilon") != first_set.end() && follow_set.find(lookahead->type) != follow_set.end()));
+		} while (lookahead->type != "$" &&
+				 first_set.find(lookahead->type) == first_set.end() ||
+				 (first_set.find("epsilon") != first_set.end() && follow_set.find(lookahead->type) != follow_set.end()));
 	}
 	//usleep(2000000);
 }
