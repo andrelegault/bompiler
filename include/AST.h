@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <unordered_set>
+#include <stdarg.h>
+#include <vector>
 /**
  * Deals with collecting the nodes while program is being parsed.
  * Difference b/w it and a Parse Tree is that it doens't include everything.
@@ -9,17 +12,25 @@
  */
 
 using std::string;
+using std::vector;
+using std::unordered_set;
 
 struct ASTNode {
-	ASTNode *parent, *leftmost_child, *leftmost_sibling, *right;
-	string value;
+	ASTNode *parent = nullptr, *leftmost_child = nullptr, *leftmost_sibling = nullptr, *right = nullptr;
+	string value, par;
 	ASTNode();
-	ASTNode(string &value);
-	//ASTNode(ASTNode *parent, ASTNode *leftmost_child, ASTNode *leftmost_sibling, ASTNode *next);
+	ASTNode(const string &value);
+	ASTNode(string &value, string &par);
 	ASTNode* make_siblings(ASTNode *y);
+	static ASTNode* make_family(string &op, const vector<ASTNode*> &children);
 	void adopt_children(ASTNode *y);
-	ASTNode* make_family(string op, ASTNode *kid1, ASTNode *kid2);
+	//ASTNode* make_family(string op, ASTNode *kid1, ASTNode *kid2);
     static ASTNode* make_node();
-    static ASTNode* make_node(string type);
+    static ASTNode* make_node(const string &type);
+	
+	void to_dot_notation();
+
+    static ASTNode* make_node(string &type, string &par);
 };
 
+/* TODO: add node subclasses */

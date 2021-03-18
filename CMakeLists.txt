@@ -21,7 +21,7 @@ endforeach(LIBRARY)
 
 # generate an executable called ``bompiler`` that's based off ``LexDriver.cpp``
 add_executable(lexdriver ${BOMPILER_SOURCE_DIR}/${BOMPILER_LEX_DRIVER} ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
-add_executable(parserdriver ${BOMPILER_SOURCE_DIR}/${BOMPILER_PARSER_DRIVER} ${BOMPILER_SOURCE_DIR}/Utils.cpp ${BOMPILER_SOURCE_DIR}/Grammar.cpp ${BOMPILER_SOURCE_DIR}/Parser.cpp ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp)
+add_executable(parserdriver ${BOMPILER_SOURCE_DIR}/${BOMPILER_PARSER_DRIVER} ${BOMPILER_SOURCE_DIR}/Utils.cpp ${BOMPILER_SOURCE_DIR}/Grammar.cpp ${BOMPILER_SOURCE_DIR}/Parser.cpp ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/AST.cpp)
 
 # propagate that this project needs the gtest library (optional)
 #target_link_libraries(bompiler PUBLIC gtest)

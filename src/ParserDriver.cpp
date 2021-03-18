@@ -10,7 +10,7 @@ using std::cout;
 using std::string;
 using std::endl;
 
-const string GRAMMAR_FILE = "data/handout/calgary.grm";
+const string GRAMMAR_FILE = "data/handout/calgary.attribute.grm";
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {

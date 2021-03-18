@@ -21,56 +21,34 @@ using std::pair;
 using std::list;
 
 
-// fwd def
-
-/*
-struct AbstractSymbol {
-	const string value;
-	Symbol(const string &value);
-	virtual bool is_terminal() = 0;
-};
-
-struct NonTerminalSymbol : AbstractSymbol {
-	const unordered_set<string> first, follow;
-	NonTerminalSymbol(
-			const string &value,
-			const unordered_set<string> &first,
-			const unordered_set<string> &follow);
-	virtual bool is_terminal() override;
-};
-
-struct TerminalSymbol {
-	const string value;
-	const Rule *source;
-	Symbol(const string &value);
-	virtual bool is_terminal() = 0;
-};
-*/
-
 struct Symbol {
 	string val;
 	string lhs;
-	Symbol(const string &val, const string &lhs);
+	Symbol(const string &lhs, const string &val);
+	static Symbol* from_string(const string &lhs, const string &str);
 	virtual void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) = 0;
 };
 
-struct ParsingSymbol : Symbol {
-	bool is_terminal;
-	ParsingSymbol(const bool is_terminal, const string &value, const string &lhs);
-	static ParsingSymbol* from_string(const string &lhs, const string &str);
+struct TerminalSymbol : Symbol {
+	TerminalSymbol(const string &lhs, const string &val);
+	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
+};
+
+struct NonTerminalSymbol : Symbol {
+	NonTerminalSymbol(const string &lhs, const string &val);
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
 
 struct SemanticSymbol : Symbol {
-	string type;
-	SemanticSymbol(const string &val, const string &lhs);
+	const int pop_operations;
+	SemanticSymbol(const string &lhs, const string &val, const int &pop_operations = 0);
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
 
 struct Rule {
     string original;
-    vector<ParsingSymbol*> sentential_form;
-    Rule(const string &original, const vector<ParsingSymbol*> &sentential_form);
+    vector<Symbol*> sentential_form;
+    Rule(const string &original, const vector<Symbol*> &sentential_form);
 	Rule();
     static Rule* from_line(const string &line);
 };
@@ -78,18 +56,18 @@ struct Rule {
 class Grammar {
 public:
     unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> non_terminals;
-    unordered_map<string, map<string, Rule*>> translation_table;
+    unordered_map<string, map<string, Rule*>> parsing_table;
     Grammar(
         const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
-        const unordered_map<string, map<string, Rule*>> &translation_table);
+        const unordered_map<string, map<string, Rule*>> &parsing_table);
     ~Grammar();
     static Grammar* from_file(const string &filename);
-	ParsingSymbol *START = new ParsingSymbol(false, "start", "");
-	ParsingSymbol *END = new ParsingSymbol(false, "$", "");
+	NonTerminalSymbol *START = new NonTerminalSymbol("", "start");
+	NonTerminalSymbol *END = new NonTerminalSymbol("", "$");
 	list<Symbol*> derivation;
 };
 
-ostream& operator<<(ostream& stream, const Rule &rule);
-ostream& operator<<(ostream& stream, const Symbol &symbol);
-ostream& operator<<(ostream& stream, const SemanticSymbol &symbol);
-ostream& operator<<(ostream& stream, const ParsingSymbol &symbol);
+//ostream& operator<<(ostream& stream, const Rule &rule);
+//ostream& operator<<(ostream& stream, const Symbol &symbol);
+//ostream& operator<<(ostream& stream, const SemanticSymbol &symbol);
+//ostream& operator<<(ostream& stream, const ParsingSymbol &symbol);
