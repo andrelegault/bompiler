@@ -26,22 +26,26 @@ struct Symbol {
 	string lhs;
 	Symbol(const string &lhs, const string &val);
 	static Symbol* from_string(const string &lhs, const string &str);
+    virtual string to_str() const = 0;
 	virtual void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) = 0;
 };
 
 struct TerminalSymbol : Symbol {
 	TerminalSymbol(const string &lhs, const string &val);
+    string to_str() const override;
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
 
 struct NonTerminalSymbol : Symbol {
 	NonTerminalSymbol(const string &lhs, const string &val);
+    string to_str() const override;
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
 
 struct SemanticSymbol : Symbol {
 	const int pop_operations;
 	SemanticSymbol(const string &lhs, const string &val, const int &pop_operations = 0);
+    string to_str() const override;
 	void process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) override;
 };
 
@@ -69,5 +73,4 @@ public:
 
 //ostream& operator<<(ostream& stream, const Rule &rule);
 //ostream& operator<<(ostream& stream, const Symbol &symbol);
-//ostream& operator<<(ostream& stream, const SemanticSymbol &symbol);
 //ostream& operator<<(ostream& stream, const ParsingSymbol &symbol);

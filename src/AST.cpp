@@ -1,23 +1,22 @@
 #include "AST.h"
-#include "stdarg.h"
 #include <string>
 #include <queue>
 #include <iostream>
+#include <unordered_map>
 
 using std::string;
 using std::cout;
 using std::queue;
 using std::endl;
+using std::unordered_map;
+using std::to_string;
 
-ASTNode::ASTNode() {}
-
-ASTNode::ASTNode(const string &value) : value(value) {}
-
-ASTNode::ASTNode(string &value, string &par) : value(value), par(par) {}
+ASTNode::ASTNode(const string &val) : val(val) { }
 
 ASTNode* ASTNode::make_siblings(ASTNode *y) {
 	/* makes this a sibling of y where `this` becomes the leftmost sibling if y doesn't have a leftmode sibling.*/
 	// `this` inherits the parents of y, not the other way around.
+	//cout << this->val << ".make_siblings(" << y->val << ")" << endl;
     ASTNode *xsibs = this;
 	while (xsibs->right != nullptr)
 		xsibs = xsibs->right;
@@ -25,12 +24,12 @@ ASTNode* ASTNode::make_siblings(ASTNode *y) {
 
 	ASTNode *ysibs = y->leftmost_sibling == nullptr ? y : y->leftmost_sibling;
 	xsibs->right = ysibs;
-    ysibs->leftmost_sibling = xsibs->leftmost_sibling != nullptr ? xsibs->leftmost_sibling : xsibs;
+    ysibs->leftmost_sibling = xsibs->leftmost_sibling == nullptr ? xsibs: xsibs->leftmost_sibling;
 	ysibs->parent = xsibs->parent;
 
 	while (ysibs->right != nullptr) {
 		ysibs = ysibs->right;
-		ysibs->leftmost_sibling = xsibs->leftmost_sibling != nullptr ? xsibs->leftmost_sibling: xsibs;
+		ysibs->leftmost_sibling = xsibs->leftmost_sibling == nullptr ? xsibs: xsibs->leftmost_sibling;
 		ysibs->parent = xsibs->parent;
 	}
 
@@ -41,7 +40,7 @@ void ASTNode::adopt_children(ASTNode *y) {
 	if (this->leftmost_child != nullptr) {
 		this->leftmost_child->make_siblings(y);
 	} else {
-		ASTNode *ysibs = y->leftmost_sibling;
+		ASTNode *ysibs = y->leftmost_sibling == nullptr ? y : y->leftmost_sibling;
 		this->leftmost_child = ysibs;
 		while (ysibs != nullptr) {
 			ysibs->parent = this;
@@ -52,28 +51,36 @@ void ASTNode::adopt_children(ASTNode *y) {
 
 void ASTNode::to_dot_notation() {
 	queue<ASTNode*> container;
-	string output = "";
+	unordered_map<string, int> seen;
 	container.push(this);
+	seen[this->val]++;
 	while (!container.empty()) {
 		ASTNode *parent = container.front();
-		//cout << parent->value << "->";
 		container.pop();
 		ASTNode *start = parent->leftmost_child;
+		string parent_val = parent->val;
+        parent_val = parent->val + to_string(seen[parent->val]-1);
 		while (start != nullptr) {
 			container.push(start);
-			//cout << start->value;
+            string start_val = start->val + to_string(seen[start->val]);
+            seen[start->val]++;
+			cout << parent_val << "->" << start_val << endl;
 			start = start->right;
 		}
-		//cout << endl;
 	}
 }
 
 ASTNode *ASTNode::make_family(string &op, const vector<ASTNode*> &children) {
+//	cout << "make_family(" << op << ", {";
 	ASTNode *node = ASTNode::make_node(op);
 	ASTNode *base = children.front();
-	for(int i = 1; i < children.size(); ++i)
+//	cout << base->val << ",";
+	for(int i = 1; i < children.size(); ++i) {
+//		cout << children[i]->val << ",";
 		base->make_siblings(children[i]);
-	node->adopt_children(base);
+	}
+//	cout << "})"<<endl;
+	node->adopt_children(children.back());
 	return node;
 }
 
@@ -81,10 +88,6 @@ ASTNode *ASTNode::make_node() {
 	return new ASTNode();
 }
 
-ASTNode *ASTNode::make_node(const string &type) {
-	return new ASTNode(type);
-}
-
-ASTNode *ASTNode::make_node(string &type, string &par) {
-	return new ASTNode(type, par);
+ASTNode *ASTNode::make_node(const string &val) {
+	return new ASTNode(val);
 }

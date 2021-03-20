@@ -27,7 +27,7 @@ class Parser {
         ofstream out_errors;
 		/* TODO: use a vector instead of a stack, can print the whole thing by doing it */
 		stack<Symbol*> symbols;
-		stack<ASTNode*> attributes;
+		vector<ASTNode*> attributes;
 		static int id;
     private:
         Grammar *grammar = nullptr;

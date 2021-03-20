@@ -25,6 +25,7 @@ using std::cout;
 using std::endl;
 using std::filesystem::exists;
 using std::list;
+using std::to_string;
 
 Symbol::Symbol(const string &lhs, const string &val): val(val), lhs(lhs) { }
 
@@ -36,13 +37,42 @@ SemanticSymbol::SemanticSymbol(const string &lhs, const string &val, const int &
 
 void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
 	parser->symbols.pop();
+    if (this->pop_operations == 0) {
+		if (this->val == "e")
+			parser->attributes.push_back(ASTNode::make_node());
+		else
+			parser->attributes.push_back(ASTNode::make_node(this->val));
+	} else {
+		vector<ASTNode*> children;
+		if (this->pop_operations > 0) {
+			for(int i = 0; i < this->pop_operations; ++i) {
+				children.push_back(parser->attributes.back());
+				parser->attributes.pop_back();
+			}
+
+			parser->attributes.push_back(ASTNode::make_family(this->val, children));
+		} else {
+			while (parser->attributes.back()->val != "epsilon") {
+			    cout << "popping " << parser->attributes.back()->val;
+				children.push_back(parser->attributes.back());
+				parser->attributes.pop_back();
+			}
+			children.push_back(parser->attributes.back());
+			parser->attributes.pop_back();
+			parser->attributes.push_back(ASTNode::make_family(this->val, children));
+		}
+	}
+	if (this->val == "prog")
+		parser->attributes.back()->to_dot_notation();
+	cout << endl;
 }
 
 void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
 	if (this->val == lookahead->type) {
 		parser->symbols.pop();
+        cout << lookahead->lexeme << endl;
 		//cout << "just pushed attribute: " << this->val << endl;
-		parser->attributes.push(ASTNode::make_node(this->lhs + ": " + this->val));
+		//parser->attributes.push_back(ASTNode::make_node(this->lhs));
 		delete lookahead;
 		lookahead = analyzer->next_token();
 	}
@@ -53,20 +83,21 @@ void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *
 }
 
 void NonTerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
-	cout << this->val << endl;
+	//cout << this->val << endl;
 	auto &symbols = parser->symbols;
-	auto &attributes = parser->attributes;
 	if (grammar->parsing_table.find(this->val) != grammar->parsing_table.end()) {
 		if (grammar->parsing_table[this->val].find(lookahead->type) != grammar->parsing_table[this->val].end()) {
 			grammar->derivation.remove(symbols.top());
 			symbols.pop();
-			//cout << "[" << this->val << "][" << lookahead->type << "] -> ";
+			cout << "[" << this->val << "][" << lookahead->type << "] -> ";
 			const vector<Symbol*> form = grammar->parsing_table[this->val][lookahead->type]->sentential_form;
 			auto it = form.rbegin();
 			for (; it != form.rend(); ++it) {
 				Symbol *s = *it;
+                cout << s->to_str() << ", ";
 				symbols.push(s);
 			}
+			cout << endl;
 		}
 		else {
 			parser->skip_errors(lookahead);
@@ -125,24 +156,21 @@ Rule* Rule::from_line(const string &line) {
 	return new Rule(line, sentential_form);
 }
 
-/*
-ostream& operator<<(ostream& stream, const SemanticSymbol &symbol) {
-	string output = "SemanticSymbol(val=" + symbol.val + ",lhs=" + symbol.lhs + ",id=" + symbol.type + ")";
-	stream << output;
-	return stream;
+string SemanticSymbol::to_str() const {
+	return "{" + val + " " + to_string(pop_operations) + "}";
 }
 
+string NonTerminalSymbol::to_str() const {
+    return "<" + val + ">";
+}
+
+string TerminalSymbol::to_str() const {
+    return "'" + val + "'";
+}
 ostream& operator<<(ostream& stream, const Symbol &symbol) {
-	stream << "Symbol(val=" << symbol.val << ",lhs=" << symbol.lhs << ")";
+	stream << symbol.to_str();
 	return stream;
 }
-
-ostream& operator<<(ostream& stream, const ParsingSymbol &symbol) {
-	string trm;
-	stream << "ParsingSymbol(is_terminal=" << trm << ", val=" << symbol.val << ", lhs=" << symbol.lhs << ")";
-	return stream;
-}
-*/
 
 Grammar::Grammar(const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
 		const unordered_map<string, map<string, Rule*>> &parsing_table):

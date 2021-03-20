@@ -17,20 +17,16 @@ using std::unordered_set;
 
 struct ASTNode {
 	ASTNode *parent = nullptr, *leftmost_child = nullptr, *leftmost_sibling = nullptr, *right = nullptr;
-	string value, par;
-	ASTNode();
-	ASTNode(const string &value);
-	ASTNode(string &value, string &par);
+	string val;
+	ASTNode(const string &val = "epsilon");
 	ASTNode* make_siblings(ASTNode *y);
 	static ASTNode* make_family(string &op, const vector<ASTNode*> &children);
 	void adopt_children(ASTNode *y);
 	//ASTNode* make_family(string op, ASTNode *kid1, ASTNode *kid2);
     static ASTNode* make_node();
-    static ASTNode* make_node(const string &type);
+	static ASTNode* make_node(const string &val);
 	
 	void to_dot_notation();
-
-    static ASTNode* make_node(string &type, string &par);
 };
 
 /* TODO: add node subclasses */
