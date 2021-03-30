@@ -64,7 +64,7 @@
 <NumInt> ::= 'intlit' node,int
 <NumInt> ::= EPSILON node,e
 <MemberDecl> ::= <FuncDecl> 
-<MemberDecl> ::= <VarDecl> tree,vardecl,1
+<MemberDecl> ::= <VarDecl>
 <MethodBodyVar> ::= 'var' 'lcurbr' <VarDeclRep> 'rcurbr'
 <MethodBodyVar> ::= EPSILON
 <MultOp> ::= 'mult' 
