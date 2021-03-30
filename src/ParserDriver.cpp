@@ -26,5 +26,6 @@ int main(int argc, char* argv[]) {
         Parser parser(g, &analyzer, source);
         parser.parse();
         cout << "Finished" << endl;
+		delete g;
     }
 }

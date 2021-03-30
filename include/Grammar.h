@@ -51,6 +51,7 @@ struct SemanticSymbol : Symbol {
 
 struct Rule {
     string original;
+	~Rule();
     vector<Symbol*> sentential_form;
     Rule(const string &original, const vector<Symbol*> &sentential_form);
 	Rule();
@@ -61,7 +62,9 @@ class Grammar {
 public:
     unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> non_terminals;
     unordered_map<string, map<string, Rule*>> parsing_table;
+	vector<Rule*> rules;
     Grammar(
+		const vector<Rule*> &rules,
         const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
         const unordered_map<string, map<string, Rule*>> &parsing_table);
     ~Grammar();

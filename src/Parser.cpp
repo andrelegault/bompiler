@@ -36,8 +36,9 @@ bool Parser::parse() {
     symbols.push_back(grammar->END);
     symbols.push_back(grammar->START);
     Token *lookahead = analyzer->next_token();
-    while (symbols.back() != grammar->END) {
+	while (symbols.back() != grammar->END) {
 		while (lookahead->type == "inlinecmt" || lookahead->type == "blockcmt") {
+			delete lookahead;
 			lookahead = analyzer->next_token();
 		}
 		symbols.back()->process(this, grammar, analyzer, lookahead, error);
@@ -55,7 +56,7 @@ void Parser::skip_errors(Token* &lookahead) {
 		auto first_set = grammar->non_terminals[symbols.back()->lhs].first;
 		auto follow_set = grammar->non_terminals[symbols.back()->lhs].second;
 		do {
-			//delete lookahead;
+			delete lookahead;
 			lookahead = analyzer->next_token();
 		} while (lookahead->type != "$" &&
 				 first_set.find(lookahead->type) == first_set.end() ||

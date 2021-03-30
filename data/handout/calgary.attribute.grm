@@ -86,8 +86,8 @@
 <StatBlock> ::= <Statement> tree,statement,1
 <StatBlock> ::= EPSILON
 <Statement> ::= <FuncOrAssignStat> 'semi' 
-<Statement> ::= 'if' 'lpar' <Expr> 'rpar' 'then' node,e <StatBlock> tree,statblock,e 'else' node,e <StatBlock> tree,statblock,e 'semi' tree,ifStat,3
-<Statement> ::= 'while' 'lpar' <Expr> 'rpar' node,e <StatBlock> tree,statblock,e 'semi' tree,whileStat,2
+<Statement> ::= 'if' 'lpar' <Expr> 'rpar' 'then' node,e <StatBlock> tree,statblock,e 'else' node,e <StatBlock> tree,statblock,e 'semi' tree,ifStmt,3
+<Statement> ::= 'while' 'lpar' <Expr> 'rpar' node,e <StatBlock> tree,statblock,e 'semi' tree,whileStmt,2
 <Statement> ::= 'read' 'lpar' node,e <Variable> tree,var,e 'rpar' 'semi' tree,readStmt,2
 <Statement> ::= 'write' 'lpar' <Expr> 'rpar' 'semi' tree,writeStmt,1
 <Statement> ::= 'return' 'lpar' <Expr> 'rpar' 'semi' tree,returnStmt,1

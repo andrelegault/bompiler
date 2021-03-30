@@ -79,18 +79,13 @@ void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *
 	}
 }
 
-void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *&lookahead, bool &error) {
+void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token* &lookahead, bool &error) {
 	if (this->val == lookahead->type) {
-		cout << "old: " << this->val << ", " << lookahead->type << endl;
 		parser->symbols.pop_back();
-		//cout << "just pushed attribute: " << this->val << endl;
-		//parser->attributes.push_back(ASTNode::make_node(this->lhs));
-		//delete lookahead;
+		delete lookahead;
 		lookahead = analyzer->next_token();
-		cout << "new: " << parser->symbols.back()->val << ", " << lookahead->type << endl;
 	}
 	else {
-		cout << "nope" << endl;
 		parser->skip_errors(lookahead);
 		error = true;
 	}
@@ -185,8 +180,9 @@ ostream& operator<<(ostream& stream, const Symbol &symbol) {
 	return stream;
 }
 
-Grammar::Grammar(const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
+Grammar::Grammar(const vector<Rule*> &rules, const unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> &non_terminals,
 		const unordered_map<string, map<string, Rule*>> &parsing_table):
+	rules(rules),
 	non_terminals(non_terminals),
 	parsing_table(parsing_table) {
 		derivation.push_back(START);
@@ -433,18 +429,15 @@ Grammar* Grammar::from_file(const string &filename) {
 
 	input.close();
 
-	return new Grammar(non_terminals, parsing_table);
+	return new Grammar(rules, non_terminals, parsing_table);
 }
 
 Grammar::~Grammar() {
-	delete START;
-	delete END;
-	// for (auto &it : parsing_table) {
-	//     for(auto &it2 : it.second) {
-	//         for (auto &vec : it2.second->sentential_form) {
-	//             for (auto &kek : vec)
-	//                 delete kek;
-	//         }
-	//     }
-	// }
+	for(auto rule : rules)
+		delete rule;
+}
+
+Rule::~Rule() {
+	for(auto symbol : sentential_form)
+		delete symbol;
 }
