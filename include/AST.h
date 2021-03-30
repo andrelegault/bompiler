@@ -18,7 +18,7 @@ using std::unordered_set;
 struct ASTNode {
 	ASTNode *parent = nullptr, *leftmost_child = nullptr, *leftmost_sibling = nullptr, *right = nullptr;
 	string val;
-	ASTNode(const string &val = "epsilon");
+	ASTNode(string val = "epsilon");
 	ASTNode* make_siblings(ASTNode *y);
 	static ASTNode* make_family(string &op, const vector<ASTNode*> &children);
 	void adopt_children(ASTNode *y);
@@ -26,7 +26,7 @@ struct ASTNode {
     static ASTNode* make_node();
 	static ASTNode* make_node(const string &val);
 	
-	void to_dot_notation();
+	string to_dot_notation();
 };
 
 /* TODO: add node subclasses */

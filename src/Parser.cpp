@@ -3,13 +3,11 @@
 #include "Parser.h"
 #include "Utils.h"
 #include <unistd.h>
-#include <stack>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <iostream>
 
-using std::stack;
 using std::string;
 using std::ios_base;
 using std::to_string;
@@ -35,30 +33,29 @@ Parser::~Parser() {
 
 bool Parser::parse() {
     bool error = false;
-    symbols.push(grammar->END);
-    symbols.push(grammar->START);
+    symbols.push_back(grammar->END);
+    symbols.push_back(grammar->START);
     Token *lookahead = analyzer->next_token();
-    while (symbols.top() != grammar->END) {
+    while (symbols.back() != grammar->END) {
 		while (lookahead->type == "inlinecmt" || lookahead->type == "blockcmt") {
-			delete lookahead;
 			lookahead = analyzer->next_token();
 		}
-		symbols.top()->process(this, grammar, analyzer, lookahead, error);
+		symbols.back()->process(this, grammar, analyzer, lookahead, error);
     }
     return lookahead->type == "$" && !error;
 }
 
-void Parser::skip_errors(Token *lookahead) {
-    exit(0);
-    out_errors << "syntax error at " + to_string(lookahead->line) << endl;
-	if (lookahead->type == "$" || grammar->non_terminals[symbols.top()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.top()->lhs].second.end()) {
-		symbols.pop();
+void Parser::skip_errors(Token* &lookahead) {
+    //cout << "syntax error at " + to_string(lookahead->line) << ", unexpected char: " << lookahead->lexeme << endl;
+    out_errors << "syntax error at " + to_string(lookahead->line) << ", unexpected char: " << lookahead->lexeme << endl;
+	if (lookahead->type == "$" || grammar->non_terminals[symbols.back()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.back()->lhs].second.end()) {
+		symbols.pop_back();
 	}
 	else {
-		auto first_set = grammar->non_terminals[symbols.top()->lhs].first;
-		auto follow_set = grammar->non_terminals[symbols.top()->lhs].second;
+		auto first_set = grammar->non_terminals[symbols.back()->lhs].first;
+		auto follow_set = grammar->non_terminals[symbols.back()->lhs].second;
 		do {
-			delete lookahead;
+			//delete lookahead;
 			lookahead = analyzer->next_token();
 		} while (lookahead->type != "$" &&
 				 first_set.find(lookahead->type) == first_set.end() ||

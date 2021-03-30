@@ -21,12 +21,11 @@ class Parser {
         Parser(Grammar *grammar, LexicalAnalyzer *analyzer, const string &filename);
         ~Parser();
         bool parse();
-        void skip_errors(Token* lookahead);
+        void skip_errors(Token* &lookahead);
         ofstream out_derivation;
         ofstream out_ast;
         ofstream out_errors;
-		/* TODO: use a vector instead of a stack, can print the whole thing by doing it */
-		stack<Symbol*> symbols;
+		vector<Symbol*> symbols;
 		vector<ASTNode*> attributes;
 		static int id;
     private:

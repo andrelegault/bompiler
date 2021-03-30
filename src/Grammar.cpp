@@ -35,8 +35,14 @@ NonTerminalSymbol::NonTerminalSymbol( const string &lhs, const string &val): Sym
 
 SemanticSymbol::SemanticSymbol(const string &lhs, const string &val, const int &pop_operations) : Symbol(lhs, val), pop_operations(pop_operations) { }
 
-void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
-	parser->symbols.pop();
+void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *&lookahead, bool &error) {
+	cout << "\t[";
+	for(const auto &attr : parser->attributes) {
+		cout << attr->val << ", ";
+	}
+	cout << "]" << endl;
+	parser->symbols.pop_back();
+	cout << "\tprocessing semantic action [" << this->val << ", " << this->pop_operations << "]" << endl;
     if (this->pop_operations == 0) {
 		if (this->val == "e")
 			parser->attributes.push_back(ASTNode::make_node());
@@ -46,56 +52,63 @@ void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *
 		vector<ASTNode*> children;
 		if (this->pop_operations > 0) {
 			for(int i = 0; i < this->pop_operations; ++i) {
-				children.push_back(parser->attributes.back());
+				auto node = parser->attributes.back();
+				cout << "\t\tchild_node: " << node->val << endl;
+				children.push_back(node);
 				parser->attributes.pop_back();
 			}
 
 			parser->attributes.push_back(ASTNode::make_family(this->val, children));
 		} else {
 			while (parser->attributes.back()->val != "epsilon") {
-			    cout << "popping " << parser->attributes.back()->val;
-				children.push_back(parser->attributes.back());
+				auto node = parser->attributes.back();
+				cout << "\t\tchild_node: " << node->val << endl;
+				children.push_back(node);
 				parser->attributes.pop_back();
 			}
-			children.push_back(parser->attributes.back());
+			auto node = parser->attributes.back();
+			cout << "\t\tchild_node: " << node->val << endl;
+			children.push_back(node);
 			parser->attributes.pop_back();
+
 			parser->attributes.push_back(ASTNode::make_family(this->val, children));
 		}
 	}
-	if (this->val == "prog")
-		parser->attributes.back()->to_dot_notation();
-	cout << endl;
+	if (this->val == "prog") {
+		parser->out_ast << parser->attributes.back()->to_dot_notation();
+	}
 }
 
-void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
+void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *&lookahead, bool &error) {
 	if (this->val == lookahead->type) {
-		parser->symbols.pop();
-        cout << lookahead->lexeme << endl;
+		cout << "old: " << this->val << ", " << lookahead->type << endl;
+		parser->symbols.pop_back();
 		//cout << "just pushed attribute: " << this->val << endl;
 		//parser->attributes.push_back(ASTNode::make_node(this->lhs));
-		delete lookahead;
+		//delete lookahead;
 		lookahead = analyzer->next_token();
+		cout << "new: " << parser->symbols.back()->val << ", " << lookahead->type << endl;
 	}
 	else {
+		cout << "nope" << endl;
 		parser->skip_errors(lookahead);
 		error = true;
 	}
 }
 
-void NonTerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *lookahead, bool &error) {
-	//cout << this->val << endl;
+void NonTerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *&lookahead, bool &error) {
 	auto &symbols = parser->symbols;
 	if (grammar->parsing_table.find(this->val) != grammar->parsing_table.end()) {
 		if (grammar->parsing_table[this->val].find(lookahead->type) != grammar->parsing_table[this->val].end()) {
-			grammar->derivation.remove(symbols.top());
-			symbols.pop();
+			grammar->derivation.remove(symbols.back());
+			symbols.pop_back();
 			cout << "[" << this->val << "][" << lookahead->type << "] -> ";
 			const vector<Symbol*> form = grammar->parsing_table[this->val][lookahead->type]->sentential_form;
 			auto it = form.rbegin();
 			for (; it != form.rend(); ++it) {
 				Symbol *s = *it;
                 cout << s->to_str() << ", ";
-				symbols.push(s);
+				symbols.push_back(s);
 			}
 			cout << endl;
 		}
