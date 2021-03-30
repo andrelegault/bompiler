@@ -71,7 +71,7 @@
 <MultOp> ::= 'div' 
 <MultOp> ::= 'and' 
 <NestedId> ::= 'comma' 'id' node,id <NestedId> 
-<NestedId> ::= EPSILON node,e
+<NestedId> ::= EPSILON
 <Prog> ::= node,e <ClassDecl> tree,classlist,e node,e <FuncDef> tree,funcdeflist,e 'main' <FuncBody> tree,prog,3
 <RelOp> ::= 'eq' node,eq
 <RelOp> ::= 'neq' node,neq
