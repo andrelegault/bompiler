@@ -16,4 +16,4 @@ bin
 **/bompilerConfig.h
 settings.json
 .vscode
-data
+data/testing/*
