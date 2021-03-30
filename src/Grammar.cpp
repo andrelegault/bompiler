@@ -165,15 +165,15 @@ Rule* Rule::from_line(const string &line) {
 }
 
 string SemanticSymbol::to_str() const {
-	return "{" + val + " " + to_string(pop_operations) + "}";
+    return "SemanticSymbol(lhs=" + this->lhs + ",val=" + this->val + ",op=" + to_string(this->pop_operations) + ")";
 }
 
 string NonTerminalSymbol::to_str() const {
-    return "<" + val + ">";
+    return "NonTerminalSymbol(lhs=" + this->lhs + ",val=" + this->val + ")";
 }
 
 string TerminalSymbol::to_str() const {
-    return "'" + val + "'";
+    return "TerminalSymbol(lhs=" + this->lhs + ",val=" + this->val + ")";
 }
 ostream& operator<<(ostream& stream, const Symbol &symbol) {
 	stream << symbol.to_str();
