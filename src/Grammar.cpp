@@ -226,7 +226,7 @@ Grammar* Grammar::from_file(const string &filename) {
 		{"funcdecl",                        {{"func"}, {"public", "private", "func", "integer", "float", "string", "id", "rcurbr"}}},
 		{"methodbodyvar",                   {{"var", "epsilon"}, {"if", "while", "read", "write", "return", "break", "continue", "id", "rcurbr"}}},
 		{"nestedid",                        {{"comma", "epsilon"}, {"lcurbr"}}},
-		{"classdecl",                       {{"class", "epsilon"}, {"func", "main"}}},
+		{"classdecl",                       {{"class", "epsilon"}, {"func", "main", "class"}}},
 		{"funcdef",                         {{"func", "epsilon"}, {"main"}}},
 		{"funcbody",                        {{"lcurbr"}, {"main", "func"}}},
 		{"relop",                           {{"eq", "neq", "lt", "gt", "leq", "geq"}, {"intlit", "floatlit", "stringlit", "lpar", "not", "qm", "id", "plus", "minus"}}},
