@@ -3,6 +3,7 @@
 #include <queue>
 #include <iostream>
 #include <unordered_map>
+#include <utility>
 
 using std::string;
 using std::cout;
@@ -11,7 +12,7 @@ using std::endl;
 using std::unordered_map;
 using std::to_string;
 
-ASTNode::ASTNode(const string &val) : val(val) { }
+ASTNode::ASTNode(string val) : val(std::move(val)) { }
 
 ASTNode* ASTNode::make_siblings(ASTNode *y) {
 	/* makes this a sibling of y where `this` becomes the leftmost sibling if y doesn't have a leftmode sibling.*/
@@ -49,25 +50,26 @@ void ASTNode::adopt_children(ASTNode *y) {
 	}
 }
 
-void ASTNode::to_dot_notation() {
+string ASTNode::to_dot_notation() {
+	string str = "digraph G {\n";
 	queue<ASTNode*> container;
-	unordered_map<string, int> seen;
+	unordered_map<string, int> children_count, parent_count;
 	container.push(this);
-	seen[this->val]++;
 	while (!container.empty()) {
 		ASTNode *parent = container.front();
 		container.pop();
 		ASTNode *start = parent->leftmost_child;
 		string parent_val = parent->val;
-        parent_val = parent->val + to_string(seen[parent->val]-1);
+        parent_val = parent->val + to_string(parent_count[parent->val]++);
 		while (start != nullptr) {
 			container.push(start);
-            string start_val = start->val + to_string(seen[start->val]);
-            seen[start->val]++;
-			cout << parent_val << "->" << start_val << endl;
+            string start_val = start->val + to_string(children_count[start->val]++);
+			str +=  "\t" + parent_val + "->" + start_val + "\n";
 			start = start->right;
 		}
 	}
+	str += "}\n";
+	return str;
 }
 
 ASTNode *ASTNode::make_family(string &op, const vector<ASTNode*> &children) {
