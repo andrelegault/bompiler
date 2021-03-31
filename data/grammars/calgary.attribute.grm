@@ -31,7 +31,7 @@
 <Factor> ::= 'stringlit' node,string
 <Factor> ::= 'lpar' <Expr> 'rpar' 
 <Factor> ::= 'not' <Factor> tree,not,1
-<Factor> ::= <Sign> <Factor> tree,sign,1
+<Factor> ::= <Sign> <Factor> tree,sign,2
 <Factor> ::= 'qm' 'lsqbr' <Expr> 'colon' <Expr> 'colon' <Expr> 'rsqbr' tree,expr,3
 <FuncBody> ::= 'lcurbr' node,e <MethodBodyVar> <StatementList> 'rcurbr' tree,statorvardecl,e tree,statblock,1
 <FuncDecl> ::= 'func' 'id' node,id 'lpar' node,e <FParams> tree,fparamlist,e 'rpar' 'colon' <FuncDeclTail> 'semi' tree,funcdecl,3
@@ -67,9 +67,9 @@
 <MemberDecl> ::= <VarDecl>
 <MethodBodyVar> ::= 'var' 'lcurbr' <VarDeclRep> 'rcurbr'
 <MethodBodyVar> ::= EPSILON
-<MultOp> ::= 'mult' 
-<MultOp> ::= 'div' 
-<MultOp> ::= 'and' 
+<MultOp> ::= 'mult' node,mult
+<MultOp> ::= 'div' node,div
+<MultOp> ::= 'and' node,and
 <NestedId> ::= 'comma' 'id' node,id <NestedId> 
 <NestedId> ::= EPSILON
 <Prog> ::= node,e <ClassDecl> tree,classlist,e node,e <FuncDef> tree,funcdeflist,e 'main' <FuncBody> tree,prog,3
@@ -80,8 +80,8 @@
 <RelOp> ::= 'leq' node,leq
 <RelOp> ::= 'geq' node,geq
 <START> ::= <Prog> node,done,1
-<Sign> ::= 'plus' 
-<Sign> ::= 'minus' 
+<Sign> ::= 'plus' node,plus
+<Sign> ::= 'minus' node,minus
 <StatBlock> ::= 'lcurbr' <StatementList> 'rcurbr'
 <StatBlock> ::= <Statement> tree,statement,1
 <StatBlock> ::= EPSILON
@@ -96,7 +96,7 @@
 <StatementList> ::= <Statement> tree,statement,1 <StatementList> 
 <StatementList> ::= EPSILON
 <Term> ::= <Factor> <TermTail> 
-<TermTail> ::= <MultOp> <Factor> tree,multop,2 <TermTail> 
+<TermTail> ::= <MultOp> <Factor> tree,multop,3 <TermTail> 
 <TermTail> ::= EPSILON
 <Type> ::= 'integer' node,integer
 <Type> ::= 'float' node,float
