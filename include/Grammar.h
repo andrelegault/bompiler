@@ -62,6 +62,7 @@ class Grammar {
 public:
     unordered_map<string, pair<unordered_set<string>, unordered_set<string>>> non_terminals;
     unordered_map<string, map<string, Rule*>> parsing_table;
+	unordered_set<string> processable_terminal_nodes{"id", "floatlit", "stringlit", "integer", "float", "int", "string", "intlit", "void", "plus", "minus", "or", "eq", "neq", "lt", "gt", "geq", "leq", "mult", "div", "and"};
 	vector<Rule*> rules;
     Grammar(
 		const vector<Rule*> &rules,

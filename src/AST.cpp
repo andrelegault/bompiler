@@ -12,12 +12,12 @@ using std::endl;
 using std::unordered_map;
 using std::to_string;
 
-ASTNode::ASTNode(string val) : val(std::move(val)) { }
+ASTNode::ASTNode(string type, string val) : type(std::move(type)), val(std::move(val)) { }
 
 ASTNode* ASTNode::make_siblings(ASTNode *y) {
 	/* makes this a sibling of y where `this` becomes the leftmost sibling if y doesn't have a leftmode sibling.*/
 	// `this` inherits the parents of y, not the other way around.
-	//cout << this->val << ".make_siblings(" << y->val << ")" << endl;
+	//cout << this->type << ".make_siblings(" << y->type << ")" << endl;
     ASTNode *xsibs = this;
 	while (xsibs->right != nullptr)
 		xsibs = xsibs->right;
@@ -59,11 +59,12 @@ string ASTNode::to_dot_notation() {
 		ASTNode *parent = container.front();
 		container.pop();
 		ASTNode *start = parent->leftmost_child;
-		string parent_val = parent->val;
-        parent_val = parent->val + to_string(parent_count[parent->val]++);
+		string parent_val = parent->type;
+        parent_val = parent->type + to_string(parent_count[parent->type]++);
 		while (start != nullptr) {
 			container.push(start);
-            string start_val = start->val + to_string(children_count[start->val]++);
+			cout << start->type << ":" << start->val << endl;
+            string start_val = start->type + to_string(children_count[start->type]++);
 			str +=  "\t" + parent_val + "->" + start_val + "\n";
 			start = start->right;
 		}
@@ -76,9 +77,9 @@ ASTNode *ASTNode::make_family(string &op, const vector<ASTNode*> &children) {
 //	cout << "make_family(" << op << ", {";
 	ASTNode *node = ASTNode::make_node(op);
 	ASTNode *base = children.front();
-//	cout << base->val << ",";
+//	cout << base->type << ",";
 	for(int i = 1; i < children.size(); ++i) {
-//		cout << children[i]->val << ",";
+//		cout << children[i]->type << ",";
 		base->make_siblings(children[i]);
 	}
 //	cout << "})"<<endl;
@@ -90,6 +91,6 @@ ASTNode *ASTNode::make_node() {
 	return new ASTNode();
 }
 
-ASTNode *ASTNode::make_node(const string &val) {
-	return new ASTNode(val);
+ASTNode *ASTNode::make_node(const string &type, const string &val) {
+	return new ASTNode(type, val);
 }

@@ -27,6 +27,7 @@ class Parser {
         ofstream out_errors;
 		vector<Symbol*> symbols;
 		vector<ASTNode*> attributes;
+		vector<ASTNode*> testing;
 		static int id;
     private:
         Grammar *grammar = nullptr;

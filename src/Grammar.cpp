@@ -36,51 +36,74 @@ NonTerminalSymbol::NonTerminalSymbol( const string &lhs, const string &val): Sym
 SemanticSymbol::SemanticSymbol(const string &lhs, const string &val, const int &pop_operations) : Symbol(lhs, val), pop_operations(pop_operations) { }
 
 void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token *&lookahead, bool &error) {
+	/*
 	cout << "\t[";
 	for(const auto &attr : parser->attributes) {
 		cout << attr->val << ", ";
 	}
 	cout << "]" << endl;
+	*/
+	cout << "\tprocessing semantic action [" << this->val << ", " << this->pop_operations << "]";
 	parser->symbols.pop_back();
-	cout << "\tprocessing semantic action [" << this->val << ", " << this->pop_operations << "]" << endl;
     if (this->pop_operations == 0) {
 		if (this->val == "e")
 			parser->attributes.push_back(ASTNode::make_node());
-		else
+		else {
+			/*
+			 * basically do nothing, pass the attribute along
+			if (!parser->testing.empty()) {
+				ASTNode *node = parser->testing.back();
+				cout << "value: " << node->val << endl;
+				parser->testing.pop_back();
+			} else
+				cout << " is empty";
 			parser->attributes.push_back(ASTNode::make_node(this->val));
+			*/
+		}
 	} else {
 		vector<ASTNode*> children;
 		if (this->pop_operations > 0) {
 			for(int i = 0; i < this->pop_operations; ++i) {
 				auto node = parser->attributes.back();
-				cout << "\t\tchild_node: " << node->val << endl;
+				//cout << "\t\tchild_node: " << node->val << endl;
 				children.push_back(node);
 				parser->attributes.pop_back();
 			}
 
 			parser->attributes.push_back(ASTNode::make_family(this->val, children));
 		} else {
-			while (parser->attributes.back()->val != "epsilon") {
+			while (parser->attributes.back()->type != "epsilon") {
 				auto node = parser->attributes.back();
-				cout << "\t\tchild_node: " << node->val << endl;
+				//cout << "\t\tchild_node: " << node->val << endl;
 				children.push_back(node);
 				parser->attributes.pop_back();
 			}
 			auto node = parser->attributes.back();
-			cout << "\t\tchild_node: " << node->val << endl;
+			//cout << "\t\tchild_node: " << node->val << endl;
 			children.push_back(node);
 			parser->attributes.pop_back();
 
 			parser->attributes.push_back(ASTNode::make_family(this->val, children));
 		}
 	}
+	cout << endl;
 	if (this->val == "prog") {
 		parser->out_ast << parser->attributes.back()->to_dot_notation();
+		cout << "[";
+		for (const auto &node : parser->testing)
+			cout << node->val << ", ";
+		cout << "]" << endl;
 	}
 }
 
 void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token* &lookahead, bool &error) {
 	if (this->val == lookahead->type) {
+		if (grammar->processable_terminal_nodes.find(this->val) != grammar->processable_terminal_nodes.end()) {
+			cout << "pushing: " << this->val << endl;
+			parser->attributes.push_back(ASTNode::make_node(lookahead->type, lookahead->lexeme));
+		} else {
+			cout << this->val << " is not processable"<< endl;
+		}
 		parser->symbols.pop_back();
 		delete lookahead;
 		lookahead = analyzer->next_token();
@@ -97,15 +120,15 @@ void NonTerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyze
 		if (grammar->parsing_table[this->val].find(lookahead->type) != grammar->parsing_table[this->val].end()) {
 			grammar->derivation.remove(symbols.back());
 			symbols.pop_back();
-			cout << "[" << this->val << "][" << lookahead->type << "] -> ";
+			//cout << "[" << this->val << "][" << lookahead->type << "] -> ";
 			const vector<Symbol*> form = grammar->parsing_table[this->val][lookahead->type]->sentential_form;
 			auto it = form.rbegin();
 			for (; it != form.rend(); ++it) {
 				Symbol *s = *it;
-                cout << s->to_str() << ", ";
+                //cout << s->to_str() << ", ";
 				symbols.push_back(s);
 			}
-			cout << endl;
+			//cout << endl;
 		}
 		else {
 			parser->skip_errors(lookahead);

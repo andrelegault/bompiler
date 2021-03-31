@@ -26,9 +26,9 @@
 <FParamsTail> ::= 'comma' <Type> tree,type,1 'id' node,id node,e <ArraySizeRept> tree,dimlist,e tree,fparam,3 <FParamsTail>
 <FParamsTail> ::= EPSILON
 <Factor> ::= <FuncOrVar> 
-<Factor> ::= 'intlit' node,int
-<Factor> ::= 'floatlit' node,float
-<Factor> ::= 'stringlit' node,string
+<Factor> ::= 'intlit' node,intlit
+<Factor> ::= 'floatlit' node,floatlit
+<Factor> ::= 'stringlit' node,stringlit
 <Factor> ::= 'lpar' <Expr> 'rpar' 
 <Factor> ::= 'not' <Factor> tree,not,1
 <Factor> ::= <Sign> <Factor> tree,sign,2
@@ -61,7 +61,7 @@
 <IndiceRep> ::= EPSILON
 <Inherit> ::= 'inherits' 'id' node,id <NestedId> 
 <Inherit> ::= EPSILON
-<NumInt> ::= 'intlit' node,int
+<NumInt> ::= 'intlit' node,intlit
 <NumInt> ::= EPSILON node,e
 <MemberDecl> ::= <FuncDecl> 
 <MemberDecl> ::= <VarDecl>
@@ -79,7 +79,7 @@
 <RelOp> ::= 'gt' node,gt
 <RelOp> ::= 'leq' node,leq
 <RelOp> ::= 'geq' node,geq
-<START> ::= <Prog> node,done,1
+<START> ::= <Prog>
 <Sign> ::= 'plus' node,plus
 <Sign> ::= 'minus' node,minus
 <StatBlock> ::= 'lcurbr' <StatementList> 'rcurbr'
