@@ -14,7 +14,7 @@
 <AssignStatTail> ::= <AssignOp> <Expr> tree,assign,2
 <ClassDecl> ::= 'class' 'id' node,id node,e <Inherit> tree,inherlist,e 'lcurbr' node,e <ClassDeclBody> tree,membList,e 'rcurbr' 'semi' tree,classdecl,3 <ClassDecl>
 <ClassDecl> ::= EPSILON
-<ClassDeclBody> ::= <Visibility> <MemberDecl> <ClassDeclBody> 
+<ClassDeclBody> ::= <Visibility> <MemberDecl> tree,memberdecl,2 <ClassDeclBody> 
 <ClassDeclBody> ::= EPSILON
 <ClassMethod> ::= 'sr' 'id' node,id
 <ClassMethod> ::= EPSILON node,e
@@ -109,6 +109,6 @@
 <VariableIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,dataMember,2 <VariableIdnestTail>
 <VariableIdnestTail> ::= 'dot' 'id' node,id tree,dot,2 <VariableIdnest>
 <VariableIdnestTail> ::= EPSILON
-<Visibility> ::= 'public' 
-<Visibility> ::= 'private' 
-<Visibility> ::= EPSILON
+<Visibility> ::= 'public' node,public
+<Visibility> ::= 'private' node,private
+<Visibility> ::= EPSILON node,e
