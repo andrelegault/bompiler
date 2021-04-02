@@ -63,7 +63,6 @@ string ASTNode::to_dot_notation() {
         parent_val = parent->type + to_string(parent_count[parent->type]++);
 		while (start != nullptr) {
 			container.push(start);
-			cout << start->type << ":" << start->val << endl;
             string start_val = start->type + to_string(children_count[start->type]++);
 			str +=  "\t" + parent_val + "->" + start_val + "\n";
 			start = start->right;

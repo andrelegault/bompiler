@@ -47,19 +47,27 @@ bool Parser::parse() {
 }
 
 void Parser::skip_errors(Token* &lookahead) {
-    //cout << "syntax error at " + to_string(lookahead->line) << ", unexpected char: " << lookahead->lexeme << endl;
+    cout << "syntax error at " + to_string(lookahead->line) << ", unexpected char: " << lookahead->lexeme << " for " << symbols.back()->lhs << endl;
     out_errors << "syntax error at " + to_string(lookahead->line) << ", unexpected char: " << lookahead->lexeme << endl;
-	if (lookahead->type == "$" || grammar->non_terminals[symbols.back()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.back()->lhs].second.end()) {
+	if (lookahead->type == "$" || grammar->non_terminals[symbols.back()->lhs].second.find(lookahead->type) != grammar->non_terminals[symbols.back()->lhs].second.end()) { // pop
 		symbols.pop_back();
 	}
-	else {
+	else { // scan
 		auto first_set = grammar->non_terminals[symbols.back()->lhs].first;
 		auto follow_set = grammar->non_terminals[symbols.back()->lhs].second;
+		bool keep_searching = true, in_first_set = true, epsilon_in_first_set = true, in_follow_set = true;
+
 		do {
 			delete lookahead;
 			lookahead = analyzer->next_token();
-		} while (lookahead->type != "$" &&
-				 first_set.find(lookahead->type) == first_set.end() ||
-				 (first_set.find("epsilon") != first_set.end() && follow_set.find(lookahead->type) != follow_set.end()));
+			in_first_set = first_set.find(lookahead->type) != first_set.end();
+			epsilon_in_first_set = first_set.find("epsilon") != first_set.end();
+			in_follow_set = follow_set.find(lookahead->type) != follow_set.end();
+			if (!in_first_set)
+				keep_searching = true;
+			if (epsilon_in_first_set && in_follow_set)
+				keep_searching = false;
+		} while (lookahead->type != "$" && keep_searching);
+		cout << "exited" << endl;
 	}
 }
