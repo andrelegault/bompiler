@@ -33,7 +33,7 @@
 <Factor> ::= 'not' <Factor> tree,not,1
 <Factor> ::= <Sign> <Factor> tree,sign,2
 <Factor> ::= 'qm' 'lsqbr' <Expr> 'colon' <Expr> 'colon' <Expr> 'rsqbr' tree,expr,3
-<FuncBody> ::= 'lcurbr' node,e <MethodBodyVar> <StatementList> 'rcurbr' tree,statorvardecl,e tree,statblock,1
+<FuncBody> ::= 'lcurbr' node,e <MethodBodyVar> tree,vardecllist,e node,e <StatementList> 'rcurbr' tree,statblock,e tree,funcbody,2
 <FuncDecl> ::= 'func' 'id' node,id 'lpar' node,e <FParams> tree,fparamlist,e 'rpar' 'colon' <FuncDeclTail> 'semi' tree,funcdecl,3
 <FuncDeclTail> ::= <Type>
 <FuncDeclTail> ::= 'void' node,void
