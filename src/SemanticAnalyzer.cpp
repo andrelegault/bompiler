@@ -17,12 +17,12 @@ SemanticAnalyzer::SemanticAnalyzer(const string &filename) {
 }
 
 void SemanticAnalyzer::analyze(ASTNode *root) {
-	CreationVisitor sav;
-	SemanticCheckingVisitor scv;
+	CreatingVisitor sav;
+	CheckingVisitor scv;
 
 	// phase 1: symbol table creation
 	
-	root->accept(sav);
+	root->accept(&sav);
 	// phase 2: semantic actions processing
 }
 

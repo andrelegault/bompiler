@@ -69,7 +69,7 @@ class Visitor {
 	public:
 		Visitor();
 
-		virtual void visit(ASTNode *node);
+		//virtual void visit(ASTNode *node) = 0;
 
 		virtual void visit(ProgNode *node) = 0;
 		virtual void visit(ClassDeclListNode *node) = 0;
@@ -136,9 +136,9 @@ class Visitor {
 		virtual void visit(DataMemberNode *node) = 0;
 };
 
-class CreationVisitor : public Visitor {
+class CreatingVisitor : public Visitor {
 	public:
-		CreationVisitor();
+		CreatingVisitor();
 		void visit(ProgNode *node);
 		void visit(ClassDeclListNode *node);
 		void visit(ClassDeclNode *node);
@@ -204,9 +204,9 @@ class CreationVisitor : public Visitor {
 		void visit(DataMemberNode *node);
 };
 
-class SemanticCheckingVisitor : public Visitor {
+class CheckingVisitor : public Visitor {
 	public:
-		SemanticCheckingVisitor();
+		CheckingVisitor();
 		void visit(ProgNode *node);
 		void visit(ClassDeclListNode *node);
 		void visit(ClassDeclNode *node);

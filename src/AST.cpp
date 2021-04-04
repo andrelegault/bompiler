@@ -36,14 +36,25 @@ ASTNode* ASTNode::make_siblings(ASTNode *y) {
 	return ysibs;
 }
 
-void ASTNode::accept(Visitor &v) {
+/*
+void ASTNode::accept(CreatingVisitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
 		left->accept(v);
 		left = left->right;
 	}
-	v.visit(this);
+	v->visit(this);
 }
+
+void ASTNode::accept(CheckingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+*/
 
 void ASTNode::adopt_children(ASTNode *y) {
 	if (this->leftmost_child != nullptr) {
@@ -361,3 +372,571 @@ string IndiceListNode::get_type() {return "IndiceListNode"; }
 string PrivateNode::get_type() {return "PrivateNode"; }
 string PublicNode::get_type() {return "PublicNode"; }
 string DataMemberNode::get_type() {return "DataMemberNode"; }
+
+void ProgNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ProgNode::accept(CheckingVisitor *v) { }
+void ClassDeclListNode::accept(CreatingVisitor *v) { 
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ClassDeclListNode::accept(CheckingVisitor *v) { }
+void ClassDeclNode::accept(CreatingVisitor *v) { 
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ClassDeclNode::accept(CheckingVisitor *v) { }
+void MembListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void MembListNode::accept(CheckingVisitor *v) { }
+void InherListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void InherListNode::accept(CheckingVisitor *v) { }
+void FuncDefListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FuncDefListNode::accept(CheckingVisitor *v) { }
+void FuncDefNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FuncDefNode::accept(CheckingVisitor *v) { }
+void FuncBodyNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FuncBodyNode::accept(CheckingVisitor *v) { }
+void FuncHeadNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FuncHeadNode::accept(CheckingVisitor *v) { }
+void FuncDeclNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FuncDeclNode::accept(CheckingVisitor *v) { }
+void ParamListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ParamListNode::accept(CheckingVisitor *v) { }
+void FParamNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FParamNode::accept(CheckingVisitor *v) { }
+void FCallNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FCallNode::accept(CheckingVisitor *v) { }
+void VisibilityNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void VisibilityNode::accept(CheckingVisitor *v) { }
+void MemberDeclNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void MemberDeclNode::accept(CheckingVisitor *v) { }
+void IdNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void IdNode::accept(CheckingVisitor *v) { }
+void VarDeclNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void VarDeclNode::accept(CheckingVisitor *v) { }
+void VarDeclListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void VarDeclListNode::accept(CheckingVisitor *v) { }
+void TypeNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void TypeNode::accept(CheckingVisitor *v) { }
+void IntegerNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void IntegerNode::accept(CheckingVisitor *v) { }
+void FloatNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FloatNode::accept(CheckingVisitor *v) { }
+void StringNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void StringNode::accept(CheckingVisitor *v) { }
+void DimListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void DimListNode::accept(CheckingVisitor *v) { }
+void NumIntNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void NumIntNode::accept(CheckingVisitor *v) { }
+void StatementNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void StatementNode::accept(CheckingVisitor *v) { }
+void StatBlockNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void StatBlockNode::accept(CheckingVisitor *v) { }
+void VariableNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void VariableNode::accept(CheckingVisitor *v) { }
+void AssignStmtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void AssignStmtNode::accept(CheckingVisitor *v) { }
+void IfStmtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void IfStmtNode::accept(CheckingVisitor *v) { }
+void ReadStmtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ReadStmtNode::accept(CheckingVisitor *v) { }
+void WriteStmtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void WriteStmtNode::accept(CheckingVisitor *v) { }
+void ReturnStmtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ReturnStmtNode::accept(CheckingVisitor *v) { }
+void ContinueNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ContinueNode::accept(CheckingVisitor *v) { }
+void BreakNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void BreakNode::accept(CheckingVisitor *v) { }
+void ArithExprNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ArithExprNode::accept(CheckingVisitor *v) { }
+void RelExprNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void RelExprNode::accept(CheckingVisitor *v) { }
+void WhileStmtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void WhileStmtNode::accept(CheckingVisitor *v) { }
+void SignNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void SignNode::accept(CheckingVisitor *v) { }
+void PlusNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void PlusNode::accept(CheckingVisitor *v) { }
+void MinusNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void MinusNode::accept(CheckingVisitor *v) { }
+void RelOpNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void RelOpNode::accept(CheckingVisitor *v) { }
+void MultOpNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void MultOpNode::accept(CheckingVisitor *v) { }
+void AddOpNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void AddOpNode::accept(CheckingVisitor *v) { }
+void MultNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void MultNode::accept(CheckingVisitor *v) { }
+void DivNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void DivNode::accept(CheckingVisitor *v) { }
+void AndNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void AndNode::accept(CheckingVisitor *v) { }
+void EqNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void EqNode::accept(CheckingVisitor *v) { }
+void GtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void GtNode::accept(CheckingVisitor *v) { }
+void LtNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void LtNode::accept(CheckingVisitor *v) { }
+void NeqNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void NeqNode::accept(CheckingVisitor *v) { }
+void GeqNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void GeqNode::accept(CheckingVisitor *v) { }
+void LeqNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void LeqNode::accept(CheckingVisitor *v) { }
+void IntLitNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void IntLitNode::accept(CheckingVisitor *v) { }
+void StringLitNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void StringLitNode::accept(CheckingVisitor *v) { }
+void FloatLitNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void FloatLitNode::accept(CheckingVisitor *v) { }
+void DotNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void DotNode::accept(CheckingVisitor *v) { }
+void EpsilonNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void EpsilonNode::accept(CheckingVisitor *v) { }
+void ScopeSpecNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void ScopeSpecNode::accept(CheckingVisitor *v) { }
+void TermNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void TermNode::accept(CheckingVisitor *v) { }
+void IndiceListNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void IndiceListNode::accept(CheckingVisitor *v) { }
+void PrivateNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void PrivateNode::accept(CheckingVisitor *v) { }
+void PublicNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void PublicNode::accept(CheckingVisitor *v) { }
+void DataMemberNode::accept(CreatingVisitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void DataMemberNode::accept(CheckingVisitor *v) { }

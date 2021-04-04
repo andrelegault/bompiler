@@ -43,7 +43,8 @@ bool Parser::parse() {
 		}
 		symbols.back()->process(this, grammar, analyzer, lookahead, error);
     }
-    return lookahead->type == "$" && !error;
+	cout << lookahead->type << ", " << error << endl;
+    return !error;
 }
 
 void Parser::skip_errors(Token* &lookahead) {

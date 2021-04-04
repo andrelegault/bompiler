@@ -25,12 +25,10 @@ int main(int argc, char* argv[]) {
         LexicalAnalyzer analyzer(source);
         Parser parser(g, &analyzer, source);
         bool result = parser.parse();
-		/*
 		if (result) {
 			SemanticAnalyzer semantic_analyzer(source);
 			semantic_analyzer.analyze(parser.root);
 		}
-		*/
         cout << "Finished" << endl;
 		delete g;
     }
