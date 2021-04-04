@@ -1,14 +1,13 @@
 #include <iostream>
+#include <string>
 #include "include/bompilerConfig.h"
-#include "Grammar.h"
+#include "SemanticAnalyzer.h"
 #include "LexicalAnalyzer.h"
 #include "Parser.h"
 
-using std::ifstream;
-using std::ios_base;
 using std::cout;
-using std::string;
 using std::endl;
+using std::string;
 
 const string GRAMMAR_FILE = "data/grammars/calgary.attribute.grm";
 
@@ -17,14 +16,21 @@ int main(int argc, char* argv[]) {
         // report version
         cout << argv[0] << "Version " << bompiler_VERSION_MAJOR << "."
             << bompiler_VERSION_MINOR << "." << bompiler_VERSION_PATCH << endl;
-        cout << "Usage: parserdriver" << " <path-to-source-file>" << endl;
+        cout << "Usage: semanticanalyzerdriver" << " <path-to-source-file>" << endl;
     }
     else {
+		// TODO: support multiple source files
         const string& source = argv[1];
         Grammar *g = Grammar::from_file(GRAMMAR_FILE);
         LexicalAnalyzer analyzer(source);
         Parser parser(g, &analyzer, source);
-        parser.parse();
+        bool result = parser.parse();
+		/*
+		if (result) {
+			SemanticAnalyzer semantic_analyzer(source);
+			semantic_analyzer.analyze(parser.root);
+		}
+		*/
         cout << "Finished" << endl;
 		delete g;
     }

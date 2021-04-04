@@ -1,10 +1,10 @@
 #pragma once
-#include "Grammar.h"
-#include "LexicalAnalyzer.h"
-#include "AST.h"
 #include <fstream>
 #include <stack>
 #include <string>
+#include "Grammar.h"
+#include "LexicalAnalyzer.h"
+#include "AST.h"
 
 using std::string;
 using std::ifstream;
@@ -29,6 +29,7 @@ class Parser {
 		vector<ASTNode*> attributes;
 		vector<ASTNode*> testing;
 		static int id;
+		ASTNode *root = nullptr;
     private:
         Grammar *grammar = nullptr;
         LexicalAnalyzer *analyzer = nullptr;

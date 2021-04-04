@@ -1,12 +1,12 @@
-#include "LexicalAnalyzer.h"
-#include "Grammar.h"
-#include "Parser.h"
-#include "Utils.h"
 #include <unistd.h>
 #include <string>
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include "LexicalAnalyzer.h"
+#include "Grammar.h"
+#include "Parser.h"
+#include "Utils.h"
 
 using std::string;
 using std::ios_base;
@@ -68,6 +68,5 @@ void Parser::skip_errors(Token* &lookahead) {
 			if (epsilon_in_first_set && in_follow_set)
 				keep_searching = false;
 		} while (lookahead->type != "$" && keep_searching);
-		cout << "exited" << endl;
 	}
 }

@@ -11,17 +11,41 @@ set(BOMPILER_INCLUDE_DIR include)
 set(BOMPILER_LIBS_DIR libs)
 set(BOMPILER_LEX_DRIVER LexDriver.cpp)
 set(BOMPILER_PARSER_DRIVER ParserDriver.cpp)
+set(BOMPILER_SEMANTIC_ANALYZER_DRIVER SemanticAnalyzerDriver.cpp)
 #set(BOMPILER_LIBRARIES gtest)
 
 configure_file(${BOMPILER_INCLUDE_DIR}/bompilerConfig.h.in ${BOMPILER_INCLUDE_DIR}/bompilerConfig.h)
 
 foreach(LIBRARY ${BOMPILER_LIBRARIES})
-    add_subdirectory(${BOMPILER_LIBS_DIR}/${LIBRARY})
+	add_subdirectory(${BOMPILER_LIBS_DIR}/${LIBRARY})
 endforeach(LIBRARY)
 
-# generate an executable called ``bompiler`` that's based off ``LexDriver.cpp``
-add_executable(lexdriver ${BOMPILER_SOURCE_DIR}/${BOMPILER_LEX_DRIVER} ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/Utils.cpp)
-add_executable(parserdriver ${BOMPILER_SOURCE_DIR}/${BOMPILER_PARSER_DRIVER} ${BOMPILER_SOURCE_DIR}/Utils.cpp ${BOMPILER_SOURCE_DIR}/Grammar.cpp ${BOMPILER_SOURCE_DIR}/Parser.cpp ${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp ${BOMPILER_SOURCE_DIR}/Token.cpp ${BOMPILER_SOURCE_DIR}/AST.cpp)
+add_executable(lexdriver
+	${BOMPILER_SOURCE_DIR}/${BOMPILER_LEX_DRIVER}
+	${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp
+	${BOMPILER_SOURCE_DIR}/Token.cpp
+	${BOMPILER_SOURCE_DIR}/Utils.cpp)
+
+add_executable(parserdriver
+	${BOMPILER_SOURCE_DIR}/${BOMPILER_PARSER_DRIVER}
+	${BOMPILER_SOURCE_DIR}/Utils.cpp
+	${BOMPILER_SOURCE_DIR}/Grammar.cpp
+	${BOMPILER_SOURCE_DIR}/Parser.cpp
+	${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp
+	${BOMPILER_SOURCE_DIR}/Token.cpp
+	${BOMPILER_SOURCE_DIR}/AST.cpp)
+
+add_executable(semanticanalyzerdriver
+	${BOMPILER_SOURCE_DIR}/${BOMPILER_SEMANTIC_ANALYZER_DRIVER}
+	${BOMPILER_SOURCE_DIR}/Utils.cpp
+	${BOMPILER_SOURCE_DIR}/Grammar.cpp
+	${BOMPILER_SOURCE_DIR}/Parser.cpp
+	${BOMPILER_SOURCE_DIR}/LexicalAnalyzer.cpp
+	${BOMPILER_SOURCE_DIR}/Token.cpp
+	${BOMPILER_SOURCE_DIR}/AST.cpp
+	${BOMPILER_SOURCE_DIR}/SemanticAnalyzer.cpp
+	${BOMPILER_SOURCE_DIR}/SymbolTable.cpp
+	${BOMPILER_SOURCE_DIR}/Visitor.cpp)
 
 # propagate that this project needs the gtest library (optional)
 #target_link_libraries(bompiler PUBLIC gtest)
@@ -32,10 +56,12 @@ include_directories(${PROJECT_SOURCE_DIR}/${BOMPILER_INCLUDE_DIR})
 # make bompiler's binary dir visible
 target_include_directories(lexdriver PUBLIC "${PROJECT_BINARY_DIR}")
 target_include_directories(parserdriver PUBLIC "${PROJECT_BINARY_DIR}")
+target_include_directories(semanticanalyzerdriver PUBLIC "${PROJECT_BINARY_DIR}")
 
 # redirect built thing to /bin
 install(TARGETS lexdriver DESTINATION bin)
 install(TARGETS parserdriver DESTINATION bin)
+install(TARGETS semanticanalyzerdriver DESTINATION bin)
 
 # redirect required headers to /include
 install(FILES ${PROJECT_BINARY_DIR}/${BOMPILER_INCLUDE_DIR}/bompilerConfig.h DESTINATION include)

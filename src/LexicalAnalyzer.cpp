@@ -1,12 +1,12 @@
-#include "LexicalAnalyzer.h"
-#include "Token.h"
-#include "Utils.h"
 #include <locale>
 #include <sstream>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <filesystem>
+#include "LexicalAnalyzer.h"
+#include "Token.h"
+#include "Utils.h"
 
 using std::string;
 using std::ostringstream;
