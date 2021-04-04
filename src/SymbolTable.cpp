@@ -13,7 +13,7 @@ SymbolTable::SymbolTable(const string &name): name(name) { }
 
 // this should check if an element with the same name already exists
 // if it does, a semantic error has happened: multiply declared identifiers
-void SymbolTable::insert(ASTNode *node) {
+void SymbolTable::insert(SymbolTableRecord *node) {
 }
 
 // should search in parent if not found, and then parent's parent if still not found, etc.

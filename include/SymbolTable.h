@@ -17,7 +17,7 @@ class SymbolTable {
 
 		SymbolTable(const string &name);
 
-		void insert(ASTNode *node);
+		void insert(SymbolTableRecord *node);
 
 		// should search in parent if not found, and then parent's parent if still not found, etc.
 		// need to take visiblity descriptors, i.e., `public` and `private into account

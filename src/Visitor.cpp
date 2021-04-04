@@ -7,268 +7,82 @@ using std::cout;
 using std::endl;
 
 Visitor::Visitor() { }
-//void Visitor::visit(ASTNode *node) { cout << "ok" << endl;}
+
+void Visitor::visit(ProgNode *node) { }
+void Visitor::visit(ClassDeclListNode *node) { }
+void Visitor::visit(ClassDeclNode *node) { }
+void Visitor::visit(MembListNode *node) { }
+void Visitor::visit(InherListNode *node) { }
+void Visitor::visit(FuncDefListNode *node) { }
+void Visitor::visit(FuncDefNode *node) { }
+void Visitor::visit(FuncBodyNode *node) { }
+void Visitor::visit(FuncHeadNode *node) { }
+void Visitor::visit(FuncDeclNode *node) { }
+void Visitor::visit(ParamListNode *node) { }
+void Visitor::visit(FParamNode *node) { }
+void Visitor::visit(FCallNode *node) { }
+void Visitor::visit(VisibilityNode *node) { }
+void Visitor::visit(MemberDeclNode *node) { }
+void Visitor::visit(IdNode *node) { }
+void Visitor::visit(VarDeclNode *node) { }
+void Visitor::visit(VarDeclListNode *node) { }
+void Visitor::visit(TypeNode *node) { }
+void Visitor::visit(IntegerNode *node) { }
+void Visitor::visit(FloatNode *node) { }
+void Visitor::visit(StringNode *node) { }
+void Visitor::visit(DimListNode *node) { }
+void Visitor::visit(NumIntNode *node) { }
+void Visitor::visit(StatementNode *node) { }
+void Visitor::visit(StatBlockNode *node) { }
+void Visitor::visit(VariableNode *node) { }
+void Visitor::visit(AssignStmtNode *node) { }
+void Visitor::visit(IfStmtNode *node) { }
+void Visitor::visit(ReadStmtNode *node) { }
+void Visitor::visit(WriteStmtNode *node) { }
+void Visitor::visit(ReturnStmtNode *node) { }
+void Visitor::visit(ContinueNode *node) { }
+void Visitor::visit(BreakNode *node) { }
+void Visitor::visit(ArithExprNode *node) { }
+void Visitor::visit(RelExprNode *node) { }
+void Visitor::visit(WhileStmtNode *node) { }
+void Visitor::visit(SignNode *node) { }
+void Visitor::visit(PlusNode *node) { }
+void Visitor::visit(MinusNode *node) { }
+void Visitor::visit(RelOpNode *node) { }
+void Visitor::visit(MultOpNode *node) { }
+void Visitor::visit(AddOpNode *node) { }
+void Visitor::visit(MultNode *node) { }
+void Visitor::visit(DivNode *node) { }
+void Visitor::visit(AndNode *node) { }
+void Visitor::visit(EqNode *node) { }
+void Visitor::visit(GtNode *node) { }
+void Visitor::visit(LtNode *node) { }
+void Visitor::visit(NeqNode *node) { }
+void Visitor::visit(GeqNode *node) { }
+void Visitor::visit(LeqNode *node) { }
+void Visitor::visit(IntLitNode *node) { }
+void Visitor::visit(StringLitNode *node) { }
+void Visitor::visit(FloatLitNode *node) { }
+void Visitor::visit(DotNode *node) { }
+void Visitor::visit(EpsilonNode *node) { }
+void Visitor::visit(ScopeSpecNode *node) { }
+void Visitor::visit(TermNode *node) { }
+void Visitor::visit(IndiceListNode *node) { }
+void Visitor::visit(PrivateNode *node) { }
+void Visitor::visit(PublicNode *node) { }
+void Visitor::visit(DataMemberNode *node) { }
 
 CreatingVisitor::CreatingVisitor() { }
 
 void CreatingVisitor::visit(ProgNode *node) {
 	node->table = new SymbolTable("Global");
 	ASTNode *child = node->leftmost_child;
+	node->table->insert(child->record);
 	cout << child->get_type() << endl; // funcbody
 	cout << child->right->get_type() << endl; // funcdeflist
 	cout << child->right->right->get_type() << endl; // classdecllist
-}
-void CreatingVisitor::visit(ClassDeclListNode *node) {
-}
-void CreatingVisitor::visit(ClassDeclNode *node) {
-}
-void CreatingVisitor::visit(MembListNode *node) {
-}
-void CreatingVisitor::visit(InherListNode *node) {
-}
-void CreatingVisitor::visit(FuncDefListNode *node) {
-}
-void CreatingVisitor::visit(FuncDefNode *node) {
-}
-void CreatingVisitor::visit(FuncBodyNode *node) {
-}
-void CreatingVisitor::visit(FuncHeadNode *node) {
-}
-void CreatingVisitor::visit(FuncDeclNode *node) {
-}
-void CreatingVisitor::visit(ParamListNode *node) {
-}
-void CreatingVisitor::visit(FParamNode *node) {
-}
-void CreatingVisitor::visit(FCallNode *node) {
-}
-void CreatingVisitor::visit(VisibilityNode *node) {
-}
-void CreatingVisitor::visit(MemberDeclNode *node) {
-}
-void CreatingVisitor::visit(IdNode *node) {
-}
-void CreatingVisitor::visit(VarDeclNode *node) {
-}
-void CreatingVisitor::visit(VarDeclListNode *node) {
-}
-void CreatingVisitor::visit(TypeNode *node) {
-}
-void CreatingVisitor::visit(IntegerNode *node) {
-}
-void CreatingVisitor::visit(FloatNode *node) {
-}
-void CreatingVisitor::visit(StringNode *node) {
-}
-void CreatingVisitor::visit(DimListNode *node) {
-}
-void CreatingVisitor::visit(NumIntNode *node) {
-}
-void CreatingVisitor::visit(StatementNode *node) {
-}
-void CreatingVisitor::visit(StatBlockNode *node) {
-}
-void CreatingVisitor::visit(VariableNode *node) {
-}
-void CreatingVisitor::visit(AssignStmtNode *node) {
-}
-void CreatingVisitor::visit(IfStmtNode *node) {
-}
-void CreatingVisitor::visit(ReadStmtNode *node) {
-}
-void CreatingVisitor::visit(WriteStmtNode *node) {
-}
-void CreatingVisitor::visit(ReturnStmtNode *node) {
-}
-void CreatingVisitor::visit(ContinueNode *node) {
-}
-void CreatingVisitor::visit(BreakNode *node) {
-}
-void CreatingVisitor::visit(ArithExprNode *node) {
-}
-void CreatingVisitor::visit(RelExprNode *node) {
-}
-void CreatingVisitor::visit(WhileStmtNode *node) {
-}
-void CreatingVisitor::visit(SignNode *node) {
-}
-void CreatingVisitor::visit(PlusNode *node) {
-}
-void CreatingVisitor::visit(MinusNode *node) {
-}
-void CreatingVisitor::visit(RelOpNode *node) {
-}
-void CreatingVisitor::visit(MultOpNode *node) {
-}
-void CreatingVisitor::visit(AddOpNode *node) {
-}
-void CreatingVisitor::visit(MultNode *node) {
-}
-void CreatingVisitor::visit(DivNode *node) {
-}
-void CreatingVisitor::visit(AndNode *node) {
-}
-void CreatingVisitor::visit(EqNode *node) {
-}
-void CreatingVisitor::visit(GtNode *node) {
-}
-void CreatingVisitor::visit(LtNode *node) {
-}
-void CreatingVisitor::visit(NeqNode *node) {
-}
-void CreatingVisitor::visit(GeqNode *node) {
-}
-void CreatingVisitor::visit(LeqNode *node) {
-}
-void CreatingVisitor::visit(IntLitNode *node) {
-}
-void CreatingVisitor::visit(StringLitNode *node) {
-}
-void CreatingVisitor::visit(FloatLitNode *node) {
-}
-void CreatingVisitor::visit(DotNode *node) {
-}
-void CreatingVisitor::visit(EpsilonNode *node) {
-}
-void CreatingVisitor::visit(ScopeSpecNode *node) {
-}
-void CreatingVisitor::visit(TermNode *node) {
-}
-void CreatingVisitor::visit(IndiceListNode *node) {
-}
-void CreatingVisitor::visit(PrivateNode *node) {
-}
-void CreatingVisitor::visit(PublicNode *node) {
-}
-void CreatingVisitor::visit(DataMemberNode *node) {
 }
 
 
 CheckingVisitor::CheckingVisitor() { }
 
-void CheckingVisitor::visit(ProgNode *node) {
-}
-void CheckingVisitor::visit(ClassDeclListNode *node) {
-}
-void CheckingVisitor::visit(ClassDeclNode *node) {
-}
-void CheckingVisitor::visit(MembListNode *node) {
-}
-void CheckingVisitor::visit(InherListNode *node) {
-}
-void CheckingVisitor::visit(FuncDefListNode *node) {
-}
-void CheckingVisitor::visit(FuncDefNode *node) {
-}
-void CheckingVisitor::visit(FuncBodyNode *node) {
-}
-void CheckingVisitor::visit(FuncHeadNode *node) {
-}
-void CheckingVisitor::visit(FuncDeclNode *node) {
-}
-void CheckingVisitor::visit(ParamListNode *node) {
-}
-void CheckingVisitor::visit(FParamNode *node) {
-}
-void CheckingVisitor::visit(FCallNode *node) {
-}
-void CheckingVisitor::visit(VisibilityNode *node) {
-}
-void CheckingVisitor::visit(MemberDeclNode *node) {
-}
-void CheckingVisitor::visit(IdNode *node) {
-}
-void CheckingVisitor::visit(VarDeclNode *node) {
-}
-void CheckingVisitor::visit(VarDeclListNode *node) {
-}
-void CheckingVisitor::visit(TypeNode *node) {
-}
-void CheckingVisitor::visit(IntegerNode *node) {
-}
-void CheckingVisitor::visit(FloatNode *node) {
-}
-void CheckingVisitor::visit(StringNode *node) {
-}
-void CheckingVisitor::visit(DimListNode *node) {
-}
-void CheckingVisitor::visit(NumIntNode *node) {
-}
-void CheckingVisitor::visit(StatementNode *node) {
-}
-void CheckingVisitor::visit(StatBlockNode *node) {
-}
-void CheckingVisitor::visit(VariableNode *node) {
-}
-void CheckingVisitor::visit(AssignStmtNode *node) {
-}
-void CheckingVisitor::visit(IfStmtNode *node) {
-}
-void CheckingVisitor::visit(ReadStmtNode *node) {
-}
-void CheckingVisitor::visit(WriteStmtNode *node) {
-}
-void CheckingVisitor::visit(ReturnStmtNode *node) {
-}
-void CheckingVisitor::visit(ContinueNode *node) {
-}
-void CheckingVisitor::visit(BreakNode *node) {
-}
-void CheckingVisitor::visit(ArithExprNode *node) {
-}
-void CheckingVisitor::visit(RelExprNode *node) {
-}
-void CheckingVisitor::visit(WhileStmtNode *node) {
-}
-void CheckingVisitor::visit(SignNode *node) {
-}
-void CheckingVisitor::visit(PlusNode *node) {
-}
-void CheckingVisitor::visit(MinusNode *node) {
-}
-void CheckingVisitor::visit(RelOpNode *node) {
-}
-void CheckingVisitor::visit(MultOpNode *node) {
-}
-void CheckingVisitor::visit(AddOpNode *node) {
-}
-void CheckingVisitor::visit(MultNode *node) {
-}
-void CheckingVisitor::visit(DivNode *node) {
-}
-void CheckingVisitor::visit(AndNode *node) {
-}
-void CheckingVisitor::visit(EqNode *node) {
-}
-void CheckingVisitor::visit(GtNode *node) {
-}
-void CheckingVisitor::visit(LtNode *node) {
-}
-void CheckingVisitor::visit(NeqNode *node) {
-}
-void CheckingVisitor::visit(GeqNode *node) {
-}
-void CheckingVisitor::visit(LeqNode *node) {
-}
-void CheckingVisitor::visit(IntLitNode *node) {
-}
-void CheckingVisitor::visit(StringLitNode *node) {
-}
-void CheckingVisitor::visit(FloatLitNode *node) {
-}
-void CheckingVisitor::visit(DotNode *node) {
-}
-void CheckingVisitor::visit(EpsilonNode *node) {
-}
-void CheckingVisitor::visit(ScopeSpecNode *node) {
-}
-void CheckingVisitor::visit(TermNode *node) {
-}
-void CheckingVisitor::visit(IndiceListNode *node) {
-}
-void CheckingVisitor::visit(PrivateNode *node) {
-}
-void CheckingVisitor::visit(PublicNode *node) {
-}
-void CheckingVisitor::visit(DataMemberNode *node) {
-}
