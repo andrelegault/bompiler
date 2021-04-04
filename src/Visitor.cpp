@@ -30,7 +30,7 @@ void CreationVisitor::visit(FuncHeadNode *node) {
 }
 void CreationVisitor::visit(FuncDeclNode *node) {
 }
-void CreationVisitor::visit(FParamListNode *node) {
+void CreationVisitor::visit(ParamListNode *node) {
 }
 void CreationVisitor::visit(FParamNode *node) {
 }
@@ -94,6 +94,8 @@ void CreationVisitor::visit(RelOpNode *node) {
 }
 void CreationVisitor::visit(MultOpNode *node) {
 }
+void CreationVisitor::visit(AddOpNode *node) {
+}
 void CreationVisitor::visit(MultNode *node) {
 }
 void CreationVisitor::visit(DivNode *node) {
@@ -132,6 +134,8 @@ void CreationVisitor::visit(PrivateNode *node) {
 }
 void CreationVisitor::visit(PublicNode *node) {
 }
+void CreationVisitor::visit(DataMemberNode *node) {
+}
 
 
 SemanticCheckingVisitor::SemanticCheckingVisitor() { }
@@ -156,7 +160,7 @@ void SemanticCheckingVisitor::visit(FuncHeadNode *node) {
 }
 void SemanticCheckingVisitor::visit(FuncDeclNode *node) {
 }
-void SemanticCheckingVisitor::visit(FParamListNode *node) {
+void SemanticCheckingVisitor::visit(ParamListNode *node) {
 }
 void SemanticCheckingVisitor::visit(FParamNode *node) {
 }
@@ -220,6 +224,8 @@ void SemanticCheckingVisitor::visit(RelOpNode *node) {
 }
 void SemanticCheckingVisitor::visit(MultOpNode *node) {
 }
+void SemanticCheckingVisitor::visit(AddOpNode *node) {
+}
 void SemanticCheckingVisitor::visit(MultNode *node) {
 }
 void SemanticCheckingVisitor::visit(DivNode *node) {
@@ -257,4 +263,6 @@ void SemanticCheckingVisitor::visit(IndiceListNode *node) {
 void SemanticCheckingVisitor::visit(PrivateNode *node) {
 }
 void SemanticCheckingVisitor::visit(PublicNode *node) {
+}
+void SemanticCheckingVisitor::visit(DataMemberNode *node) {
 }

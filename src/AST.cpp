@@ -66,13 +66,13 @@ string ASTNode::to_dot_notation() {
 	while (!container.empty()) {
 		ASTNode *parent = container.front();
 		container.pop();
-		ASTNode *start = parent->leftmost_child;
 		string parent_val = parent->get_type();
-		parent_val = to_string(parent_count[parent_val]++);
+		parent_val += to_string(parent_count[parent_val]++);
+		ASTNode *start = parent->leftmost_child;
 		while (start != nullptr) {
 			container.push(start);
 			string start_val = start->get_type();
-			start_val = to_string(children_count[start_val]++);
+			start_val += to_string(children_count[start_val]++);
 			str +=  "\t" + parent_val + "->" + start_val + "\n";
 			start = start->right;
 		}
@@ -117,8 +117,8 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new FuncHeadNode();
 	else if (type == "funcdecl")
 		result = new FuncDeclNode();
-	else if (type == "fparamlist")
-		result = new FParamListNode();
+	else if (type == "paramlist")
+		result = new ParamListNode();
 	else if (type == "fparam")
 		result = new FParamNode();
 	else if (type == "fcall")
@@ -181,6 +181,8 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new RelOpNode();
 	else if (type == "multop")
 		result = new MultOpNode();
+	else if (type == "addop")
+		result = new AddOpNode();
 	else if (type == "mult")
 		result = new MultNode();
 	else if (type == "div")
@@ -219,6 +221,8 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new PrivateNode();
 	else if (type == "public")
 		result = new PublicNode();
+	else if (type == "datamember")
+		result = new DataMemberNode();
 	else {
 		cout << type << endl;
 		throw type;
@@ -236,7 +240,7 @@ FuncDefNode::FuncDefNode() { }
 FuncBodyNode::FuncBodyNode() { }
 FuncHeadNode::FuncHeadNode() { }
 FuncDeclNode::FuncDeclNode() { }
-FParamListNode::FParamListNode() { }
+ParamListNode::ParamListNode() { }
 FParamNode::FParamNode() { }
 FCallNode::FCallNode() { }
 VisibilityNode::VisibilityNode() { }
@@ -268,6 +272,7 @@ PlusNode::PlusNode() { }
 MinusNode::MinusNode() { }
 RelOpNode::RelOpNode() { }
 MultOpNode::MultOpNode() { }
+AddOpNode::AddOpNode() { }
 MultNode::MultNode() { }
 DivNode::DivNode() { }
 AndNode::AndNode() { }
@@ -287,6 +292,7 @@ TermNode::TermNode() { }
 IndiceListNode::IndiceListNode() { }
 PrivateNode::PrivateNode() { }
 PublicNode::PublicNode() { }
+DataMemberNode::DataMemberNode() { }
 
 bool EpsilonNode::is_epsilon() {
 	return true;
@@ -302,7 +308,7 @@ string FuncDefNode::get_type() {return "FuncDefNode"; }
 string FuncBodyNode::get_type() {return "FuncBodyNode"; }
 string FuncHeadNode::get_type() {return "FuncHeadNode"; }
 string FuncDeclNode::get_type() {return "FuncDeclNode"; }
-string FParamListNode::get_type() {return "FParamListNode"; }
+string ParamListNode::get_type() {return "ParamListNode"; }
 string FParamNode::get_type() {return "FParamNode"; }
 string FCallNode::get_type() {return "FCallNode"; }
 string VisibilityNode::get_type() {return "VisibilityNode"; }
@@ -334,6 +340,7 @@ string PlusNode::get_type() {return "PlusNode"; }
 string MinusNode::get_type() {return "MinusNode"; }
 string RelOpNode::get_type() {return "RelOpNode"; }
 string MultOpNode::get_type() {return "MultOpNode"; }
+string AddOpNode::get_type() {return "AddOpNode"; }
 string MultNode::get_type() {return "MultNode"; }
 string DivNode::get_type() {return "DivNode"; }
 string AndNode::get_type() {return "AndNode"; }
@@ -353,3 +360,4 @@ string TermNode::get_type() {return "TermNode"; }
 string IndiceListNode::get_type() {return "IndiceListNode"; }
 string PrivateNode::get_type() {return "PrivateNode"; }
 string PublicNode::get_type() {return "PublicNode"; }
+string DataMemberNode::get_type() {return "DataMemberNode"; }

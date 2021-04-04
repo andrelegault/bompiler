@@ -91,9 +91,9 @@ class FuncDeclNode : public ASTNode {
 		FuncDeclNode();
 		virtual string get_type() override;
 };
-class FParamListNode : public ASTNode {
+class ParamListNode : public ASTNode {
 	public:
-		FParamListNode();
+		ParamListNode();
 		virtual string get_type() override;
 };
 class FParamNode : public ASTNode {
@@ -251,6 +251,11 @@ class MultOpNode : public ASTNode {
 		MultOpNode();
 		virtual string get_type() override;
 };
+class AddOpNode : public ASTNode {
+	public:
+		AddOpNode();
+		virtual string get_type() override;
+};
 class MultNode : public ASTNode {
 	public:
 		MultNode();
@@ -346,4 +351,9 @@ class PublicNode : public ASTNode {
 	public:
 		virtual string get_type() override;
 		PublicNode();
+};
+class DataMemberNode : public ASTNode {
+	public:
+		virtual string get_type() override;
+		DataMemberNode();
 };

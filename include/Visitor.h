@@ -11,7 +11,7 @@ class FuncDefNode;
 class FuncBodyNode;
 class FuncHeadNode;
 class FuncDeclNode;
-class FParamListNode;
+class ParamListNode;
 class FParamNode;
 class FCallNode;
 class VisibilityNode;
@@ -43,6 +43,7 @@ class PlusNode;
 class MinusNode;
 class RelOpNode;
 class MultOpNode;
+class AddOpNode;
 class MultNode;
 class DivNode;
 class AndNode;
@@ -62,6 +63,7 @@ class TermNode;
 class IndiceListNode;
 class PrivateNode;
 class PublicNode;
+class DataMemberNode;
 
 class Visitor {
 	public:
@@ -79,7 +81,7 @@ class Visitor {
 		virtual void visit(FuncBodyNode *node) = 0;
 		virtual void visit(FuncHeadNode *node) = 0;
 		virtual void visit(FuncDeclNode *node) = 0;
-		virtual void visit(FParamListNode *node) = 0;
+		virtual void visit(ParamListNode *node) = 0;
 		virtual void visit(FParamNode *node) = 0;
 		virtual void visit(FCallNode *node) = 0;
 		virtual void visit(VisibilityNode *node) = 0;
@@ -111,6 +113,7 @@ class Visitor {
 		virtual void visit(MinusNode *node) = 0;
 		virtual void visit(RelOpNode *node) = 0;
 		virtual void visit(MultOpNode *node) = 0;
+		virtual void visit(AddOpNode *node) = 0;
 		virtual void visit(MultNode *node) = 0;
 		virtual void visit(DivNode *node) = 0;
 		virtual void visit(AndNode *node) = 0;
@@ -130,6 +133,7 @@ class Visitor {
 		virtual void visit(IndiceListNode *node) = 0;
 		virtual void visit(PrivateNode *node) = 0;
 		virtual void visit(PublicNode *node) = 0;
+		virtual void visit(DataMemberNode *node) = 0;
 };
 
 class CreationVisitor : public Visitor {
@@ -145,7 +149,7 @@ class CreationVisitor : public Visitor {
 		void visit(FuncBodyNode *node);
 		void visit(FuncHeadNode *node);
 		void visit(FuncDeclNode *node);
-		void visit(FParamListNode *node);
+		void visit(ParamListNode *node);
 		void visit(FParamNode *node);
 		void visit(FCallNode *node);
 		void visit(VisibilityNode *node);
@@ -177,6 +181,7 @@ class CreationVisitor : public Visitor {
 		void visit(MinusNode *node);
 		void visit(RelOpNode *node);
 		void visit(MultOpNode *node);
+		void visit(AddOpNode *node);
 		void visit(MultNode *node);
 		void visit(DivNode *node);
 		void visit(AndNode *node);
@@ -196,6 +201,7 @@ class CreationVisitor : public Visitor {
 		void visit(IndiceListNode *node);
 		void visit(PrivateNode *node);
 		void visit(PublicNode *node);
+		void visit(DataMemberNode *node);
 };
 
 class SemanticCheckingVisitor : public Visitor {
@@ -211,7 +217,7 @@ class SemanticCheckingVisitor : public Visitor {
 		void visit(FuncBodyNode *node);
 		void visit(FuncHeadNode *node);
 		void visit(FuncDeclNode *node);
-		void visit(FParamListNode *node);
+		void visit(ParamListNode *node);
 		void visit(FParamNode *node);
 		void visit(FCallNode *node);
 		void visit(VisibilityNode *node);
@@ -243,6 +249,7 @@ class SemanticCheckingVisitor : public Visitor {
 		void visit(MinusNode *node);
 		void visit(RelOpNode *node);
 		void visit(MultOpNode *node);
+		void visit(AddOpNode *node);
 		void visit(MultNode *node);
 		void visit(DivNode *node);
 		void visit(AndNode *node);
@@ -262,4 +269,5 @@ class SemanticCheckingVisitor : public Visitor {
 		void visit(IndiceListNode *node);
 		void visit(PrivateNode *node);
 		void visit(PublicNode *node);
+		void visit(DataMemberNode *node);
 };
