@@ -25,6 +25,7 @@ class ASTNode {
 		ASTNode *parent = nullptr, *leftmost_child = nullptr, *leftmost_sibling = nullptr, *right = nullptr;
 		SymbolTable *table = nullptr;
 		SymbolTableRecord *record = nullptr;
+		int num_children = 0;
 		string val;
 		ASTNode(string val = "");
 		ASTNode* make_siblings(ASTNode *y);
@@ -34,9 +35,11 @@ class ASTNode {
 
 		string to_dot_notation();
 		virtual bool is_epsilon();
+		virtual string to_str();
 
 		virtual void accept(Visitor *v)=0;
 		virtual string get_type() = 0;
+		virtual string get_dims() const;
 };
 
 
@@ -199,6 +202,7 @@ class DimListNode : public ASTNode {
 		DimListNode();
 		virtual string get_type() override;
 		virtual void accept(Visitor *v) override;
+		virtual string get_dims() const override;
 
 };
 class NumIntNode : public ASTNode {

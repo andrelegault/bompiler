@@ -48,11 +48,11 @@
 <FuncOrAssignStatIdnestVarTail> ::= 'dot' 'id' node,id <FuncOrAssignStatIdnest> tree,dot,2
 <FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail> 
 <FuncOrVar> ::= 'id' node,id <FuncOrVarIdnest> 
-<FuncOrVarIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,datamember,2 <FuncOrVarIdnestTail>
+<FuncOrVarIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 <FuncOrVarIdnestTail>
 <FuncOrVarIdnest> ::= 'lpar' node,e <AParams> tree,paramlist,e 'rpar' tree,fcall,2 <FuncOrVarIdnestTail>
 <FuncOrVarIdnestTail> ::= 'dot' 'id' node,id <FuncOrVarIdnest> tree,dot,2
 <FuncOrVarIdnestTail> ::= EPSILON
-<FuncStatTail> ::= node,e <IndiceRep> tree,indicelist,e tree,datamember,2 'dot' 'id' node,id <FuncStatTail> tree,dot,2
+<FuncStatTail> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 'dot' 'id' node,id <FuncStatTail> tree,dot,2
 <FuncStatTail> ::= 'lpar' node,e <AParams> tree,paramlist,e 'rpar' tree,fcall,2 <FuncStatTailIdnest>
 <FuncStatTailIdnest> ::= 'dot' 'id' node,id <FuncStatTail> tree,dot,2
 <FuncStatTailIdnest> ::= EPSILON
@@ -72,7 +72,7 @@
 <MultOp> ::= 'and' node,and
 <NestedId> ::= 'comma' 'id' node,id <NestedId> 
 <NestedId> ::= EPSILON
-<Prog> ::= node,e <ClassDecl> tree,classdecllist,e node,e <FuncDef> tree,funcdeflist,e 'main' <FuncBody> tree,prog,3
+<Prog> ::= node,e <ClassDecl> tree,classdecllist,e node,e <FuncDef> tree,funcdeflist,e 'main' <FuncBody> tree,funcdef,1 tree,prog,3
 <RelOp> ::= 'eq' node,eq
 <RelOp> ::= 'neq' node,neq
 <RelOp> ::= 'lt' node,lt
@@ -88,7 +88,7 @@
 <Statement> ::= <FuncOrAssignStat> 'semi' 
 <Statement> ::= 'if' 'lpar' <Expr> 'rpar' 'then' node,e <StatBlock> tree,statblock,e 'else' node,e <StatBlock> tree,statblock,e 'semi' tree,ifstmt,3
 <Statement> ::= 'while' 'lpar' <Expr> 'rpar' node,e <StatBlock> tree,statblock,e 'semi' tree,whilestmt,2
-<Statement> ::= 'read' 'lpar' node,e <Variable> tree,var,e 'rpar' 'semi' tree,readstmt,2
+<Statement> ::= 'read' 'lpar' <Variable> 'rpar' 'semi' tree,readstmt,1
 <Statement> ::= 'write' 'lpar' <Expr> 'rpar' 'semi' tree,writestmt,1
 <Statement> ::= 'return' 'lpar' <Expr> 'rpar' 'semi' tree,returnstmt,1
 <Statement> ::= 'break' 'semi' node,break
@@ -106,7 +106,7 @@
 <VarDeclRep> ::= <VarDecl> <VarDeclRep> 
 <VarDeclRep> ::= EPSILON
 <Variable> ::= 'id' node,id <VariableIdnest> 
-<VariableIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,datamember,2 <VariableIdnestTail>
+<VariableIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 <VariableIdnestTail>
 <VariableIdnestTail> ::= 'dot' 'id' node,id tree,dot,2 <VariableIdnest>
 <VariableIdnestTail> ::= EPSILON
 <Visibility> ::= 'public' node,public

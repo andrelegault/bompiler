@@ -6,6 +6,7 @@ class Visitor {
 	public:
 		Visitor();
 
+
 		virtual void visit(ProgNode *node);
 		virtual void visit(ClassDeclListNode *node);
 		virtual void visit(ClassDeclNode *node);
@@ -75,6 +76,12 @@ class CreatingVisitor : public Visitor {
 	public:
 		CreatingVisitor();
 		void visit(ProgNode *node);
+		void visit(FuncDefNode *node);
+		void visit(FParamNode *node);
+		void visit(ClassDeclNode *node);
+		void visit(InherListNode *node);
+		void visit(FuncDeclNode *node);
+		void visit(VarDeclNode *node);
 };
 
 class CheckingVisitor : public Visitor {

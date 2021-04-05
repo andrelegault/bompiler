@@ -13,10 +13,13 @@ class SymbolTable;
 
 class SymbolTableRecord {
 	// needs to contain all necessary information to know in order to make checks, e.g., type of params, number of params, etc.
-	const string name, kind;
-	const vector<string> params;
-	ASTNode *node;
-	SymbolTable *link = nullptr;
-	SymbolTableRecord();
+	public:
+		string name = "";
+		string kind = "";
+		SymbolTable *link = nullptr;
+		vector<string> types; // first entry is return type, second is first param, second is second param and so on...
+		vector<ASTNode*> children;
+		ASTNode *node;
+		SymbolTableRecord(ASTNode *node);
+		string to_str() const;
 };
-

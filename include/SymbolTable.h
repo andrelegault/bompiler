@@ -11,17 +11,17 @@ class SymbolTableRecord;
 
 class SymbolTable {
 	public:
-		const string name;
-		const map<string, SymbolTableRecord*> records;
-		SymbolTable *parent;
+		map<string, SymbolTableRecord*> records;
+		string name;
+		const string type;
 
-		SymbolTable(const string &name);
+		SymbolTable(const string &type);
 
 		void insert(SymbolTableRecord *node);
 
 		// should search in parent if not found, and then parent's parent if still not found, etc.
 		// need to take visiblity descriptors, i.e., `public` and `private into account
-		bool search(ASTNode *node);
+		bool search(const string &name);
 
 		string print();
 

@@ -12,5 +12,5 @@ class SemanticAnalyzer {
 	public:
 		SemanticAnalyzer(const string &filename);
 		void analyze(ASTNode *root);
-		ofstream semantic_errors, symbol_tables;
+		static ofstream semantic_errors, symbol_tables;
 };
