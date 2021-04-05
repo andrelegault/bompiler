@@ -40,7 +40,9 @@ void SymbolTable::insert(SymbolTableRecord *node) {
 	if (records.find(node->name) != records.end()) {
 		// TODO: call `search` to check global scope + inherited scope
 		// find solution for inherited scope
+		cout << "multiply declared identifier: " << node->name << endl;
 		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << node->name << endl;
+		throw node->name;
 	} else {
 		records[node->name] = node;
 	}

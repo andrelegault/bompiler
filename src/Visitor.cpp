@@ -77,6 +77,9 @@ CreatingVisitor::CreatingVisitor() { }
 // do i pass the symboltable in the accept method or do i add to it after its done
 // difference b/w main function and another free function is that you just don't have parameters
 
+// there is a bug where the dot operator takes precedence over the assign statement:
+//
+// somevariable.a = B; // would have the dot operator be the parent operator when it should be the assignment operator
 void CreatingVisitor::visit(ProgNode *node) {
 	node->table = new SymbolTable("Global");
 	ASTNode *main = node->leftmost_child;
@@ -119,8 +122,9 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 		ASTNode *type = funchead->leftmost_child;
 		node->record->types.push_back(type->leftmost_child->get_type());
 		ASTNode *paramlist = type->right;
+		// if the scope spec is epsilon, then the id is this
 		ASTNode *scopespec = paramlist->right;
-		ASTNode *id = scopespec->right;
+		ASTNode *id = scopespec->leftmost_child->is_epsilon() ? scopespec->right : scopespec->leftmost_child;
 
 		ASTNode *fparam = paramlist->leftmost_child;
 		while (fparam != nullptr) {

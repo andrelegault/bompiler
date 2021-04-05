@@ -72,7 +72,7 @@ void SemanticSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *
 void TerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyzer *analyzer, Token* &lookahead, bool &error) {
 	if (this->val == lookahead->type) {
 		if (grammar->processable_terminal_nodes.find(this->val) != grammar->processable_terminal_nodes.end()) {
-			cout << "created a " << this->val << " node" << endl;
+			//cout << "created a " << this->val << " node -> " << lookahead->lexeme << endl;
 			parser->attributes.push_back(ASTNode::make_node(lookahead->type, lookahead->lexeme));
 		} else {
 		}
@@ -90,14 +90,17 @@ void NonTerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyze
 	auto &symbols = parser->symbols;
 	if (grammar->parsing_table.find(this->val) != grammar->parsing_table.end()) {
 		if (grammar->parsing_table[this->val].find(lookahead->type) != grammar->parsing_table[this->val].end()) {
+			cout << "[" << this->val << "][" << lookahead->type << "]";
 			grammar->derivation.remove(symbols.back());
 			symbols.pop_back();
 			const vector<Symbol*> form = grammar->parsing_table[this->val][lookahead->type]->sentential_form;
 			auto it = form.rbegin();
 			for (; it != form.rend(); ++it) {
 				Symbol *s = *it;
+				cout << s->val;
 				symbols.push_back(s);
 			}
+			cout << endl;
 		}
 		else {
 			parser->skip_errors(lookahead);
