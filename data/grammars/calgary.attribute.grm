@@ -45,7 +45,7 @@
 <FuncOrAssignStatIdnest> ::= 'lpar' node,e <AParams> tree,paramlist,e tree,fcall,2 'rpar' <FuncOrAssignStatIdnestFuncTail>
 <FuncOrAssignStatIdnestFuncTail> ::= 'dot' 'id' node,id <FuncStatTail> tree,dot,2
 <FuncOrAssignStatIdnestFuncTail> ::= EPSILON
-<FuncOrAssignStatIdnestVarTail> ::= 'dot' 'id' node,id <FuncOrAssignStatIdnest> tree,dot,2
+<FuncOrAssignStatIdnestVarTail> ::= 'dot' 'id' node,id tree,dot,2 <FuncOrAssignStatIdnest>
 <FuncOrAssignStatIdnestVarTail> ::= <AssignStatTail> 
 <FuncOrVar> ::= 'id' node,id <FuncOrVarIdnest> 
 <FuncOrVarIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 <FuncOrVarIdnestTail>
@@ -53,7 +53,7 @@
 <FuncOrVarIdnestTail> ::= 'dot' 'id' node,id <FuncOrVarIdnest> tree,dot,2
 <FuncOrVarIdnestTail> ::= EPSILON
 <FuncStatTail> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 'dot' 'id' node,id <FuncStatTail> tree,dot,2
-<FuncStatTail> ::= 'lpar' node,e <AParams> tree,paramlist,e 'rpar' tree,fcall,2 <FuncStatTailIdnest>
+<FuncStatTail> ::= 'lpar' node,e <AParams> tree,paramlist,e 'rpar' tree,fcall,2 <FuncStatTailIdnest> tree,dot,2
 <FuncStatTailIdnest> ::= 'dot' 'id' node,id <FuncStatTail> tree,dot,2
 <FuncStatTailIdnest> ::= EPSILON
 <Function> ::= <FuncHead> <FuncBody> tree,funcdef,2
@@ -107,7 +107,7 @@
 <VarDeclRep> ::= EPSILON
 <Variable> ::= 'id' node,id <VariableIdnest> 
 <VariableIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 <VariableIdnestTail>
-<VariableIdnestTail> ::= 'dot' 'id' node,id tree,dot,2 <VariableIdnest>
+<VariableIdnestTail> ::= 'dot' 'id' node,id <VariableIdnest> tree,dot,2 
 <VariableIdnestTail> ::= EPSILON
 <Visibility> ::= 'public' node,public
 <Visibility> ::= 'private' node,private
