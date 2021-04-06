@@ -90,14 +90,14 @@ void NonTerminalSymbol::process(Parser *parser, Grammar *grammar, LexicalAnalyze
 	auto &symbols = parser->symbols;
 	if (grammar->parsing_table.find(this->val) != grammar->parsing_table.end()) {
 		if (grammar->parsing_table[this->val].find(lookahead->type) != grammar->parsing_table[this->val].end()) {
-			cout << "[" << this->val << "][" << lookahead->type << "]";
+			cout << "[" << this->val << "][" << lookahead->type << "] => ";
 			grammar->derivation.remove(symbols.back());
 			symbols.pop_back();
 			const vector<Symbol*> form = grammar->parsing_table[this->val][lookahead->type]->sentential_form;
 			auto it = form.rbegin();
 			for (; it != form.rend(); ++it) {
 				Symbol *s = *it;
-				cout << s->val;
+				cout << s->val << " ";
 				symbols.push_back(s);
 			}
 			cout << endl;

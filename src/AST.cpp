@@ -136,8 +136,10 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new FuncHeadNode();
 	else if (type == "funcdecl")
 		result = new FuncDeclNode();
-	else if (type == "paramlist")
-		result = new ParamListNode();
+	else if (type == "fparamlist")
+		result = new FParamListNode();
+	else if (type == "aparamlist")
+		result = new AParamListNode();
 	else if (type == "fparam")
 		result = new FParamNode();
 	else if (type == "fcall")
@@ -259,7 +261,8 @@ FuncDefNode::FuncDefNode() { }
 FuncBodyNode::FuncBodyNode() { }
 FuncHeadNode::FuncHeadNode() { }
 FuncDeclNode::FuncDeclNode() { }
-ParamListNode::ParamListNode() { }
+FParamListNode::FParamListNode() { }
+AParamListNode::AParamListNode() { }
 FParamNode::FParamNode() { }
 FCallNode::FCallNode() { }
 VisibilityNode::VisibilityNode() { }
@@ -323,7 +326,8 @@ string FuncDefNode::get_type() {return "funcdef"; }
 string FuncBodyNode::get_type() {return "funcbody"; }
 string FuncHeadNode::get_type() {return "funchead"; }
 string FuncDeclNode::get_type() {return "funcdecl"; }
-string ParamListNode::get_type() {return "paramlist"; }
+string FParamListNode::get_type() {return "fparamlist"; }
+string AParamListNode::get_type() {return "aparamlist"; }
 string FParamNode::get_type() {return "fparam"; }
 string FCallNode::get_type() {return "fcall"; }
 string VisibilityNode::get_type() {return "visibility"; }
@@ -477,7 +481,16 @@ void FuncDeclNode::accept(Visitor *v) {
 	v->visit(this);
 }
 
-void ParamListNode::accept(Visitor *v) {
+void FParamListNode::accept(Visitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
+		
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+void AParamListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
 		

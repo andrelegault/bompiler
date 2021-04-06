@@ -14,6 +14,8 @@
  * The tree SHOULD NOT contain the types of each node.
  */
 
+// TODO: create AParams node as it shouldnt be in paramslist (a as in argument param)
+
 using std::string;
 using std::vector;
 using std::unordered_set;
@@ -113,9 +115,16 @@ class FuncDeclNode : public ASTNode {
 		virtual void accept(Visitor *v) override;
 
 };
-class ParamListNode : public ASTNode {
+class FParamListNode : public ASTNode {
 	public:
-		ParamListNode();
+		FParamListNode();
+		virtual string get_type() override;
+		virtual void accept(Visitor *v) override;
+
+};
+class AParamListNode : public ASTNode {
+	public:
+		AParamListNode();
 		virtual string get_type() override;
 		virtual void accept(Visitor *v) override;
 

@@ -27,22 +27,35 @@ string SymbolTableRecord::to_str() const {
 	return ss.str();
 }
 
-SymbolTable::SymbolTable(const string &type): type(type) { }
-//SymbolTableRecord::SymbolTableRecord(const string &name, const string &kind, const vector<string> &params = {}, SymbolTable *parent = nullptr) { }
-
-// add table to parent's
+SymbolTable::SymbolTable(ASTNode *node, const string &type): node(node), type(type) { }
 
 // this should check if an element with the same name already exists
 // if it does, a semantic error has happened: multiply declared identifiers
+// else, check in the parent's table until found or parent's parent's table, etc.
 void SymbolTable::insert(SymbolTableRecord *node) {
 	if (node == nullptr)
 		return;
-	if (records.find(node->name) != records.end()) {
+	auto first = records.find(node->name);
+	if (first != records.end()) {
 		// TODO: call `search` to check global scope + inherited scope
 		// find solution for inherited scope
+		// function overloading: 2 functions can have the same name but different parameters
+
+		// check params of matching function
+		auto &first_types = first->second->types;
+
+		if (first_types.size() == node->types.size()) {
+			int same_type_count = 0;
+			for(int i = 0; i < first_types.size(); i++) {
+				if (first_types[i] == node->types[i])
+					same_type_count++;
+			}
+			if (same_type_count != first_types.size())
+				return;
+		}
+		
 		cout << "multiply declared identifier: " << node->name << endl;
 		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << node->name << endl;
-		throw node->name;
 	} else {
 		records[node->name] = node;
 	}
@@ -50,8 +63,21 @@ void SymbolTable::insert(SymbolTableRecord *node) {
 
 // should search in parent if not found, and then parent's parent if still not found, etc.
 // need to take visiblity descriptors, i.e., `public` and `private into account
-bool SymbolTable::search(const string &name) {
-	return true;
+bool SymbolTable::search(const string &target_name, const string &target_type) {
+	bool found = false;
+	ASTNode *current = this->node;
+	do {
+		if (current->record->link != nullptr) {
+			auto result = current->record->link->records.find(target_name);
+			if (result != current->record->link->records.end()) {
+				found = result->second->node->get_type() == target_type && result->second->name == target_name;
+				// doesn't take into account the `types` vector of parameters, return types, etc.
+			}
+		}
+		current = current->parent;
+	}
+	while (!found && current != nullptr);
+	return found;
 }
 
 string SymbolTable::print() {
@@ -70,5 +96,6 @@ string SymbolTable::print() {
 		container += "\n";
 	}
 	SemanticAnalyzer::symbol_tables << container << endl;
+	cout << container << endl;
 	return container;
 }

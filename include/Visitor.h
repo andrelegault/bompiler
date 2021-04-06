@@ -17,7 +17,8 @@ class Visitor {
 		virtual void visit(FuncBodyNode *node);
 		virtual void visit(FuncHeadNode *node);
 		virtual void visit(FuncDeclNode *node);
-		virtual void visit(ParamListNode *node);
+		virtual void visit(FParamListNode *node);
+		virtual void visit(AParamListNode *node);
 		virtual void visit(FParamNode *node);
 		virtual void visit(FCallNode *node);
 		virtual void visit(VisibilityNode *node);
@@ -87,4 +88,7 @@ class CreatingVisitor : public Visitor {
 class CheckingVisitor : public Visitor {
 	public:
 		CheckingVisitor();
+		void visit(FuncDefNode *node);
+		void visit(FuncDeclNode *node);
+		void visit(MemberDeclNode *node);
 };

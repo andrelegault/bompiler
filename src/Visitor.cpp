@@ -18,7 +18,8 @@ void Visitor::visit(FuncDefNode *node) { }
 void Visitor::visit(FuncBodyNode *node) { }
 void Visitor::visit(FuncHeadNode *node) { }
 void Visitor::visit(FuncDeclNode *node) { }
-void Visitor::visit(ParamListNode *node) { }
+void Visitor::visit(FParamListNode *node) { }
+void Visitor::visit(AParamListNode *node) { }
 void Visitor::visit(FParamNode *node) { }
 void Visitor::visit(FCallNode *node) { }
 void Visitor::visit(VisibilityNode *node) { }
@@ -81,7 +82,7 @@ CreatingVisitor::CreatingVisitor() { }
 //
 // somevariable.a = B; // would have the dot operator be the parent operator when it should be the assignment operator
 void CreatingVisitor::visit(ProgNode *node) {
-	node->table = new SymbolTable("Global");
+	node->table = new SymbolTable(node, "Global");
 	ASTNode *main = node->leftmost_child;
 
 	node->table->insert(main->record);
@@ -98,12 +99,15 @@ void CreatingVisitor::visit(ProgNode *node) {
 		node->table->insert(classdecl->record);
 		classdecl = classdecl->right;
 	}
-	cout << node->table->print() << endl;
+	node->table->print();
 }
 
 void CreatingVisitor::visit(FuncDefNode *node) {
+	// must have respective declaration, check using parent node?
+	// TODO: search parent->parent (classdecl)'s table to see if defined
+	
 	node->record = new SymbolTableRecord(node);
-	node->record->link = new SymbolTable("function");
+	node->record->link = new SymbolTable(node, "function");
 	node->record->kind = "function";
 
 	ASTNode *funcbody = node->leftmost_child;
@@ -121,12 +125,14 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 		ASTNode *funchead = funcbody->right;
 		ASTNode *type = funchead->leftmost_child;
 		node->record->types.push_back(type->leftmost_child->get_type());
-		ASTNode *paramlist = type->right;
+		ASTNode *fparamlist = type->right;
 		// if the scope spec is epsilon, then the id is this
-		ASTNode *scopespec = paramlist->right;
+		// TODO: check if class is defined
+		// if defined, it must have a declaration inside the class's table
+		ASTNode *scopespec = fparamlist->right;
 		ASTNode *id = scopespec->leftmost_child->is_epsilon() ? scopespec->right : scopespec->leftmost_child;
 
-		ASTNode *fparam = paramlist->leftmost_child;
+		ASTNode *fparam = fparamlist->leftmost_child;
 		while (fparam != nullptr) {
 			node->record->link->insert(fparam->record);
 			fparam = fparam->right;
@@ -141,7 +147,7 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 
 void CreatingVisitor::visit(ClassDeclNode *node) {
 	node->record = new SymbolTableRecord(node);
-	node->record->link = new SymbolTable("class");
+	node->record->link = new SymbolTable(node, "class");
 	// memberlist, inherlist, id
 	ASTNode *memberlist = node->leftmost_child;
 	ASTNode *inherlist = memberlist->right;
@@ -197,18 +203,18 @@ void CreatingVisitor::visit(FParamNode *node) {
 
 void CreatingVisitor::visit(FuncDeclNode *node) {
 	ASTNode *type = node->leftmost_child;
-	ASTNode *paramlist = type->right;
-	ASTNode *id = paramlist->right;
+	ASTNode *fparamlist = type->right;
+	ASTNode *id = fparamlist->right;
 	node->record = new SymbolTableRecord(node);
 	node->record->name = id->val;
 	node->record->kind = "function";
 	node->record->types.push_back(type->get_type());
 
-	ASTNode *param = paramlist->leftmost_child;
+	ASTNode *fparam = fparamlist->leftmost_child;
 
-	while (param != nullptr && !param->is_epsilon()) {
-		node->record->types.push_back(param->record->types[0]);
-		param = param->right;
+	while (fparam != nullptr && !fparam->is_epsilon()) {
+		node->record->types.push_back(fparam->record->types[0]);
+		fparam = fparam->right;
 	}
 
 }
@@ -219,14 +225,29 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 	string type = dimlist->right->right->leftmost_child->get_type();
 
 	string dims = dimlist->get_dims();
+	cout << dims << endl;
 	type += dims;
 
 	node->record = new SymbolTableRecord(node);
 	node->record->name = id;
-	node->record->kind = "vardecl";
+	node->record->kind = "variable";
 	node->record->types.push_back(type);
+	cout << "yeah no." << endl;
 }
 
 
 CheckingVisitor::CheckingVisitor() { }
+
+void CheckingVisitor::visit(FuncDefNode *node) {
+	// TODO: check if respective funcdeclnode is present (is declared)
+	// TODO: if there's a scope specifier, check if that class was declared
+}
+
+void CheckingVisitor::visit(FuncDeclNode *node) {
+	// TODO: check if its respective funcdefnode is present (is defined)
+}
+
+void CheckingVisitor::visit(MemberDeclNode *node) {
+	// TODO: use visibility descriptor to check if identifier is accessible
+}
 

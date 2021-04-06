@@ -26,6 +26,7 @@ int main(int argc, char* argv[]) {
         Parser parser(g, &analyzer, source);
         bool result = parser.parse();
 		if (result) {
+			cout << "Parsing successful, doing semantic analysis!" << endl;
 			SemanticAnalyzer semantic_analyzer(source);
 			semantic_analyzer.analyze(parser.root);
 		}
