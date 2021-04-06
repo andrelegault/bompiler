@@ -102,13 +102,13 @@ string ASTNode::get_dims() const {
 
 string DimListNode::get_dims() const {
 	string dims = "";
-	ASTNode *dim = this->leftmost_child;
-	if (!dim->is_epsilon()) {
-		while (dim != nullptr && !dim->is_epsilon()) {
-			ASTNode *numint = dim->leftmost_child;
-			string dimval = numint->is_epsilon() ? "" : numint->leftmost_child->val;
+	ASTNode *numint = this->leftmost_child;
+	if (!numint->is_epsilon()) {
+		while (numint != nullptr && !numint ->is_epsilon()) {
+			ASTNode *intlit = numint->leftmost_child;
+			string dimval = intlit->val;
 			dims += "[" + dimval + "]";
-			dim = dim->right;
+			numint = numint->right;
 		}
 	}
 	return dims;
