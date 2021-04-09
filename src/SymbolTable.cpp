@@ -37,21 +37,19 @@ void SymbolTable::insert(SymbolTableRecord *node) {
 		return;
 	auto first = records.find(node->name);
 	if (first != records.end()) {
-		// TODO: call `search` to check global scope + inherited scope
-		// find solution for inherited scope
-		// function overloading: 2 functions can have the same name but different parameters
-
 		// check params of matching function
-		auto &first_types = first->second->types;
+		if (first->second->kind == "function") {
+			auto &first_types = first->second->types;
 
-		if (first_types.size() == node->types.size()) {
-			int same_type_count = 0;
-			for(int i = 0; i < first_types.size(); i++) {
-				if (first_types[i] == node->types[i])
-					same_type_count++;
+			if (first_types.size() == node->types.size()) {
+				int same_type_count = 0;
+				for(int i = 0; i < first_types.size(); i++) {
+					if (first_types[i] == node->types[i])
+						same_type_count++;
+				}
+				if (same_type_count != first_types.size())
+					return;
 			}
-			if (same_type_count != first_types.size())
-				return;
 		}
 		
 		cout << "multiply declared identifier: " << node->name << endl;
@@ -68,8 +66,12 @@ bool SymbolTable::search(const string &target_name, const string &target_type) {
 	ASTNode *current = this->node;
 	do {
 		if (current->record->link != nullptr) {
+			//for (const auto &what : current->record->link->records)
+				//cout << what.first << endl;
+
 			auto result = current->record->link->records.find(target_name);
 			if (result != current->record->link->records.end()) {
+				//cout << result->second->node->get_type() << " == " << target_type << ", " << result->second->name << " == " << target_name << endl;
 				found = result->second->node->get_type() == target_type && result->second->name == target_name;
 				// doesn't take into account the `types` vector of parameters, return types, etc.
 			}

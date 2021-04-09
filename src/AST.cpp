@@ -244,6 +244,8 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new PublicNode();
 	else if (type == "datamember")
 		result = new DataMemberNode();
+	else if (type == "void")
+		result = new VoidNode();
 	else {
 		cout << type << endl;
 		throw type;
@@ -315,6 +317,7 @@ IndiceListNode::IndiceListNode() { }
 PrivateNode::PrivateNode() { }
 PublicNode::PublicNode() { }
 DataMemberNode::DataMemberNode() { }
+VoidNode::VoidNode() { }
 
 string ProgNode::get_type() {return "prog"; }
 string ClassDeclListNode::get_type() {return "classdecllist"; }
@@ -380,11 +383,11 @@ string IndiceListNode::get_type() {return "indicelist"; }
 string PrivateNode::get_type() {return "private"; }
 string PublicNode::get_type() {return "public"; }
 string DataMemberNode::get_type() {return "datamember"; }
+string VoidNode::get_type() {return "void"; }
 
 void ProgNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -394,7 +397,6 @@ void ProgNode::accept(Visitor *v) {
 void ClassDeclListNode::accept(Visitor *v) { 
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -404,7 +406,6 @@ void ClassDeclListNode::accept(Visitor *v) {
 void ClassDeclNode::accept(Visitor *v) { 
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -414,7 +415,6 @@ void ClassDeclNode::accept(Visitor *v) {
 void MembListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -424,7 +424,6 @@ void MembListNode::accept(Visitor *v) {
 void InherListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -434,7 +433,6 @@ void InherListNode::accept(Visitor *v) {
 void FuncDefListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -444,7 +442,6 @@ void FuncDefListNode::accept(Visitor *v) {
 void FuncDefNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -454,7 +451,6 @@ void FuncDefNode::accept(Visitor *v) {
 void FuncBodyNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -464,7 +460,6 @@ void FuncBodyNode::accept(Visitor *v) {
 void FuncHeadNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -474,7 +469,6 @@ void FuncHeadNode::accept(Visitor *v) {
 void FuncDeclNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -484,16 +478,15 @@ void FuncDeclNode::accept(Visitor *v) {
 void FParamListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
 	v->visit(this);
 }
+
 void AParamListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -503,7 +496,6 @@ void AParamListNode::accept(Visitor *v) {
 void FParamNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -513,7 +505,6 @@ void FParamNode::accept(Visitor *v) {
 void FCallNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -523,7 +514,6 @@ void FCallNode::accept(Visitor *v) {
 void VisibilityNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -533,7 +523,6 @@ void VisibilityNode::accept(Visitor *v) {
 void MemberDeclNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -543,7 +532,6 @@ void MemberDeclNode::accept(Visitor *v) {
 void IdNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -553,7 +541,6 @@ void IdNode::accept(Visitor *v) {
 void VarDeclNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -563,7 +550,6 @@ void VarDeclNode::accept(Visitor *v) {
 void VarDeclListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -573,7 +559,6 @@ void VarDeclListNode::accept(Visitor *v) {
 void TypeNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -583,7 +568,6 @@ void TypeNode::accept(Visitor *v) {
 void IntegerNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -593,7 +577,6 @@ void IntegerNode::accept(Visitor *v) {
 void FloatNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -603,7 +586,6 @@ void FloatNode::accept(Visitor *v) {
 void StringNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -613,7 +595,6 @@ void StringNode::accept(Visitor *v) {
 void DimListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -623,7 +604,6 @@ void DimListNode::accept(Visitor *v) {
 void NumIntNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -633,7 +613,6 @@ void NumIntNode::accept(Visitor *v) {
 void StatementNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -643,7 +622,6 @@ void StatementNode::accept(Visitor *v) {
 void StatBlockNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -653,7 +631,6 @@ void StatBlockNode::accept(Visitor *v) {
 void VariableNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -663,7 +640,6 @@ void VariableNode::accept(Visitor *v) {
 void AssignStmtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -673,7 +649,6 @@ void AssignStmtNode::accept(Visitor *v) {
 void IfStmtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -683,7 +658,6 @@ void IfStmtNode::accept(Visitor *v) {
 void ReadStmtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -693,7 +667,6 @@ void ReadStmtNode::accept(Visitor *v) {
 void WriteStmtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -703,7 +676,6 @@ void WriteStmtNode::accept(Visitor *v) {
 void ReturnStmtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -713,7 +685,6 @@ void ReturnStmtNode::accept(Visitor *v) {
 void ContinueNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -723,7 +694,6 @@ void ContinueNode::accept(Visitor *v) {
 void BreakNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -733,7 +703,6 @@ void BreakNode::accept(Visitor *v) {
 void ArithExprNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -743,7 +712,6 @@ void ArithExprNode::accept(Visitor *v) {
 void RelExprNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -753,7 +721,6 @@ void RelExprNode::accept(Visitor *v) {
 void WhileStmtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -763,7 +730,6 @@ void WhileStmtNode::accept(Visitor *v) {
 void SignNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -773,7 +739,6 @@ void SignNode::accept(Visitor *v) {
 void PlusNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -783,7 +748,6 @@ void PlusNode::accept(Visitor *v) {
 void MinusNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -793,7 +757,6 @@ void MinusNode::accept(Visitor *v) {
 void RelOpNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -803,7 +766,6 @@ void RelOpNode::accept(Visitor *v) {
 void MultOpNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -813,7 +775,6 @@ void MultOpNode::accept(Visitor *v) {
 void AddOpNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -823,7 +784,6 @@ void AddOpNode::accept(Visitor *v) {
 void MultNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -833,7 +793,6 @@ void MultNode::accept(Visitor *v) {
 void DivNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -843,7 +802,6 @@ void DivNode::accept(Visitor *v) {
 void AndNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -853,7 +811,6 @@ void AndNode::accept(Visitor *v) {
 void EqNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -863,7 +820,6 @@ void EqNode::accept(Visitor *v) {
 void GtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -873,7 +829,6 @@ void GtNode::accept(Visitor *v) {
 void LtNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -883,7 +838,6 @@ void LtNode::accept(Visitor *v) {
 void NeqNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -893,7 +847,6 @@ void NeqNode::accept(Visitor *v) {
 void GeqNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -903,7 +856,6 @@ void GeqNode::accept(Visitor *v) {
 void LeqNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -913,7 +865,6 @@ void LeqNode::accept(Visitor *v) {
 void IntLitNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -923,7 +874,6 @@ void IntLitNode::accept(Visitor *v) {
 void StringLitNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -933,7 +883,6 @@ void StringLitNode::accept(Visitor *v) {
 void FloatLitNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -943,7 +892,6 @@ void FloatLitNode::accept(Visitor *v) {
 void DotNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -953,7 +901,6 @@ void DotNode::accept(Visitor *v) {
 void EpsilonNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -963,7 +910,6 @@ void EpsilonNode::accept(Visitor *v) {
 void ScopeSpecNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -973,7 +919,6 @@ void ScopeSpecNode::accept(Visitor *v) {
 void TermNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -983,7 +928,6 @@ void TermNode::accept(Visitor *v) {
 void IndiceListNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -993,7 +937,6 @@ void IndiceListNode::accept(Visitor *v) {
 void PrivateNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -1003,7 +946,6 @@ void PrivateNode::accept(Visitor *v) {
 void PublicNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
 		left->accept(v);
 		left = left->right;
 	}
@@ -1013,7 +955,15 @@ void PublicNode::accept(Visitor *v) {
 void DataMemberNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
-		
+		left->accept(v);
+		left = left->right;
+	}
+	v->visit(this);
+}
+
+void VoidNode::accept(Visitor *v) {
+	ASTNode *left = this->leftmost_child;
+	while (left != nullptr) {
 		left->accept(v);
 		left = left->right;
 	}

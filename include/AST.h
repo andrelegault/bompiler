@@ -28,6 +28,7 @@ class ASTNode {
 		SymbolTable *table = nullptr;
 		SymbolTableRecord *record = nullptr;
 		int num_children = 0;
+		string return_type = "";
 		string val;
 		ASTNode(string val = "");
 		ASTNode* make_siblings(ASTNode *y);
@@ -491,6 +492,13 @@ class PublicNode : public ASTNode {
 class DataMemberNode : public ASTNode {
 	public:
 		DataMemberNode();
+		virtual string get_type() override;
+		virtual void accept(Visitor *v) override;
+
+};
+class VoidNode : public ASTNode {
+	public:
+		VoidNode();
 		virtual string get_type() override;
 		virtual void accept(Visitor *v) override;
 

@@ -6,7 +6,6 @@ class Visitor {
 	public:
 		Visitor();
 
-
 		virtual void visit(ProgNode *node);
 		virtual void visit(ClassDeclListNode *node);
 		virtual void visit(ClassDeclNode *node);
@@ -71,6 +70,7 @@ class Visitor {
 		virtual void visit(PrivateNode *node);
 		virtual void visit(PublicNode *node);
 		virtual void visit(DataMemberNode *node);
+		virtual void visit(VoidNode *node);
 };
 
 class CreatingVisitor : public Visitor {
@@ -88,7 +88,15 @@ class CreatingVisitor : public Visitor {
 class CheckingVisitor : public Visitor {
 	public:
 		CheckingVisitor();
+		void visit(ClassDeclNode *node);
 		void visit(FuncDefNode *node);
 		void visit(FuncDeclNode *node);
 		void visit(MemberDeclNode *node);
+		void visit(VarDeclNode *node);
+		void visit(AssignStmtNode *node);
+		void visit(FCallNode *node);
+		void visit(ReturnStmtNode *node);
+		void visit(DimListNode *node);
+		void visit(DotNode *node);
+		void visit(VariableNode *node);
 };

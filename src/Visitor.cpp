@@ -1,6 +1,7 @@
 #include <iostream>
 #include "AST.h"
 #include "SymbolTable.h"
+#include "SemanticAnalyzer.h"
 #include "Visitor.h"
 
 using std::cout;
@@ -72,6 +73,7 @@ void Visitor::visit(IndiceListNode *node) { }
 void Visitor::visit(PrivateNode *node) { }
 void Visitor::visit(PublicNode *node) { }
 void Visitor::visit(DataMemberNode *node) { }
+void Visitor::visit(VoidNode *node) { }
 
 CreatingVisitor::CreatingVisitor() { }
 
@@ -82,29 +84,28 @@ CreatingVisitor::CreatingVisitor() { }
 //
 // somevariable.a = B; // would have the dot operator be the parent operator when it should be the assignment operator
 void CreatingVisitor::visit(ProgNode *node) {
-	node->table = new SymbolTable(node, "Global");
+	node->record = new SymbolTableRecord(node);
+	node->record->link = new SymbolTable(node, node->get_type());
 	ASTNode *main = node->leftmost_child;
 
-	node->table->insert(main->record);
+	node->record->link->insert(main->record);
 
 	ASTNode *funcdeflist = main->right;
 	ASTNode *funcdef = funcdeflist->leftmost_child;
 	while (funcdef != nullptr) {
-		node->table->insert(funcdef->record);
+		node->record->link->insert(funcdef->record);
 		funcdef = funcdef->right;
 	}
 	ASTNode *classdecllist = funcdeflist->right;
 	ASTNode *classdecl = classdecllist->leftmost_child;
 	while (classdecl != nullptr) {
-		node->table->insert(classdecl->record);
+		node->record->link->insert(classdecl->record);
 		classdecl = classdecl->right;
 	}
-	node->table->print();
+	node->record->link->print();
 }
 
 void CreatingVisitor::visit(FuncDefNode *node) {
-	// must have respective declaration, check using parent node?
-	// TODO: search parent->parent (classdecl)'s table to see if defined
 	
 	node->record = new SymbolTableRecord(node);
 	node->record->link = new SymbolTable(node, "function");
@@ -126,11 +127,15 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 		ASTNode *type = funchead->leftmost_child;
 		node->record->types.push_back(type->leftmost_child->get_type());
 		ASTNode *fparamlist = type->right;
-		// if the scope spec is epsilon, then the id is this
-		// TODO: check if class is defined
-		// if defined, it must have a declaration inside the class's table
+
 		ASTNode *scopespec = fparamlist->right;
-		ASTNode *id = scopespec->leftmost_child->is_epsilon() ? scopespec->right : scopespec->leftmost_child;
+		ASTNode *id = nullptr;
+		if (scopespec->leftmost_child->is_epsilon()) {
+			id = scopespec->right;
+		} else {
+			id = scopespec->leftmost_child;
+			node->record->base = scopespec->right->val;
+		}
 
 		ASTNode *fparam = fparamlist->leftmost_child;
 		while (fparam != nullptr) {
@@ -164,6 +169,7 @@ void CreatingVisitor::visit(ClassDeclNode *node) {
 		memberdecl = memberdecl->right;
 	}
 
+	node->record->base = inherlist->leftmost_child->val;
 	node->record->link->name = id->val;
 	node->record->name = id->val;
 	node->record->kind = "class";
@@ -225,29 +231,89 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 	string type = dimlist->right->right->leftmost_child->get_type();
 
 	string dims = dimlist->get_dims();
-	cout << dims << endl;
+	//cout << dims << endl;
 	type += dims;
 
 	node->record = new SymbolTableRecord(node);
 	node->record->name = id;
 	node->record->kind = "variable";
 	node->record->types.push_back(type);
-	cout << "yeah no." << endl;
 }
 
 
 CheckingVisitor::CheckingVisitor() { }
 
+void CheckingVisitor::visit(ClassDeclNode *node) {
+	// TODO: check for circular dependencies
+	if (node->record->base != "") {
+		// check in global table
+		bool found = node->parent->parent->record->link->search(node->record->base, "classdecl");
+		if (!found) {
+			cout << "undeclared class " << node->record->base << endl;
+			SemanticAnalyzer::semantic_errors << "undeclared class " << node->record->base << endl;
+		} else {
+			// check if circular
+			auto record = node->parent->parent->record->link->records[node->record->base];
+			if (record->base == node->record->name) {
+				cout << "circular dependency between " << node->record->base << " <-> " << node->record->name << endl;
+				SemanticAnalyzer::semantic_errors << "circular dependency between " << node->record->base << " <-> " << node->record->name << endl;
+			}
+		}
+	}
+}
+
 void CheckingVisitor::visit(FuncDefNode *node) {
-	// TODO: check if respective funcdeclnode is present (is declared)
 	// TODO: if there's a scope specifier, check if that class was declared
+	// TODO: if member func, check if respective funcdeclnode is present
+	if (node->record->base != "") { // is a member function
+		// check in parent (global table) if it has a `classdecl` with name `node->record->scope`
+		bool assoc_class_declared = node->parent->parent->record->link->search(node->record->base, "classdecl");
+		if (!assoc_class_declared) {
+			cout << "undeclared class " << node->record->base << endl;
+			SemanticAnalyzer::semantic_errors << "undeclared class " << node->record->base << endl;
+		} else {
+			auto table = node->parent->parent->record->link;
+			bool funcdecl_found = table->search(node->record->name, "funcdecl");
+			if (!funcdecl_found) {
+				cout << "definition of undeclared function " << node->record->name << endl;
+				SemanticAnalyzer::semantic_errors << "definition of undeclared function " << node->record->name << endl;
+			}
+		}
+	}
 }
 
 void CheckingVisitor::visit(FuncDeclNode *node) {
 	// TODO: check if its respective funcdefnode is present (is defined)
+	
 }
 
 void CheckingVisitor::visit(MemberDeclNode *node) {
 	// TODO: use visibility descriptor to check if identifier is accessible
 }
 
+void CheckingVisitor::visit(VariableNode *node) {
+	// TODO: check if it was declared in parent
+}
+
+void CheckingVisitor::visit(FCallNode *node) {
+	// TODO: check number of params match + parameter types match (use aparamslist to check each child)
+}
+
+void CheckingVisitor::visit(VarDeclNode *node) {
+}
+
+void CheckingVisitor::visit(AssignStmtNode *node) {
+	// TODO: check that operand types match
+}
+
+void CheckingVisitor::visit(ReturnStmtNode *node) {
+	// TODO: check if return type of parent function is same as that of statement
+}
+
+void CheckingVisitor::visit(DimListNode *node) {
+	// TODO: check if type of indices is integer
+}
+
+void CheckingVisitor::visit(DotNode *node) {
+	// TODO: check if left's type is declared + is a member of that (mind inherited members)
+}

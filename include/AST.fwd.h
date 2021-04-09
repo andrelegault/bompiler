@@ -64,4 +64,5 @@ class IndiceListNode;
 class PrivateNode;
 class PublicNode;
 class DataMemberNode;
+class VoidNode;
 

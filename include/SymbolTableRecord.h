@@ -16,6 +16,7 @@ class SymbolTableRecord {
 	public:
 		string name = "";
 		string kind = "";
+		string base = ""; // for associating a function to its class
 		SymbolTable *link = nullptr;
 		vector<string> types; // first entry is return type, second is first param, second is second param and so on...
 		vector<ASTNode*> children;
