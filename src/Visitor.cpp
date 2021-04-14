@@ -229,6 +229,9 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 	ASTNode *dimlist = node->leftmost_child;
 	string id = dimlist->right->val;
 	string type = dimlist->right->right->leftmost_child->get_type();
+	if (type == "id") {
+		type = dimlist->right->right->leftmost_child->val;
+	}
 
 	string dims = dimlist->get_dims();
 	//cout << dims << endl;
