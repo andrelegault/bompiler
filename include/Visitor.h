@@ -75,6 +75,7 @@ class Visitor {
 
 class CreatingVisitor : public Visitor {
 	public:
+		int temp_count = 0;
 		CreatingVisitor();
 		void visit(ProgNode *node);
 		void visit(FuncDefNode *node);
@@ -83,6 +84,10 @@ class CreatingVisitor : public Visitor {
 		void visit(InherListNode *node);
 		void visit(FuncDeclNode *node);
 		void visit(VarDeclNode *node);
+		void visit(IntLitNode *node);
+		void visit(FloatLitNode *node);
+		void visit(StringLitNode *node);
+		void visit(StatementNode *node);
 };
 
 class CheckingVisitor : public Visitor {

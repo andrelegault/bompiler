@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <queue>
+#include <vector>
 #include "AST.h"
 #include "SymbolTable.h"
 #include "SemanticAnalyzer.h"
@@ -8,6 +10,8 @@
 using std::cout;
 using std::endl;
 using std::to_string;
+using std::queue;
+using std::vector;
 
 Visitor::Visitor() { }
 
@@ -84,36 +88,31 @@ CreatingVisitor::CreatingVisitor() { }
 // do i pass the symboltable in the accept method or do i add to it after its done
 // difference b/w main function and another free function is that you just don't have parameters
 
-// there is a bug where the dot operator takes precedence over the assign statement:
-//
-// somevariable.a = B; // would have the dot operator be the parent operator when it should be the assignment operator
 void CreatingVisitor::visit(ProgNode *node) {
 	node->record = new SymbolTableRecord(node);
-	node->record->link = new SymbolTable(node, node->get_type());
+	node->table = new SymbolTable(node, node->get_type());
 	ASTNode *main = node->leftmost_child;
 
-	node->record->link->insert(main->record);
+	node->table->insert(main->record);
 
 	ASTNode *funcdeflist = main->right;
 	ASTNode *funcdef = funcdeflist->leftmost_child;
 	while (funcdef != nullptr) {
-		node->record->link->insert(funcdef->record);
+		node->table->insert(funcdef->record);
 		funcdef = funcdef->right;
 	}
 	ASTNode *classdecllist = funcdeflist->right;
 	ASTNode *classdecl = classdecllist->leftmost_child;
 	while (classdecl != nullptr) {
-		node->record->link->insert(classdecl->record);
+		node->table->insert(classdecl->record);
 		classdecl = classdecl->right;
 	}
-	node->record->link->print();
 }
 
 void CreatingVisitor::visit(FuncDefNode *node) {
 	
-	node->record = new SymbolTableRecord(node);
-	node->record->link = new SymbolTable(node, "function");
-	node->record->kind = "function";
+	node->record = new FunctionSymbolTableRecord(node);
+	node->table = new SymbolTable(node, "function");
 
 	ASTNode *funcbody = node->leftmost_child;
 	ASTNode *statblock = funcbody->leftmost_child;
@@ -121,15 +120,26 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 
 	ASTNode *vardecl = vardecllist->leftmost_child;
 
-	while (vardecl != nullptr) {
-		node->record->link->insert(vardecl->record);
-		vardecl = vardecl->right;
+	// gets all the temporary variables needed from the funcbody
+	queue<ASTNode*> nodes;
+	nodes.push(funcbody);
+	while (!nodes.empty()) {
+		ASTNode *current = nodes.front();
+		if (current->record != nullptr) {
+			node->table->insert(current->record);
+		}
+		nodes.pop();
+		ASTNode *child = current->leftmost_child;
+		while(child != nullptr) {
+			nodes.push(child);
+			child = child->right;
+		}
 	}
 
 	if (funcbody->right != nullptr) { // is there a funchead
 		ASTNode *funchead = funcbody->right;
 		ASTNode *type = funchead->leftmost_child;
-		node->record->types.push_back(type->leftmost_child->get_type());
+		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->leftmost_child->get_type();
 		ASTNode *fparamlist = type->right;
 
 		ASTNode *scopespec = fparamlist->right;
@@ -143,20 +153,20 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 
 		ASTNode *fparam = fparamlist->leftmost_child;
 		while (fparam != nullptr) {
-			node->record->link->insert(fparam->record);
+			node->table->insert(fparam->record);
 			fparam = fparam->right;
 		}
 		node->record->name = id->val;
-		node->record->link->name = id->val;
+		node->table->name = id->val;
 	} else { // main function doesnt have a function head
-		node->record->link->name = "main";
+		node->table->name = "main";
 		node->record->name = "main";
 	}
 }
 
 void CreatingVisitor::visit(ClassDeclNode *node) {
-	node->record = new SymbolTableRecord(node);
-	node->record->link = new SymbolTable(node, "class");
+	node->record = new ClassSymbolTableRecord(node);
+	node->table = new SymbolTable(node, "class");
 	// memberlist, inherlist, id
 	ASTNode *memberlist = node->leftmost_child;
 	ASTNode *inherlist = memberlist->right;
@@ -164,24 +174,25 @@ void CreatingVisitor::visit(ClassDeclNode *node) {
 
 	ASTNode *memberdecl = memberlist->leftmost_child;
 
-	node->record->link->insert(inherlist->record);
+	node->table->insert(inherlist->record);
 	while (memberdecl != nullptr && !memberdecl->is_epsilon()) {
 		ASTNode *funcdeclorvardecl = memberdecl->leftmost_child;
 		ASTNode *visibility = funcdeclorvardecl->right;
-		funcdeclorvardecl->record->types.push_back(visibility->get_type());
-		node->record->link->insert(funcdeclorvardecl->record);
+		if (funcdeclorvardecl->record->kind == "function")
+			dynamic_cast<FunctionSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
+		else
+			dynamic_cast<VariableSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
+		node->table->insert(funcdeclorvardecl->record);
 		memberdecl = memberdecl->right;
 	}
 
 	node->record->base = inherlist->leftmost_child->val;
-	node->record->link->name = id->val;
+	node->table->name = id->val;
 	node->record->name = id->val;
-	node->record->kind = "class";
 }
 
 void CreatingVisitor::visit(InherListNode *node) {
-	node->record = new SymbolTableRecord(node);
-	node->record->kind = "inherit";
+	node->record = new InheritSymbolTableRecord(node);
 	string inherval = "";
 	ASTNode *inher_id = node->leftmost_child;
 	while (inher_id != nullptr && !inher_id->is_epsilon()) {
@@ -211,25 +222,23 @@ void CreatingVisitor::visit(FParamNode *node) {
 	}
 	type += dim_container;
 
-	node->record = new SymbolTableRecord(node);
+	node->record = new ParamSymbolTableRecord(node);
 	node->record->name = id;
-	node->record->kind = "parameter";
-	node->record->types.push_back(type);
+	dynamic_cast<ParamSymbolTableRecord*>(node->record)->type = type;
 }
 
 void CreatingVisitor::visit(FuncDeclNode *node) {
 	ASTNode *type = node->leftmost_child;
 	ASTNode *fparamlist = type->right;
 	ASTNode *id = fparamlist->right;
-	node->record = new SymbolTableRecord(node);
+	node->record = new FunctionSymbolTableRecord(node);
 	node->record->name = id->val;
-	node->record->kind = "function";
-	node->record->types.push_back(type->get_type());
+	dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->get_type();
 
 	ASTNode *fparam = fparamlist->leftmost_child;
 
 	while (fparam != nullptr && !fparam->is_epsilon()) {
-		node->record->types.push_back(fparam->record->types[0]);
+		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->params.push_back(dynamic_cast<ParamSymbolTableRecord*>(fparam->record)->type);
 		fparam = fparam->right;
 	}
 
@@ -250,12 +259,9 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 	}
 	type += dim_container;
 
-	node->record = new SymbolTableRecord(node);
+	node->record = new VariableSymbolTableRecord(node);
 	node->record->name = id;
-	node->record->kind = "variable";
-	node->record->types.push_back(type);
-	node->table->insert(node->record);
-	cout <<"inserted into table " << node->table << endl;
+	dynamic_cast<VariableSymbolTableRecord*>(node->record)->type = type;
 }
 
 void CreatingVisitor::visit(IntLitNode *node) {
@@ -271,9 +277,7 @@ void CreatingVisitor::visit(IntLitNode *node) {
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
-		node->record->types.push_back("integer");
-		node->table->insert(node->record);
-	cout <<"inserted into table " << node->table << endl;
+		node->record->type = "integer";
 	}
 }
 
@@ -291,9 +295,7 @@ void CreatingVisitor::visit(FloatLitNode *node) {
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
-		node->record->types.push_back("float");
-		table->insert(node->record);
-	cout <<"inserted into table " << node->table << endl;
+		node->record->type = "float";
 	}
 }
 
@@ -311,10 +313,11 @@ void CreatingVisitor::visit(StringLitNode *node) {
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
-		node->record->types.push_back("string");
-		table->insert(node->record);
-	cout <<"inserted into table " << node->table << endl;
+		node->record->type = "string";
 	}
+}
+
+void CreatingVisitor::visit(StatementNode *node) {
 }
 
 
@@ -435,7 +438,8 @@ void SizeSetterVisitor::visit(FuncDefNode *node) {
 		// jump
 		node->size += 4;
 		// return
-		if (node->record->types.size() > 0 && node->record->types[0] != "void") {
+		FunctionSymbolTableRecord *record = dynamic_cast<FunctionSymbolTableRecord*>(node->record);
+		if (record->return_type != "" && record->return_type != "void") {
 			node->size += 4;
 		}
 	}

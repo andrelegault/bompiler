@@ -18,10 +18,46 @@ class SymbolTableRecord {
 		string name = "";
 		string kind = "";
 		string base = ""; // for associating a function to its class
+		int offset = 0;
 		SymbolTable *link = nullptr;
-		vector<string> types; // first entry is return type, second is first param, second is second param and so on...
 		vector<ASTNode*> children;
 		ASTNode *node;
 		SymbolTableRecord(ASTNode *node);
-		string to_str() const;
+		virtual string to_str() const;
+};
+
+class FunctionSymbolTableRecord : public SymbolTableRecord {
+	public:
+		FunctionSymbolTableRecord(ASTNode *node);
+		string return_type = "";
+		string visibility = "";
+		vector<string> params; // first entry is return type, second is first param, second is second param and so on...
+		virtual string to_str() const override;
+};
+
+class VariableSymbolTableRecord : public SymbolTableRecord {
+	public:
+		string type = "";
+		string visibility = "";
+		VariableSymbolTableRecord(ASTNode *node);
+		virtual string to_str() const override;
+};
+
+class ClassSymbolTableRecord : public SymbolTableRecord {
+	public:
+		ClassSymbolTableRecord(ASTNode *node);
+		virtual string to_str() const override;
+};
+
+class InheritSymbolTableRecord : public SymbolTableRecord {
+	public:
+		InheritSymbolTableRecord(ASTNode *node);
+		virtual string to_str() const override;
+};
+
+class ParamSymbolTableRecord : public SymbolTableRecord {
+	public:
+		ParamSymbolTableRecord(ASTNode *node);
+		string type = "";
+		virtual string to_str() const override;
 };

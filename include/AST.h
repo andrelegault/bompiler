@@ -216,7 +216,6 @@ class DimListNode : public ASTNode {
 		virtual string get_type() override;
 		virtual void accept(Visitor *v);
 		vector<int> get_dims() const;
-		virtual void accept(CreatingVisitor *v);
 };
 class NumIntNode : public ASTNode {
 	public:
