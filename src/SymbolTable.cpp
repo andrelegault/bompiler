@@ -23,7 +23,7 @@ string SymbolTableRecord::to_str() const {
 	for(const auto &str : types) {
 		types_str += str + ", ";
 	}
-	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(10) << types_str;
+	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(20) << types_str << " | " << setw(3) << node->size;
 	return ss.str();
 }
 

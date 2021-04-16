@@ -100,3 +100,22 @@ class CheckingVisitor : public Visitor {
 		void visit(DotNode *node);
 		void visit(VariableNode *node);
 };
+
+class SizeSetterVisitor : public Visitor {
+	public:
+		SizeSetterVisitor();
+		void visit(IntegerNode *node);
+		void visit(FloatNode *node);
+		void visit(FuncDefNode *node);
+		void visit(VarDeclNode *node);
+		void visit(StatBlockNode *node);
+		void visit(VarDeclListNode *node);
+};
+
+class CodeGenerationVisitor : public Visitor {
+	public:
+		CodeGenerationVisitor();
+		void visit(ClassDeclNode *node);
+		void visit(VarDeclNode *node);
+		void visit(FuncDefNode *node);
+};

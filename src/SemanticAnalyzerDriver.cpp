@@ -29,6 +29,7 @@ int main(int argc, char* argv[]) {
 			cout << "Parsing successful, doing semantic analysis!" << endl;
 			SemanticAnalyzer semantic_analyzer(source);
 			semantic_analyzer.analyze(parser.root);
+			parser.root->record->link->print();
 		}
         cout << "Finished" << endl;
 		delete g;

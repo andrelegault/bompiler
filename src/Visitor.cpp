@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include "AST.h"
 #include "SymbolTable.h"
 #include "SemanticAnalyzer.h"
@@ -6,6 +7,7 @@
 
 using std::cout;
 using std::endl;
+using std::to_string;
 
 Visitor::Visitor() { }
 
@@ -74,6 +76,8 @@ void Visitor::visit(PrivateNode *node) { }
 void Visitor::visit(PublicNode *node) { }
 void Visitor::visit(DataMemberNode *node) { }
 void Visitor::visit(VoidNode *node) { }
+
+/* Creating Visitor Definitions */
 
 CreatingVisitor::CreatingVisitor() { }
 
@@ -197,9 +201,15 @@ void CreatingVisitor::visit(FParamNode *node) {
 	string id = dimlist->right->val;
 	string type = dimlist->right->right->leftmost_child->get_type();
 
-	ASTNode *dim = dimlist->leftmost_child;
-	string dims = dim->get_dims();
-	type += dims;
+	DimListNode *dim = dynamic_cast<DimListNode*>(dimlist->leftmost_child);
+	string dim_container = "";
+
+	vector<int> dims = dim->get_dims();
+
+	for (const auto &dim : dims) {
+		dim_container += "[" + to_string(dim) + "]";
+	}
+	type += dim_container;
 
 	node->record = new SymbolTableRecord(node);
 	node->record->name = id;
@@ -233,16 +243,82 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 		type = dimlist->right->right->leftmost_child->val;
 	}
 
-	string dims = dimlist->get_dims();
-	//cout << dims << endl;
-	type += dims;
+	string dim_container = "";
+	vector<int> dims = dynamic_cast<DimListNode*>(dimlist)->get_dims();
+	for (const auto &dim : dims) {
+		dim_container += "[" + to_string(dim) + "]";
+	}
+	type += dim_container;
 
 	node->record = new SymbolTableRecord(node);
 	node->record->name = id;
 	node->record->kind = "variable";
 	node->record->types.push_back(type);
+	node->table->insert(node->record);
+	cout <<"inserted into table " << node->table << endl;
 }
 
+void CreatingVisitor::visit(IntLitNode *node) {
+	ASTNode *parent = node->parent;
+	while (parent != nullptr && parent->get_type() != "statement") {
+		parent = parent->parent;
+	}
+	// only int literals that are in statements must have their temporary record
+	if (parent != nullptr) {
+		ASTNode *funcdef = parent->parent->parent->parent;
+		funcdef->size += 4;
+		node->size = 4;
+		node->record = new SymbolTableRecord(node);
+		node->record->name = "t" + to_string(this->temp_count++);
+		node->record->kind = "temp";
+		node->record->types.push_back("integer");
+		node->table->insert(node->record);
+	cout <<"inserted into table " << node->table << endl;
+	}
+}
+
+void CreatingVisitor::visit(FloatLitNode *node) {
+	ASTNode *parent = node->parent;
+	while (parent != nullptr && parent->get_type() != "statement") {
+		parent = parent->parent;
+	}
+	// only int literals that are in statements must have their temporary record
+	if (parent != nullptr) {
+		ASTNode *funcdef = parent->parent->parent->parent;
+		funcdef->size += 8;
+		node->size = 8;
+		SymbolTable *table = funcdef->table;
+		node->record = new SymbolTableRecord(node);
+		node->record->name = "t" + to_string(this->temp_count++);
+		node->record->kind = "temp";
+		node->record->types.push_back("float");
+		table->insert(node->record);
+	cout <<"inserted into table " << node->table << endl;
+	}
+}
+
+void CreatingVisitor::visit(StringLitNode *node) {
+	ASTNode *parent = node->parent;
+	while (parent != nullptr && parent->get_type() != "statement") {
+		parent = parent->parent;
+	}
+	// only int literals that are in statements must have their temporary record
+	if (parent != nullptr) {
+		ASTNode *funcdef = parent->parent->parent->parent;
+		funcdef->size += 4;
+		node->size = 4;
+		SymbolTable *table = funcdef->table;
+		node->record = new SymbolTableRecord(node);
+		node->record->name = "t" + to_string(this->temp_count++);
+		node->record->kind = "temp";
+		node->record->types.push_back("string");
+		table->insert(node->record);
+	cout <<"inserted into table " << node->table << endl;
+	}
+}
+
+
+/* Checking Visitor Definitions */
 
 CheckingVisitor::CheckingVisitor() { }
 
@@ -250,13 +326,13 @@ void CheckingVisitor::visit(ClassDeclNode *node) {
 	// TODO: check for circular dependencies
 	if (node->record->base != "") {
 		// check in global table
-		bool found = node->parent->parent->record->link->search(node->record->base, "classdecl");
+		bool found = node->parent->parent->table->search(node->record->base, "classdecl");
 		if (!found) {
 			cout << "undeclared class " << node->record->base << endl;
 			SemanticAnalyzer::semantic_errors << "undeclared class " << node->record->base << endl;
 		} else {
 			// check if circular
-			auto record = node->parent->parent->record->link->records[node->record->base];
+			auto record = node->parent->parent->table->records[node->record->base];
 			if (record->base == node->record->name) {
 				cout << "circular dependency between " << node->record->base << " <-> " << node->record->name << endl;
 				SemanticAnalyzer::semantic_errors << "circular dependency between " << node->record->base << " <-> " << node->record->name << endl;
@@ -270,12 +346,12 @@ void CheckingVisitor::visit(FuncDefNode *node) {
 	// TODO: if member func, check if respective funcdeclnode is present
 	if (node->record->base != "") { // is a member function
 		// check in parent (global table) if it has a `classdecl` with name `node->record->scope`
-		bool assoc_class_declared = node->parent->parent->record->link->search(node->record->base, "classdecl");
+		bool assoc_class_declared = node->parent->parent->table->search(node->record->base, "classdecl");
 		if (!assoc_class_declared) {
 			cout << "undeclared class " << node->record->base << endl;
 			SemanticAnalyzer::semantic_errors << "undeclared class " << node->record->base << endl;
 		} else {
-			auto table = node->parent->parent->record->link;
+			auto table = node->parent->parent->table;
 			bool funcdecl_found = table->search(node->record->name, "funcdecl");
 			if (!funcdecl_found) {
 				cout << "definition of undeclared function " << node->record->name << endl;
@@ -287,7 +363,6 @@ void CheckingVisitor::visit(FuncDefNode *node) {
 
 void CheckingVisitor::visit(FuncDeclNode *node) {
 	// TODO: check if its respective funcdefnode is present (is defined)
-	
 }
 
 void CheckingVisitor::visit(MemberDeclNode *node) {
@@ -319,4 +394,87 @@ void CheckingVisitor::visit(DimListNode *node) {
 
 void CheckingVisitor::visit(DotNode *node) {
 	// TODO: check if left's type is declared + is a member of that (mind inherited members)
+}
+
+/* Size Checker Visitor definitions */
+
+SizeSetterVisitor::SizeSetterVisitor() {
+}
+
+void SizeSetterVisitor::visit(IntegerNode *node) {
+	node->size = 4;
+}
+
+
+void SizeSetterVisitor::visit(FloatNode *node) {
+	node->size = 8;
+}
+
+void SizeSetterVisitor::visit(VarDeclNode *node) {
+	DimListNode *dims = dynamic_cast<DimListNode*>(node->leftmost_child);
+	vector<int> dimensions = dims->get_dims();
+	int total_cells = 1;
+	if (dimensions.size() >= 1) {
+		for (const auto &dim : dimensions) {
+			total_cells *= dim;
+		}
+	}
+
+	node->size = total_cells * node->leftmost_child->right->right->leftmost_child->size;
+}
+
+void SizeSetterVisitor::visit(FuncDefNode *node) {
+	ASTNode *func_body = node->leftmost_child;
+	ASTNode *statblock = func_body->leftmost_child;
+	ASTNode *vardecllist = statblock->right;
+
+	ASTNode *stmt = statblock->leftmost_child;
+	ASTNode *vardecl = vardecllist->leftmost_child;
+
+	if (node->record->name != "main") {
+		// jump
+		node->size += 4;
+		// return
+		if (node->record->types.size() > 0 && node->record->types[0] != "void") {
+			node->size += 4;
+		}
+	}
+	while (stmt != nullptr) {
+		node->size += stmt->size;
+		stmt = stmt->right;
+	}
+	while (vardecl != nullptr) {
+		node->size += vardecl->size;
+		vardecl = vardecl->right;
+	}
+}
+
+void SizeSetterVisitor::visit(StatBlockNode *node) {
+	ASTNode *stmt = node->leftmost_child;
+	while (stmt != nullptr) {
+		node->size += stmt->size;
+		stmt = stmt->right;
+	}
+}
+
+void SizeSetterVisitor::visit(VarDeclListNode *node) {
+	ASTNode *vardecl = node->leftmost_child;
+	while (vardecl != nullptr) {
+		node->size += vardecl->size;
+		vardecl = vardecl->right;
+	}
+}
+
+
+/* Code Generation Visitor Definitions */
+
+CodeGenerationVisitor::CodeGenerationVisitor() {
+}
+
+void CodeGenerationVisitor::visit(ClassDeclNode *node) {
+}
+void CodeGenerationVisitor::visit(VarDeclNode *node) {
+	
+}
+void CodeGenerationVisitor::visit(FuncDefNode *node) {
 }

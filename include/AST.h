@@ -46,7 +46,6 @@ class ASTNode {
 
 		virtual void accept(Visitor *v)=0;
 		virtual string get_type() = 0;
-		virtual string get_dims() const;
 };
 
 
@@ -215,9 +214,9 @@ class DimListNode : public ASTNode {
 	public:
 		DimListNode();
 		virtual string get_type() override;
-		virtual void accept(Visitor *v) override;
-		virtual string get_dims() const override;
-
+		virtual void accept(Visitor *v);
+		vector<int> get_dims() const;
+		virtual void accept(CreatingVisitor *v);
 };
 class NumIntNode : public ASTNode {
 	public:

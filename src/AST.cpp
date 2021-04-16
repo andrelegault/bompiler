@@ -12,6 +12,7 @@ using std::queue;
 using std::endl;
 using std::unordered_map;
 using std::to_string;
+using std::stoi;
 
 ASTNode::ASTNode(string val) : val(std::move(val)) { }
 
@@ -96,22 +97,18 @@ string ASTNode::to_str() {
 }
 
 
-string ASTNode::get_dims() const {
-	return "";
-}
-
-string DimListNode::get_dims() const {
-	string dims = "";
+vector<int> DimListNode::get_dims() const {
+	vector<int> dimensions;
 	ASTNode *numint = this->leftmost_child;
 	if (!numint->is_epsilon()) {
 		while (numint != nullptr && !numint ->is_epsilon()) {
 			ASTNode *intlit = numint->leftmost_child;
-			string dimval = intlit->val;
-			dims += "[" + dimval + "]";
+			int dimval = stoi(intlit->val);
+			dimensions.push_back(dimval);
 			numint = numint->right;
 		}
 	}
-	return dims;
+	return dimensions;
 }
 
 ASTNode *ASTNode::make_node(const string &type, const string &val) {
