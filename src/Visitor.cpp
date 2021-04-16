@@ -473,7 +473,7 @@ CodeGenerationVisitor::CodeGenerationVisitor() {
 }
 
 void CodeGenerationVisitor::visit(ProgNode *node) {
-	Compiler::moon_code << "entry";
+	Compiler::moon_code << "entry" << endl;
 }
 void CodeGenerationVisitor::visit(ClassDeclNode *node) {
 }
