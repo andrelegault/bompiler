@@ -61,17 +61,27 @@ string ParamSymbolTableRecord::to_str() const {
 
 SymbolTable::SymbolTable(ASTNode *node, const string &type): node(node), type(type) { }
 
+SymbolTableRecord* SymbolTable::has_name(const string &to_find) const {
+	for(const auto &record : records) {
+		if (record->name == to_find) {
+			return record;
+		}
+	}
+	return nullptr;
+}
+
 // this should check if an element with the same name already exists
 // if it does, a semantic error has happened: multiply declared identifiers
 // else, check in the parent's table until found or parent's parent's table, etc.
 void SymbolTable::insert(SymbolTableRecord *record) {
 	if (record == nullptr)
 		return;
-	auto first = records.find(record->name);
-	if (first != records.end()) {
+
+	SymbolTableRecord *first = has_name(record->name);
+	if (first != nullptr) {
 		// check params of matching function
-		if (first->second->kind == "function" && record->kind == "function") {
-			auto &first_types = dynamic_cast<FunctionSymbolTableRecord*>(first->second)->params;
+		if (first->kind == "function" && record->kind == "function") {
+			auto &first_types = dynamic_cast<FunctionSymbolTableRecord*>(first)->params;
 			auto &second_types = dynamic_cast<FunctionSymbolTableRecord*>(record)->params;
 
 			if (first_types.size() == second_types.size()) {
@@ -88,7 +98,7 @@ void SymbolTable::insert(SymbolTableRecord *record) {
 		cout << "multiply declared identifier: " << record->name << endl;
 		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << record->name << endl;
 	} else {
-		records[record->name] = record;
+		records.push_back(record);
 		//cout << "added " << record->node->get_type() << " to " << this << ", which as " << records.size() << endl;
 	}
 }
@@ -103,10 +113,10 @@ bool SymbolTable::search(const string &target_name, const string &target_type) {
 			//for (const auto &what : current->record->link->records)
 				//cout << what.first << endl;
 
-			auto result = current->table->records.find(target_name);
-			if (result != current->table->records.end()) {
-				//cout << result->second->node->get_type() << " == " << target_type << ", " << result->second->name << " == " << target_name << endl;
-				found = result->second->node->get_type() == target_type && result->second->name == target_name;
+			auto result = current->table->has_name(target_name);
+			if (result != nullptr) {
+				//cout << result->node->get_type() << " == " << target_type << ", " << result->name << " == " << target_name << endl;
+				found = result->node->get_type() == target_type && result->name == target_name;
 				// doesn't take into account the `types` vector of parameters, return types, etc.
 			}
 		}
@@ -120,7 +130,7 @@ int SymbolTable::compute_size() const {
 	//cout << "in " << this << " which, again, has " << records.size() << " children" << endl;
 	int sz = 0;
 	for(const auto &it : records) {
-		sz += it.second->node->size;
+		sz += it->node->size;
 	}
 	return sz;
 }
@@ -133,11 +143,11 @@ string SymbolTable::print() {
 		SymbolTable *current = tables.front();
 		//cout << "printing " << current << " which has " << current->records.size() << " children" << endl;
 		tables.pop();
-		container += "table::" + current->type + " " + current->name + " scope offset: " + to_string(current->compute_size()) + "\n";
+		container += "table::" + current->name + " scope offset: " + to_string(current->compute_size()) + "\n";
 		for (const auto &it : current->records) {
-			if (it.second->node->table != nullptr)
-				tables.push(it.second->node->table);
-			container += it.second->to_str() + "\n";
+			if (it->node->table != nullptr)
+				tables.push(it->node->table);
+			container += it->to_str() + "\n";
 		}
 		container += "\n";
 	}

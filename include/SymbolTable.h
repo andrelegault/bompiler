@@ -1,10 +1,10 @@
 #pragma once
-#include <map>
 #include <string>
+#include <vector>
 #include "AST.h"
 
 using std::string;
-using std::map;
+using std::vector;
 
 class ASTNode;
 class SymbolTableRecord;
@@ -12,7 +12,7 @@ class SymbolTableRecord;
 class SymbolTable {
 	public:
 		ASTNode *node;
-		map<string, SymbolTableRecord*> records;
+		vector<SymbolTableRecord*> records;
 		string name;
 		const string type;
 		int compute_size() const;
@@ -20,6 +20,8 @@ class SymbolTable {
 		SymbolTable(ASTNode *node, const string &type);
 
 		void insert(SymbolTableRecord *node);
+
+		SymbolTableRecord* has_name(const string &to_find) const;
 
 		// should search in parent if not found, and then parent's parent if still not found, etc.
 		// need to take visiblity descriptors, i.e., `public` and `private into account

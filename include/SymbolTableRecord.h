@@ -1,11 +1,9 @@
 #pragma once
-#include <map>
 #include <string>
 #include <vector>
 #include "AST.h"
 
 using std::string;
-using std::map;
 using std::vector;
 
 class ASTNode;
@@ -39,6 +37,7 @@ class VariableSymbolTableRecord : public SymbolTableRecord {
 	public:
 		string type = "";
 		string visibility = "";
+		int offset = 0;
 		VariableSymbolTableRecord(ASTNode *node);
 		virtual string to_str() const override;
 };

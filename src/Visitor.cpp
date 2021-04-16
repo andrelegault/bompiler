@@ -91,6 +91,7 @@ CreatingVisitor::CreatingVisitor() { }
 
 void CreatingVisitor::visit(ProgNode *node) {
 	node->record = new SymbolTableRecord(node);
+	node->record->name = "Global";
 	node->table = new SymbolTable(node, node->get_type());
 	ASTNode *main = node->leftmost_child;
 
@@ -328,7 +329,7 @@ void CheckingVisitor::visit(ClassDeclNode *node) {
 			SemanticAnalyzer::semantic_errors << "undeclared class " << node->record->base << endl;
 		} else {
 			// check if circular
-			auto record = node->parent->parent->table->records[node->record->base];
+			auto record = node->parent->parent->table->has_name(node->record->base);
 			if (record->base == node->record->name) {
 				cout << "circular dependency between " << node->record->base << " <-> " << node->record->name << endl;
 				SemanticAnalyzer::semantic_errors << "circular dependency between " << node->record->base << " <-> " << node->record->name << endl;
@@ -426,6 +427,12 @@ void SizeSetterVisitor::visit(FuncDefNode *node) {
 
 	ASTNode *stmt = statblock->leftmost_child;
 	ASTNode *vardecl = vardecllist->leftmost_child;
+
+	// set offsets
+	int total = 0;
+	for(const auto &record : node->table->records) {
+		cout << record->node->get_type() << endl;
+	}
 
 	if (node->record->name != "main") {
 		// jump
