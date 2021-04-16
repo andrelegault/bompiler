@@ -269,10 +269,8 @@ void CreatingVisitor::visit(IntLitNode *node) {
 	while (parent != nullptr && parent->get_type() != "statement") {
 		parent = parent->parent;
 	}
-	// only int literals that are in statements must have their temporary record
 	if (parent != nullptr) {
 		ASTNode *funcdef = parent->parent->parent->parent;
-		funcdef->size += 4;
 		node->size = 4;
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
@@ -286,12 +284,9 @@ void CreatingVisitor::visit(FloatLitNode *node) {
 	while (parent != nullptr && parent->get_type() != "statement") {
 		parent = parent->parent;
 	}
-	// only int literals that are in statements must have their temporary record
 	if (parent != nullptr) {
 		ASTNode *funcdef = parent->parent->parent->parent;
-		funcdef->size += 8;
 		node->size = 8;
-		SymbolTable *table = funcdef->table;
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
@@ -304,12 +299,9 @@ void CreatingVisitor::visit(StringLitNode *node) {
 	while (parent != nullptr && parent->get_type() != "statement") {
 		parent = parent->parent;
 	}
-	// only int literals that are in statements must have their temporary record
 	if (parent != nullptr) {
 		ASTNode *funcdef = parent->parent->parent->parent;
-		funcdef->size += 4;
 		node->size = 4;
-		SymbolTable *table = funcdef->table;
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";

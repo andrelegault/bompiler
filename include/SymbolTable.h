@@ -15,7 +15,7 @@ class SymbolTable {
 		map<string, SymbolTableRecord*> records;
 		string name;
 		const string type;
-		int size = 0;
+		int compute_size() const;
 
 		SymbolTable(ASTNode *node, const string &type);
 

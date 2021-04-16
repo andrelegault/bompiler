@@ -25,7 +25,7 @@ InheritSymbolTableRecord::InheritSymbolTableRecord(ASTNode *node) : SymbolTableR
 ParamSymbolTableRecord::ParamSymbolTableRecord(ASTNode *node) : SymbolTableRecord(node) { SymbolTableRecord::kind = "param"; }
 string SymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(20);
+	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(20) << type << " | " << setw(3) << node->size;
 	return ss.str();
 }
 string FunctionSymbolTableRecord::to_str() const {
@@ -89,6 +89,7 @@ void SymbolTable::insert(SymbolTableRecord *record) {
 		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << record->name << endl;
 	} else {
 		records[record->name] = record;
+		//cout << "added " << record->node->get_type() << " to " << this << ", which as " << records.size() << endl;
 	}
 }
 
@@ -115,14 +116,24 @@ bool SymbolTable::search(const string &target_name, const string &target_type) {
 	return found;
 }
 
+int SymbolTable::compute_size() const {
+	//cout << "in " << this << " which, again, has " << records.size() << " children" << endl;
+	int sz = 0;
+	for(const auto &it : records) {
+		sz += it.second->node->size;
+	}
+	return sz;
+}
+
 string SymbolTable::print() {
 	string container = "\n";
 	queue<SymbolTable*> tables;
 	tables.push(this);
 	while (!tables.empty()) {
 		SymbolTable *current = tables.front();
+		//cout << "printing " << current << " which has " << current->records.size() << " children" << endl;
 		tables.pop();
-		container += "table::" + current->type + " " + current->name + " scope offset: " + to_string(this->size) + "\n";
+		container += "table::" + current->type + " " + current->name + " scope offset: " + to_string(current->compute_size()) + "\n";
 		for (const auto &it : current->records) {
 			if (it.second->node->table != nullptr)
 				tables.push(it.second->node->table);
