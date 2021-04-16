@@ -130,7 +130,7 @@ int SymbolTable::compute_size() const {
 	//cout << "in " << this << " which, again, has " << records.size() << " children" << endl;
 	int sz = 0;
 	for(const auto &it : records) {
-		sz += it->node->size;
+		sz -= it->node->size;
 	}
 	return sz;
 }

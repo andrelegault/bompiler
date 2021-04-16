@@ -431,16 +431,17 @@ void SizeSetterVisitor::visit(FuncDefNode *node) {
 	// set offsets
 	int total = 0;
 	for(const auto &record : node->table->records) {
-		cout << record->node->get_type() << endl;
+		record->offset = total;
+		total -= record->node->size;
 	}
 
 	if (node->record->name != "main") {
 		// jump
-		node->size += 4;
+		node->size -= 4;
 		// return
 		FunctionSymbolTableRecord *record = dynamic_cast<FunctionSymbolTableRecord*>(node->record);
 		if (record->return_type != "" && record->return_type != "void") {
-			node->size += 4;
+			node->size -= 4;
 		}
 		while (stmt != nullptr) {
 			node->size += stmt->size;
@@ -456,7 +457,7 @@ void SizeSetterVisitor::visit(FuncDefNode *node) {
 void SizeSetterVisitor::visit(StatBlockNode *node) {
 	ASTNode *stmt = node->leftmost_child;
 	while (stmt != nullptr) {
-		node->size += stmt->size;
+		node->size -= stmt->size;
 		stmt = stmt->right;
 	}
 }
@@ -464,7 +465,7 @@ void SizeSetterVisitor::visit(StatBlockNode *node) {
 void SizeSetterVisitor::visit(VarDeclListNode *node) {
 	ASTNode *vardecl = node->leftmost_child;
 	while (vardecl != nullptr) {
-		node->size += vardecl->size;
+		node->size -= vardecl->size;
 		vardecl = vardecl->right;
 	}
 }
