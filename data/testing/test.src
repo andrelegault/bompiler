@@ -1,8 +1,18 @@
-main
+/*
+entry
+%c = a
+% use offset of `a` to get contents
+lw r1,a_offset(r14)
+sw c_offset(r14),r1
+
+
+*/
+
+main  
 {
   var
   {
-    integer counter;
+    integer z;                                       // 1.1
   }
-  counter = 1;
+	z = 4 + 2;
 }

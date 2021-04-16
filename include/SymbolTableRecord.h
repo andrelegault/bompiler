@@ -14,6 +14,7 @@ class SymbolTable;
 class SymbolTableRecord {
 	// needs to contain all necessary information to know in order to make checks, e.g., type of params, number of params, etc.
 	public:
+		string type = "";
 		string name = "";
 		string kind = "";
 		string base = ""; // for associating a function to its class

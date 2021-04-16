@@ -1,10 +1,8 @@
 #pragma once
-#include <unordered_set>
 #include <string>
 #include <fstream>
 #include "AST.h"
 
-using std::unordered_set;
 using std::string;
 using std::ofstream;
 

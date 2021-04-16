@@ -30,6 +30,10 @@ class ASTNode {
 		int num_children = 0;
 		string return_type = "";
 		string val;
+
+		// this is set using SizeSetterVisitor
+		int size = 0;
+
 		ASTNode(string val = "");
 		ASTNode* make_siblings(ASTNode *y);
 		static ASTNode* make_family(string &op, const vector<ASTNode*> &children);
