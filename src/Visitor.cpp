@@ -475,13 +475,13 @@ void SizeSetterVisitor::visit(VarDeclListNode *node) {
 
 CodeGenerationVisitor::CodeGenerationVisitor() {
 	cout << "initialized" << endl;
-	for(int i = 0; i < REGISTER_COUNT; ++i) {
+	for(int i = REGISTER_COUNT; i > 0; --i) {
 		registers.push_back("r" + to_string(i));
 	}
 }
 
 void CodeGenerationVisitor::visit(ProgNode *node) {
-	Compiler::moon_code << "entry" << endl;
+	Compiler::moon_code << "hlt" << endl;
 }
 void CodeGenerationVisitor::visit(ClassDeclNode *node) {
 }
@@ -489,4 +489,19 @@ void CodeGenerationVisitor::visit(VarDeclNode *node) {
 	
 }
 void CodeGenerationVisitor::visit(FuncDefNode *node) {
+	cout << "gta be doin somethin" << endl;
+}
+
+void CodeGenerationVisitor::visit(AddOpNode *node) {
+	cout << "in app op node!" << endl;
+}
+
+void CodeGenerationVisitor::visit(IntLitNode *node) {
+	// loads the int into a register
+	string &reg = this->registers.back();
+	Compiler::moon_code << "addi " << reg << ",r0," << node->val << endl;
+	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << reg << endl;
+}
+void CodeGenerationVisitor::visit(AssignStmtNode *node) {
+	cout << "something being assigned" << endl;
 }

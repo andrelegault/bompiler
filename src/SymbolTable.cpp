@@ -25,7 +25,7 @@ InheritSymbolTableRecord::InheritSymbolTableRecord(ASTNode *node) : SymbolTableR
 ParamSymbolTableRecord::ParamSymbolTableRecord(ASTNode *node) : SymbolTableRecord(node) { SymbolTableRecord::kind = "param"; }
 string SymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(20) << type << " | " << setw(3) << node->size;
+	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(20) << type << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
 	return ss.str();
 }
 string FunctionSymbolTableRecord::to_str() const {
@@ -39,7 +39,7 @@ string FunctionSymbolTableRecord::to_str() const {
 }
 string VariableSymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << "variable" << " | " << setw(20) << type << " | " << setw(3) << node->size;
+	ss << setw(15) << name << " | " << setw(10) << "variable" << " | " << setw(20) << type << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
 	return ss.str();
 }
 string InheritSymbolTableRecord::to_str() const {
@@ -55,7 +55,7 @@ string ClassSymbolTableRecord::to_str() const {
 }
 string ParamSymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << "param" << " | " << setw(20) << " | " << setw(3) << node->size;
+	ss << setw(15) << name << " | " << setw(10) << "param" << " | " << setw(20) << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
 	return ss.str();
 }
 

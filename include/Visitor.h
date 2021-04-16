@@ -125,10 +125,13 @@ class SizeSetterVisitor : public Visitor {
 class CodeGenerationVisitor : public Visitor {
 	public:
 		CodeGenerationVisitor();
-		vector<string> registers;
+		vector<string> registers, loaded;
 		const int REGISTER_COUNT = 16;
 		void visit(ProgNode *node);
 		void visit(ClassDeclNode *node);
 		void visit(VarDeclNode *node);
 		void visit(FuncDefNode *node);
+		void visit(AddOpNode *node);
+		void visit(AssignStmtNode *node);
+		void visit(IntLitNode *node);
 };
