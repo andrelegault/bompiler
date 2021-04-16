@@ -6,6 +6,7 @@
 #include "SymbolTable.h"
 #include "SemanticAnalyzer.h"
 #include "Visitor.h"
+#include "Compiler.h"
 
 using std::cout;
 using std::endl;
@@ -434,14 +435,14 @@ void SizeSetterVisitor::visit(FuncDefNode *node) {
 		if (record->return_type != "" && record->return_type != "void") {
 			node->size += 4;
 		}
-	}
-	while (stmt != nullptr) {
-		node->size += stmt->size;
-		stmt = stmt->right;
-	}
-	while (vardecl != nullptr) {
-		node->size += vardecl->size;
-		vardecl = vardecl->right;
+		while (stmt != nullptr) {
+			node->size += stmt->size;
+			stmt = stmt->right;
+		}
+		while (vardecl != nullptr) {
+			node->size += vardecl->size;
+			vardecl = vardecl->right;
+		}
 	}
 }
 
@@ -465,8 +466,15 @@ void SizeSetterVisitor::visit(VarDeclListNode *node) {
 /* Code Generation Visitor Definitions */
 
 CodeGenerationVisitor::CodeGenerationVisitor() {
+	cout << "initialized" << endl;
+	for(int i = 0; i < REGISTER_COUNT; ++i) {
+		registers.push_back("r" + to_string(i));
+	}
 }
 
+void CodeGenerationVisitor::visit(ProgNode *node) {
+	Compiler::moon_code << "entry";
+}
 void CodeGenerationVisitor::visit(ClassDeclNode *node) {
 }
 void CodeGenerationVisitor::visit(VarDeclNode *node) {

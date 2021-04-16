@@ -17,6 +17,8 @@ Compiler::Compiler(const string &filename) {
 
 void Compiler::compile(ASTNode *root) {
 	SizeSetterVisitor size_setter;
+	CodeGenerationVisitor code_generator;
 
 	root->accept(&size_setter);
+	root->accept(&code_generator);
 }

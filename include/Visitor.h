@@ -1,6 +1,11 @@
 #pragma once
+#include <vector>
+#include <string>
 #include "AST.h"
 #include "AST.fwd.h"
+
+using std::vector;
+using std::string;
 
 class Visitor {
 	public:
@@ -120,6 +125,9 @@ class SizeSetterVisitor : public Visitor {
 class CodeGenerationVisitor : public Visitor {
 	public:
 		CodeGenerationVisitor();
+		vector<string> registers;
+		const int REGISTER_COUNT = 16;
+		void visit(ProgNode *node);
 		void visit(ClassDeclNode *node);
 		void visit(VarDeclNode *node);
 		void visit(FuncDefNode *node);
