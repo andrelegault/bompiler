@@ -32,19 +32,19 @@ SymbolTable::SymbolTable(ASTNode *node, const string &type): node(node), type(ty
 // this should check if an element with the same name already exists
 // if it does, a semantic error has happened: multiply declared identifiers
 // else, check in the parent's table until found or parent's parent's table, etc.
-void SymbolTable::insert(SymbolTableRecord *node) {
-	if (node == nullptr)
+void SymbolTable::insert(SymbolTableRecord *record) {
+	if (record == nullptr)
 		return;
-	auto first = records.find(node->name);
+	auto first = records.find(record->name);
 	if (first != records.end()) {
 		// check params of matching function
 		if (first->second->kind == "function") {
 			auto &first_types = first->second->types;
 
-			if (first_types.size() == node->types.size()) {
+			if (first_types.size() == record->types.size()) {
 				int same_type_count = 0;
 				for(int i = 0; i < first_types.size(); i++) {
-					if (first_types[i] == node->types[i])
+					if (first_types[i] == record->types[i])
 						same_type_count++;
 				}
 				if (same_type_count != first_types.size())
@@ -52,10 +52,10 @@ void SymbolTable::insert(SymbolTableRecord *node) {
 			}
 		}
 		
-		cout << "multiply declared identifier: " << node->name << endl;
-		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << node->name << endl;
+		cout << "multiply declared identifier: " << record->name << endl;
+		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << record->name << endl;
 	} else {
-		records[node->name] = node;
+		records[record->name] = record;
 	}
 }
 
