@@ -106,6 +106,7 @@ void SymbolTable::insert(SymbolTableRecord *record) {
 		cout << "multiply declared identifier: " << record->name << endl;
 		SemanticAnalyzer::semantic_errors << "multiply declared identifier: " << record->name << endl;
 	} else {
+		record->link = this;
 		records.push_back(record);
 		//cout << "added " << record->node->get_type() << " to " << this << ", which as " << records.size() << endl;
 	}

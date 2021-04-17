@@ -78,15 +78,13 @@ void Visitor::visit(PublicNode *node) { }
 void Visitor::visit(DataMemberNode *node) { }
 void Visitor::visit(VoidNode *node) { }
 
-/* Creating Visitor Definitions */
+/**************************************
+* Creating Visitor Definitions *
+**************************************/
 
 CreatingVisitor::CreatingVisitor() { }
 
-// do i pass the symboltable in the accept method or do i add to it after its done
-// difference b/w main function and another free function is that you just don't have parameters
-
 void CreatingVisitor::visit(ProgNode *node) {
-	// fixed for reordering
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "Global";
 	node->table = new SymbolTable(node, node->get_type());
@@ -110,8 +108,6 @@ void CreatingVisitor::visit(ProgNode *node) {
 }
 
 void CreatingVisitor::visit(FuncDefNode *node) {
-	// fixed for reordering
-	
 	node->record = new FunctionSymbolTableRecord(node);
 	node->table = new SymbolTable(node, "function");
 
@@ -164,10 +160,8 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 }
 
 void CreatingVisitor::visit(ClassDeclNode *node) {
-	// fixed for reordering
 	node->record = new ClassSymbolTableRecord(node);
 	node->table = new SymbolTable(node, "class");
-	// memberlist, inherlist, id
 	ASTNode *id = node->leftmost_child;
 	ASTNode *inherlist = id->right;
 	ASTNode *memberlist = inherlist->right;
@@ -193,7 +187,6 @@ void CreatingVisitor::visit(ClassDeclNode *node) {
 }
 
 void CreatingVisitor::visit(InherListNode *node) {
-	// fixed for reordering
 	node->record = new InheritSymbolTableRecord(node);
 	string inherval = "";
 	ASTNode *inher_id = node->leftmost_child;
@@ -211,7 +204,6 @@ void CreatingVisitor::visit(InherListNode *node) {
 }
 
 void CreatingVisitor::visit(FParamNode *node) {
-	// fixed for reordering
 	ASTNode *type = node->leftmost_child;
 	ASTNode *id = type->right;
 	ASTNode *dimlist = id->right;
@@ -226,7 +218,6 @@ void CreatingVisitor::visit(FParamNode *node) {
 }
 
 void CreatingVisitor::visit(FuncDeclNode *node) {
-	// fixed for reordering
 	ASTNode *id = node->leftmost_child;
 	ASTNode *fparamlist = id->right;
 	ASTNode *return_type = fparamlist->right;
@@ -247,7 +238,6 @@ void CreatingVisitor::visit(FuncDeclNode *node) {
 }
 
 void CreatingVisitor::visit(VarDeclNode *node) {
-	// fixed for reordering
 	ASTNode *type = node->leftmost_child;
 	ASTNode *id = type->right;
 	ASTNode *dimlist = id->right;
@@ -262,7 +252,6 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 }
 
 void CreatingVisitor::visit(IntLitNode *node) {
-	// fixed for reordering
 	ASTNode *parent = node->parent;
 	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
 		node->size = 4;
@@ -274,7 +263,6 @@ void CreatingVisitor::visit(IntLitNode *node) {
 }
 
 void CreatingVisitor::visit(FloatLitNode *node) {
-	// fixed for reordering
 	ASTNode *parent = node->parent;
 	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
 		node->size = 8;
@@ -286,7 +274,6 @@ void CreatingVisitor::visit(FloatLitNode *node) {
 }
 
 void CreatingVisitor::visit(StringLitNode *node) {
-	// fixed for reordering
 	ASTNode *parent = node->parent;
 	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
 		node->size = 4;
@@ -309,12 +296,21 @@ void CreatingVisitor::visit(MultOpNode *node) {
 	node->record->kind = "temp";
 }
 
-/* Checking Visitor Definitions */
+void CreatingVisitor::visit(FCallNode *node) {
+	ASTNode *parent = node->parent;
+	node->size = 4;
+	node->record = new SymbolTableRecord(node);
+	node->record->name = "t" + to_string(this->temp_count++);
+	node->record->kind = "temp";
+}
+
+/**************************************
+* Checking Visitor Definitions *
+**************************************/
 
 CheckingVisitor::CheckingVisitor() { }
 
 void CheckingVisitor::visit(ClassDeclNode *node) {
-	// TODO: check for circular dependencies
 	if (node->record->base != "") {
 		// check in global table
 		bool found = node->parent->parent->table->search(node->record->base, "classdecl");
@@ -387,7 +383,9 @@ void CheckingVisitor::visit(DotNode *node) {
 	// TODO: check if left's type is declared + is a member of that (mind inherited members)
 }
 
-/* Size Checker Visitor definitions */
+/**************************************
+* Size Setter Visitor Definitions *
+**************************************/
 
 SizeSetterVisitor::SizeSetterVisitor() {
 }
@@ -497,11 +495,13 @@ void SizeSetterVisitor::visit(VariableNode *node) {
 	VariableSymbolTableRecord *matching_vardecl = dynamic_cast<VariableSymbolTableRecord*>(parent->table->has_name(id->val));
 	node->record = matching_vardecl;
 	node->record->type = matching_vardecl->type;
+	node->record->link = matching_vardecl->link;
 	node->size = matching_vardecl->node->size;
 }
 
-
-/* Code Generation Visitor Definitions */
+/**************************************
+* Code Generation Visitor Definitions *
+**************************************/
 
 CodeGenerationVisitor::CodeGenerationVisitor() {
 	// r0 isnt in this list because it always contains 0
@@ -540,17 +540,13 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 	string left_op_reg = this->registers.back(); this->registers.pop_back();
 	string right_op_reg = this->registers.back(); this->registers.pop_back();
 
-	Compiler::moon_code << "% load left operand of type " << left_op->get_type() << endl;
-	Compiler::moon_code << "lw " << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
-	Compiler::moon_code << "% load right operand of type " << left_op->get_type() << endl;
-	Compiler::moon_code << "lw " << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
 
 	// assume each register contains the required data
 	
-	Compiler::moon_code << "% perform action (add, sub, or)" << endl;
-	Compiler::moon_code << moon_op_code << " " << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
-	Compiler::moon_code << "% store result of action" << endl;
-	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << result_reg << endl;
+	Compiler::moon_code << moon_op_code << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
+	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << result_reg << endl;
 	this->registers.push_back(right_op_reg);
 	this->registers.push_back(left_op_reg);
 	this->registers.push_back(result_reg);
@@ -574,17 +570,13 @@ void CodeGenerationVisitor::visit(MultOpNode *node) {
 	string left_op_reg = this->registers.back(); this->registers.pop_back();
 	string right_op_reg = this->registers.back(); this->registers.pop_back();
 
-	Compiler::moon_code << "% load left operand of type " << left_op->get_type() << endl;
-	Compiler::moon_code << "lw " << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
-	Compiler::moon_code << "% load right operand of type " << left_op->get_type() << endl;
-	Compiler::moon_code << "lw " << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
 
 	// assume each register contains the required data
 	
-	Compiler::moon_code << "% perform action (add, sub, or)" << endl;
-	Compiler::moon_code << moon_op_code << " " << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
-	Compiler::moon_code << "% store result of action" << endl;
-	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << result_reg << endl;
+	Compiler::moon_code << moon_op_code << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
+	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << result_reg << endl;
 	this->registers.push_back(right_op_reg);
 	this->registers.push_back(left_op_reg);
 	this->registers.push_back(result_reg);
@@ -594,10 +586,8 @@ void CodeGenerationVisitor::visit(IntLitNode *node) {
 	// loads the int into a register
 	string &reg = this->registers.back();
 	this->registers.pop_back();
-	Compiler::moon_code << "% setting register value" << endl;
-	Compiler::moon_code << "addi " << reg << ",r0," << node->val << endl;
-	Compiler::moon_code << "% storing into temp var" << endl;
-	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << reg << endl;
+	Compiler::moon_code << "addi\t" << reg << ",r0," << node->val << endl;
+	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << reg << endl;
 	this->registers.push_back(reg);
 }
 void CodeGenerationVisitor::visit(AssignStmtNode *node) {
@@ -611,21 +601,38 @@ void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 
 	string reg = this->registers.back(); this->registers.pop_back();
 
-	Compiler::moon_code << "% load value to assign" << endl;
-	Compiler::moon_code << "lw " << reg << "," << right_op->record->offset << "(r14)" << endl;
-	Compiler::moon_code << "% assign value" << endl;
-	Compiler::moon_code << "sw " << left_op->record->offset << "(r14)," << reg << endl;
+	Compiler::moon_code << "lw\t" << reg << "," << right_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "sw\t" << left_op->record->offset << "(r14)," << reg << endl;
 	this->registers.push_back(reg);
 }
 void CodeGenerationVisitor::visit(WriteStmtNode *node) {
-	/*
-	ASTNode *parent = node->parent;
-
-	Compiler::moon_code << "addi " << registers.back(), << "r0,buf" << endl; 
-
-	// put this in the expression
-	Compiler::moon_code << "subi r14,r14," << to_string(parent->table->compute_size()) << endl; 
-	// ... print the expression
-	*/
+	string param_reg = this->registers.back(); this->registers.pop_back();
+	string buf_reg = this->registers.back(); this->registers.pop_back();
+	SymbolTableRecord *child_record = node->get_first_child_with_record()->record;
+	int table_size = child_record->link->compute_size();
+	// put whatever u wanna print in a register
+	Compiler::moon_code << "lw\t" << param_reg << "," << child_record->offset << "(r14)" << endl;
+	// increment stack frame
+	Compiler::moon_code << "addi\tr14,r14," << table_size << endl;
+	// put whatever u wanna print onto stack @ -8(r14), has to be -8... (using register from previous step)
+	Compiler::moon_code << "sw\t-8(r14)," << param_reg << endl;
+	// put buffer address in a register
+	Compiler::moon_code << "addi\t" << buf_reg << "," << buf_reg << ",buf" << endl;
+	// put buffer address on stack @ -12(r14), has to be -12...
+	Compiler::moon_code << "sw\t-12(r14)," << buf_reg << endl;
+	// convert what's @ -8(r14) into a string, result will be in r13
+	Compiler::moon_code << "jl\tr15, intstr" << endl;
+	// put what's in r13 in -8(r14) due to call to putstr
+	Compiler::moon_code << "sw\t-8(r14),r13" << endl;
+	// print what's @ -8(r14)
+	Compiler::moon_code << "jl\tr15, putstr" << endl;
+	// decrement stack
+	Compiler::moon_code << "subi\tr14,r14," << table_size << endl;
+	
+	this->registers.push_back(buf_reg);
+	this->registers.push_back(param_reg);
 }
 
+void SizeSetterVisitor::visit(FCallNode *node) {
+	// TODO: set the type depending on associated record
+}

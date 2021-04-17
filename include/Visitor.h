@@ -90,6 +90,7 @@ class CreatingVisitor : public Visitor {
 		void visit(StringLitNode *node);
 		void visit(AddOpNode *node);
 		void visit(MultOpNode *node);
+		void visit(FCallNode *node);
 };
 
 class CheckingVisitor : public Visitor {
@@ -120,6 +121,7 @@ class SizeSetterVisitor : public Visitor {
 		void visit(AddOpNode *node);
 		void visit(MultOpNode *node);
 		void visit(VariableNode *node);
+		void visit(FCallNode *node);
 };
 
 class CodeGenerationVisitor : public Visitor {
