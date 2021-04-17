@@ -76,8 +76,8 @@ string ASTNode::to_dot_notation() {
 ASTNode *ASTNode::make_family(string &op, const vector<ASTNode*> &children) {
 	ASTNode *node = ASTNode::make_node(op);
 	node->num_children = children.size();
-	ASTNode *base = children.front();
-	for(int i = 1; i < children.size(); ++i) {
+	ASTNode *base = children.back();
+	for(int i = children.size()-2; i >= 0 ; --i) {
 		base->make_siblings(children[i]);
 	}
 	node->adopt_children(children.back());
