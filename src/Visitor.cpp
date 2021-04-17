@@ -317,6 +317,17 @@ void CreatingVisitor::visit(StringLitNode *node) {
 void CreatingVisitor::visit(StatementNode *node) {
 }
 
+void CreatingVisitor::visit(AddOpNode *node) {
+	node->record = new SymbolTableRecord(node);
+	node->record->name = "t" + to_string(this->temp_count++);
+	node->record->kind = "temp";
+}
+
+void CreatingVisitor::visit(MultOpNode *node) {
+	node->record = new SymbolTableRecord(node);
+	node->record->name = "t" + to_string(this->temp_count++);
+	node->record->kind = "temp";
+}
 
 /* Checking Visitor Definitions */
 
@@ -482,11 +493,34 @@ void SizeSetterVisitor::visit(VarDeclListNode *node) {
 	}
 }
 
+void SizeSetterVisitor::visit(AddOpNode *node) {
+	// should have a record from the creatingvisitor, assumes both operands are of the same type (and therefore have the same size)
+	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
+	node->size = left_op->size;
+	node->record->type = left_op->record->type;
+}
+
+void SizeSetterVisitor::visit(MultOpNode *node) {
+	// should have a record from the creatingvisitor, assumes both operands are of the same type (and therefore have the same size)
+	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
+	node->size = left_op->size;
+	node->record->type = left_op->record->type;
+}
+
+void SizeSetterVisitor::visit(VariableNode *node) {
+	ASTNode *parent = node->parent;
+	ASTNode *id = node->leftmost_child;
+
+	while (parent != nullptr && parent->get_type() != "funcdef")
+		parent = parent->parent;
+	// here we assume the variable was declared
+	node->record = parent->table->has_name(id->val);
+}
+
 
 /* Code Generation Visitor Definitions */
 
 CodeGenerationVisitor::CodeGenerationVisitor() {
-	cout << "initialized" << endl;
 	// r0 isnt in this list because it always contains 0
 	for(int i = REGISTER_COUNT; i > 0; --i) {
 		registers.push_back("r" + to_string(i));
@@ -506,6 +540,41 @@ void CodeGenerationVisitor::visit(FuncDefNode *node) {
 }
 
 void CodeGenerationVisitor::visit(AddOpNode *node) {
+	string op_type = node->leftmost_child->right->get_type();
+	string moon_op_code = "";
+	if (op_type == "plus") {
+		moon_op_code = "add";
+	}
+	else if (op_type == "minus") {
+		moon_op_code = "sub";
+	} else {
+		// TODO
+	}
+	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
+	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
+
+	string result_reg = this->registers.back(); this->registers.pop_back();
+	string left_op_reg = this->registers.back(); this->registers.pop_back();
+	string right_op_reg = this->registers.back(); this->registers.pop_back();
+
+	Compiler::moon_code << "% load left operand of type " << left_op->get_type() << endl;
+	Compiler::moon_code << "lw " << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "% load right operand of type " << left_op->get_type() << endl;
+	Compiler::moon_code << "lw " << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
+
+	// assume each register contains the required data
+	
+	Compiler::moon_code << "% perform action (add, sub, or)" << endl;
+	Compiler::moon_code << moon_op_code << " " << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
+	Compiler::moon_code << "% store result of action" << endl;
+	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << result_reg << endl;
+	this->registers.push_back(right_op_reg);
+	this->registers.push_back(left_op_reg);
+	this->registers.push_back(result_reg);
+}
+
+void CodeGenerationVisitor::visit(MultOpNode *node) {
+
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {
@@ -519,8 +588,21 @@ void CodeGenerationVisitor::visit(IntLitNode *node) {
 	this->registers.push_back(reg);
 }
 void CodeGenerationVisitor::visit(AssignStmtNode *node) {
-	//ASTNode *thing = node->leftmost_child;
-	//Compiler::moon_code << "sw " << node->record->offset << "(r14)," << reg << endl;
+	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
+	ASTNode *right_op = node->leftmost_child->right->get_first_child_with_record();
+	if (left_op == nullptr || right_op == nullptr) {
+		string null_node = left_op == nullptr ? "left" : "right";
+		cout << null_node << " is null " << endl;
+		exit(0);
+	}
+
+	string reg = this->registers.back(); this->registers.pop_back();
+
+	Compiler::moon_code << "% load value to assign" << endl;
+	Compiler::moon_code << "lw " << reg << "," << right_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "% assign value" << endl;
+	Compiler::moon_code << "sw " << left_op->record->offset << "(r14)," << reg << endl;
+	this->registers.push_back(reg);
 }
 void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	/*

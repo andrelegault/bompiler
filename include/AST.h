@@ -46,6 +46,7 @@ class ASTNode {
 
 		virtual void accept(Visitor *v)=0;
 		virtual string get_type() = 0;
+		ASTNode* get_first_child_with_record();
 };
 
 

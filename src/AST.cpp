@@ -50,6 +50,24 @@ void ASTNode::adopt_children(ASTNode *y) {
 	}
 }
 
+ASTNode* ASTNode::get_first_child_with_record() {
+	queue<ASTNode*> nodes;
+	nodes.push(this);
+	while(!nodes.empty()) {
+		ASTNode *current = nodes.front();
+		cout << current->get_type() << endl;
+		if (current->record != nullptr)
+			return current;
+		nodes.pop();
+		ASTNode *child = current->leftmost_child;
+		while (child != nullptr) {
+			nodes.push(child);
+			child = child->right;
+		}
+	}
+	return nullptr;
+}
+
 string ASTNode::to_dot_notation() {
 	string str = "digraph G {\n";
 	queue<ASTNode*> container;

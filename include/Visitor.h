@@ -93,6 +93,8 @@ class CreatingVisitor : public Visitor {
 		void visit(FloatLitNode *node);
 		void visit(StringLitNode *node);
 		void visit(StatementNode *node);
+		void visit(AddOpNode *node);
+		void visit(MultOpNode *node);
 };
 
 class CheckingVisitor : public Visitor {
@@ -120,6 +122,9 @@ class SizeSetterVisitor : public Visitor {
 		void visit(VarDeclNode *node);
 		void visit(StatBlockNode *node);
 		void visit(VarDeclListNode *node);
+		void visit(AddOpNode *node);
+		void visit(MultOpNode *node);
+		void visit(VariableNode *node);
 };
 
 class CodeGenerationVisitor : public Visitor {
@@ -132,6 +137,7 @@ class CodeGenerationVisitor : public Visitor {
 		void visit(VarDeclNode *node);
 		void visit(FuncDefNode *node);
 		void visit(AddOpNode *node);
+		void visit(MultOpNode *node);
 		void visit(AssignStmtNode *node);
 		void visit(IntLitNode *node);
 		void visit(WriteStmtNode *node);
