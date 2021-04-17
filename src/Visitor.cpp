@@ -178,14 +178,16 @@ void CreatingVisitor::visit(ClassDeclNode *node) {
 	ASTNode *memberdecl = memberlist->leftmost_child;
 
 	node->table->insert(inherlist->record);
-	while (memberdecl != nullptr && !memberdecl->is_epsilon()) {
-		ASTNode *visibility = memberdecl->leftmost_child;
-		ASTNode *funcdeclorvardecl = visibility->right;
-		if (funcdeclorvardecl->record->kind == "function")
-			dynamic_cast<FunctionSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
-		else
-			dynamic_cast<VariableSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
-		node->table->insert(funcdeclorvardecl->record);
+	while (memberdecl != nullptr) {
+		if (!memberdecl->is_epsilon()) {
+			ASTNode *visibility = memberdecl->leftmost_child;
+			ASTNode *funcdeclorvardecl = visibility->right;
+			if (funcdeclorvardecl->record->kind == "function")
+				dynamic_cast<FunctionSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
+			else
+				dynamic_cast<VariableSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
+			node->table->insert(funcdeclorvardecl->record);
+		}
 		memberdecl = memberdecl->right;
 	}
 
@@ -219,7 +221,8 @@ void CreatingVisitor::visit(FParamNode *node) {
 	ASTNode *dimlist = id->right;
 
 	DimListNode *dim = dynamic_cast<DimListNode*>(dimlist);
-	string types_str = type->leftmost_child->val + dim->get_dims_str();
+	string types_str = type->leftmost_child->get_type() == "id" ? type->leftmost_child->val : type->leftmost_child->get_type();
+	types_str += dim->get_dims_str();
 
 	node->record = new ParamSymbolTableRecord(node);
 	node->record->name = id->val;
@@ -239,8 +242,9 @@ void CreatingVisitor::visit(FuncDeclNode *node) {
 
 	ASTNode *fparam = fparamlist->leftmost_child;
 
-	while (fparam != nullptr && !fparam->is_epsilon()) {
-		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->params.push_back(dynamic_cast<ParamSymbolTableRecord*>(fparam->record)->type);
+	while (fparam != nullptr) {
+ 		if (!fparam->is_epsilon())
+			dynamic_cast<FunctionSymbolTableRecord*>(node->record)->params.push_back(dynamic_cast<ParamSymbolTableRecord*>(fparam->record)->type);
 		fparam = fparam->right;
 	}
 

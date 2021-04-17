@@ -25,21 +25,29 @@ InheritSymbolTableRecord::InheritSymbolTableRecord(ASTNode *node) : SymbolTableR
 ParamSymbolTableRecord::ParamSymbolTableRecord(ASTNode *node) : SymbolTableRecord(node) { SymbolTableRecord::kind = "param"; }
 string SymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(20) << type << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
+	ss << setw(15) << name << " | " << setw(10) << kind << " | " << setw(22) << type << " | " << setw(3) << node->size << " | " << setw(5) << SymbolTableRecord::offset;
 	return ss.str();
 }
 string FunctionSymbolTableRecord::to_str() const {
 	stringstream ss;
+	cout << params.size() << endl;
 	string types_str = "";
 	for(const auto &str : params) {
 		types_str += str + ", ";
+		cout << str << endl;
 	}
-	ss << setw(15) << name << " | " << setw(10) << "function" << " | " << setw(20) << types_str;
+	if (this->visibility == "")
+		ss << setw(15) << name << " | " << setw(10) << "function" << " | " << setw(20) << types_str;
+	else
+		ss << setw(15) << name << " | " << setw(10) << "function" << " | " << setw(22) << types_str << " | " << setw(5) << this->visibility;
 	return ss.str();
 }
 string VariableSymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << "variable" << " | " << setw(20) << type << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
+	if (this->visibility == "")
+		ss << setw(15) << name << " | " << setw(10) << "variable" << " | " << setw(22) << type << " | " << setw(3) << node->size << " | " << setw(5) << SymbolTableRecord::offset;
+	else
+		ss << setw(15) << name << " | " << setw(10) << "variable" << " | " << setw(22) << type << " | " << setw(5) << this->visibility << " | " << setw(3) << node->size << " | " << setw(5) << SymbolTableRecord::offset;
 	return ss.str();
 }
 string InheritSymbolTableRecord::to_str() const {
@@ -50,7 +58,7 @@ string InheritSymbolTableRecord::to_str() const {
 
 string ClassSymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << "class" << " | " << setw(3) << node->size;
+	ss << setw(15) << name << " | " << setw(10) << "class";
 	return ss.str();
 }
 string ParamSymbolTableRecord::to_str() const {
