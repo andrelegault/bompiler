@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <stack>
+#include <queue>
 #include <vector>
 #include "AST.h"
 #include "SymbolTable.h"
@@ -11,7 +11,7 @@
 using std::cout;
 using std::endl;
 using std::to_string;
-using std::stack;
+using std::queue;
 using std::vector;
 
 Visitor::Visitor() { }
@@ -153,10 +153,10 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 	}
 
 	// always process body
-	stack<ASTNode*> nodes;
+	queue<ASTNode*> nodes;
 	nodes.push(funcbody);
 	while (!nodes.empty()) {
-		ASTNode *current = nodes.top();
+		ASTNode *current = nodes.front();
 		node->table->insert(current->record);
 		nodes.pop();
 		ASTNode *child = current->leftmost_child;
