@@ -144,12 +144,13 @@ string SymbolTable::print() {
 		//cout << "printing " << current << " which has " << current->records.size() << " children" << endl;
 		tables.pop();
 		container += "table::" + current->name + " scope offset: " + to_string(current->compute_size()) + "\n";
+		container += "==========================================================\n";
 		for (const auto &it : current->records) {
 			if (it->node->table != nullptr)
 				tables.push(it->node->table);
 			container += it->to_str() + "\n";
 		}
-		container += "\n";
+		container += "==========================================================\n\n";
 	}
 	SemanticAnalyzer::symbol_tables << container << endl;
 	cout << container << endl;

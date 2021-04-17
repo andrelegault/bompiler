@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <queue>
+#include <stack>
 #include <vector>
 #include "AST.h"
 #include "SymbolTable.h"
@@ -11,7 +11,7 @@
 using std::cout;
 using std::endl;
 using std::to_string;
-using std::queue;
+using std::stack;
 using std::vector;
 
 Visitor::Visitor() { }
@@ -90,67 +90,53 @@ CreatingVisitor::CreatingVisitor() { }
 // difference b/w main function and another free function is that you just don't have parameters
 
 void CreatingVisitor::visit(ProgNode *node) {
+	// fixed for reordering
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "Global";
 	node->table = new SymbolTable(node, node->get_type());
-	ASTNode *main = node->leftmost_child;
+	ASTNode *classdecllist = node->leftmost_child;
+	ASTNode *funcdeflist= classdecllist->right;
+	ASTNode *main = funcdeflist->right;
 
-	node->table->insert(main->record);
-
-	ASTNode *funcdeflist = main->right;
-	ASTNode *funcdef = funcdeflist->leftmost_child;
-	while (funcdef != nullptr) {
-		node->table->insert(funcdef->record);
-		funcdef = funcdef->right;
-	}
-	ASTNode *classdecllist = funcdeflist->right;
 	ASTNode *classdecl = classdecllist->leftmost_child;
 	while (classdecl != nullptr) {
 		node->table->insert(classdecl->record);
 		classdecl = classdecl->right;
 	}
+
+	ASTNode *funcdef = funcdeflist->leftmost_child;
+	while (funcdef != nullptr) {
+		node->table->insert(funcdef->record);
+		funcdef = funcdef->right;
+	}
+
+	node->table->insert(main->record);
 }
 
 void CreatingVisitor::visit(FuncDefNode *node) {
+	// fixed for reordering
 	
 	node->record = new FunctionSymbolTableRecord(node);
 	node->table = new SymbolTable(node, "function");
 
-	ASTNode *funcbody = node->leftmost_child;
-	ASTNode *statblock = funcbody->leftmost_child;
-	ASTNode *vardecllist = statblock->right;
+	ASTNode *funcbodyorfunchead = node->leftmost_child;
+	ASTNode *funcbody = funcbodyorfunchead;
+	if (funcbodyorfunchead->right != nullptr) { // process head
+		ASTNode *funchead = funcbodyorfunchead;
+		funcbody = funcbodyorfunchead->right;
 
-	ASTNode *vardecl = vardecllist->leftmost_child;
+		ASTNode *id = funchead->leftmost_child;
+		ASTNode *scopespec = id->right;
+		ASTNode *fparamlist = scopespec->right;
+		ASTNode *type = fparamlist->right;
 
-	// gets all the temporary variables needed from the funcbody
-	queue<ASTNode*> nodes;
-	nodes.push(funcbody);
-	while (!nodes.empty()) {
-		ASTNode *current = nodes.front();
-		if (current->record != nullptr) {
-			node->table->insert(current->record);
-		}
-		nodes.pop();
-		ASTNode *child = current->leftmost_child;
-		while(child != nullptr) {
-			nodes.push(child);
-			child = child->right;
-		}
-	}
+		string id_val = "";
 
-	if (funcbody->right != nullptr) { // is there a funchead
-		ASTNode *funchead = funcbody->right;
-		ASTNode *type = funchead->leftmost_child;
-		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->leftmost_child->get_type();
-		ASTNode *fparamlist = type->right;
-
-		ASTNode *scopespec = fparamlist->right;
-		ASTNode *id = nullptr;
 		if (scopespec->leftmost_child->is_epsilon()) {
-			id = scopespec->right;
+			id_val = id->val;
 		} else {
-			id = scopespec->leftmost_child;
-			node->record->base = scopespec->right->val;
+			id_val = scopespec->leftmost_child->val;
+			node->record->base = id->val;
 		}
 
 		ASTNode *fparam = fparamlist->leftmost_child;
@@ -158,28 +144,43 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 			node->table->insert(fparam->record);
 			fparam = fparam->right;
 		}
-		node->record->name = id->val;
-		node->table->name = id->val;
-	} else { // main function doesnt have a function head
+		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->leftmost_child->get_type();
+		node->record->name = id_val;
+		node->table->name = id_val;
+	} else {
 		node->table->name = "main";
 		node->record->name = "main";
+	}
+
+	// always process body
+	stack<ASTNode*> nodes;
+	nodes.push(funcbody);
+	while (!nodes.empty()) {
+		ASTNode *current = nodes.top();
+		node->table->insert(current->record);
+		nodes.pop();
+		ASTNode *child = current->leftmost_child;
+		while(child != nullptr) {
+			nodes.push(child);
+			child = child->right;
+		}
 	}
 }
 
 void CreatingVisitor::visit(ClassDeclNode *node) {
+	// fixed for reordering
 	node->record = new ClassSymbolTableRecord(node);
 	node->table = new SymbolTable(node, "class");
 	// memberlist, inherlist, id
-	ASTNode *memberlist = node->leftmost_child;
-	ASTNode *inherlist = memberlist->right;
-	ASTNode *id = inherlist->right;
-
+	ASTNode *id = node->leftmost_child;
+	ASTNode *inherlist = id->right;
+	ASTNode *memberlist = inherlist->right;
 	ASTNode *memberdecl = memberlist->leftmost_child;
 
 	node->table->insert(inherlist->record);
 	while (memberdecl != nullptr && !memberdecl->is_epsilon()) {
-		ASTNode *funcdeclorvardecl = memberdecl->leftmost_child;
-		ASTNode *visibility = funcdeclorvardecl->right;
+		ASTNode *visibility = memberdecl->leftmost_child;
+		ASTNode *funcdeclorvardecl = visibility->right;
 		if (funcdeclorvardecl->record->kind == "function")
 			dynamic_cast<FunctionSymbolTableRecord*>(funcdeclorvardecl->record)->visibility = visibility->get_type();
 		else
@@ -194,11 +195,13 @@ void CreatingVisitor::visit(ClassDeclNode *node) {
 }
 
 void CreatingVisitor::visit(InherListNode *node) {
+	// fixed for reordering
 	node->record = new InheritSymbolTableRecord(node);
 	string inherval = "";
 	ASTNode *inher_id = node->leftmost_child;
-	while (inher_id != nullptr && !inher_id->is_epsilon()) {
-		inherval += inher_id->val + ", ";
+	while (inher_id != nullptr) {
+		if (!inher_id->is_epsilon())
+			inherval += inher_id->val + ", ";
 		inher_id = inher_id->right;
 	}
 
@@ -210,32 +213,29 @@ void CreatingVisitor::visit(InherListNode *node) {
 }
 
 void CreatingVisitor::visit(FParamNode *node) {
-	ASTNode *dimlist = node->leftmost_child;
-	string id = dimlist->right->val;
-	string type = dimlist->right->right->leftmost_child->get_type();
+	// fixed for reordering
+	ASTNode *type = node->leftmost_child;
+	ASTNode *id = type->right;
+	ASTNode *dimlist = id->right;
 
-	DimListNode *dim = dynamic_cast<DimListNode*>(dimlist->leftmost_child);
-	string dim_container = "";
-
-	vector<int> dims = dim->get_dims();
-
-	for (const auto &dim : dims) {
-		dim_container += "[" + to_string(dim) + "]";
-	}
-	type += dim_container;
+	DimListNode *dim = dynamic_cast<DimListNode*>(dimlist);
+	string types_str = type->leftmost_child->val + dim->get_dims_str();
 
 	node->record = new ParamSymbolTableRecord(node);
-	node->record->name = id;
-	dynamic_cast<ParamSymbolTableRecord*>(node->record)->type = type;
+	node->record->name = id->val;
+	dynamic_cast<ParamSymbolTableRecord*>(node->record)->type = types_str;
 }
 
 void CreatingVisitor::visit(FuncDeclNode *node) {
-	ASTNode *type = node->leftmost_child;
-	ASTNode *fparamlist = type->right;
-	ASTNode *id = fparamlist->right;
+	// fixed for reordering
+	ASTNode *id = node->leftmost_child;
+	ASTNode *fparamlist = id->right;
+	ASTNode *return_type = fparamlist->right;
+	string return_type_val = return_type->get_type() == "id" ? return_type->val : return_type->get_type();
+
 	node->record = new FunctionSymbolTableRecord(node);
 	node->record->name = id->val;
-	dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->get_type();
+	dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = return_type_val;
 
 	ASTNode *fparam = fparamlist->leftmost_child;
 
@@ -247,26 +247,23 @@ void CreatingVisitor::visit(FuncDeclNode *node) {
 }
 
 void CreatingVisitor::visit(VarDeclNode *node) {
-	ASTNode *dimlist = node->leftmost_child;
-	string id = dimlist->right->val;
-	string type = dimlist->right->right->leftmost_child->get_type();
-	if (type == "id") {
-		type = dimlist->right->right->leftmost_child->val;
-	}
+	// fixed for reordering
+	ASTNode *type = node->leftmost_child;
+	ASTNode *id = type->right;
+	ASTNode *dimlist = id->right;
 
-	string dim_container = "";
-	vector<int> dims = dynamic_cast<DimListNode*>(dimlist)->get_dims();
-	for (const auto &dim : dims) {
-		dim_container += "[" + to_string(dim) + "]";
-	}
-	type += dim_container;
+	ASTNode *actual_type = type->leftmost_child;
+	string type_val = actual_type->get_type() == "id" ? actual_type->val : actual_type->get_type();
+
+	type_val += dynamic_cast<DimListNode*>(dimlist)->get_dims_str();
 
 	node->record = new VariableSymbolTableRecord(node);
-	node->record->name = id;
-	dynamic_cast<VariableSymbolTableRecord*>(node->record)->type = type;
+	node->record->name = id->val;
+	dynamic_cast<VariableSymbolTableRecord*>(node->record)->type = type_val;
 }
 
 void CreatingVisitor::visit(IntLitNode *node) {
+	// fixed for reordering
 	ASTNode *parent = node->parent;
 	while (parent != nullptr && parent->get_type() != "statement") {
 		parent = parent->parent;
@@ -282,6 +279,7 @@ void CreatingVisitor::visit(IntLitNode *node) {
 }
 
 void CreatingVisitor::visit(FloatLitNode *node) {
+	// fixed for reordering
 	ASTNode *parent = node->parent;
 	while (parent != nullptr && parent->get_type() != "statement") {
 		parent = parent->parent;
@@ -297,6 +295,7 @@ void CreatingVisitor::visit(FloatLitNode *node) {
 }
 
 void CreatingVisitor::visit(StringLitNode *node) {
+	// fixed for reordering
 	ASTNode *parent = node->parent;
 	while (parent != nullptr && parent->get_type() != "statement") {
 		parent = parent->parent;
@@ -482,6 +481,7 @@ CodeGenerationVisitor::CodeGenerationVisitor() {
 
 void CodeGenerationVisitor::visit(ProgNode *node) {
 	Compiler::moon_code << "hlt" << endl;
+	Compiler::moon_code << "buf res 20" << endl;
 }
 void CodeGenerationVisitor::visit(ClassDeclNode *node) {
 }
@@ -503,5 +503,22 @@ void CodeGenerationVisitor::visit(IntLitNode *node) {
 	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << reg << endl;
 }
 void CodeGenerationVisitor::visit(AssignStmtNode *node) {
-	cout << "something being assigned" << endl;
+	//ASTNode *thing = node->leftmost_child;
+	//Compiler::moon_code << "sw " << node->record->offset << "(r14)," << reg << endl;
 }
+void CodeGenerationVisitor::visit(WriteStmtNode *node) {
+	/*
+	ASTNode *parent = node->parent;
+	while (parent->table == nullptr) {
+		parent = parent->parent;
+	}
+	Compiler::moon_code << "addi r14,r14," << to_string(parent->table->compute_size()) << endl; 
+
+	Compiler::moon_code << "addi " << registers.back(), << "r0,buf" << endl; 
+
+	// put this in the expression
+	Compiler::moon_code << "subi r14,r14," << to_string(parent->table->compute_size()) << endl; 
+	// ... print the expression
+	*/
+}
+

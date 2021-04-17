@@ -37,7 +37,6 @@ class VariableSymbolTableRecord : public SymbolTableRecord {
 	public:
 		string type = "";
 		string visibility = "";
-		int offset = 0;
 		VariableSymbolTableRecord(ASTNode *node);
 		virtual string to_str() const override;
 };

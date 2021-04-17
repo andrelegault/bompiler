@@ -97,14 +97,24 @@ string ASTNode::to_str() {
 }
 
 
+string DimListNode::get_dims_str() const {
+	string dims_str = "";
+	vector<int> dims = this->get_dims();
+	for (const auto &dim : dims) {
+		dims_str += "[" + to_string(dim) + "]";
+	}
+	return dims_str;
+}
 vector<int> DimListNode::get_dims() const {
 	vector<int> dimensions;
 	ASTNode *numint = this->leftmost_child;
 	if (!numint->is_epsilon()) {
-		while (numint != nullptr && !numint ->is_epsilon()) {
-			ASTNode *intlit = numint->leftmost_child;
-			int dimval = stoi(intlit->val);
-			dimensions.push_back(dimval);
+		while (numint != nullptr) {
+			if (!numint->is_epsilon()) {
+				ASTNode *intlit = numint->leftmost_child;
+				int dimval = stoi(intlit->val);
+				dimensions.push_back(dimval);
+			}
 			numint = numint->right;
 		}
 	}

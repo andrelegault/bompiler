@@ -31,8 +31,8 @@ int main(int argc, char* argv[]) {
 			SemanticAnalyzer semantic_analyzer(source);
 			semantic_analyzer.analyze(parser.root);
 			// TODO: compile if SemanticAnalyzer::error is false
-			Compiler c(source);
-			c.compile(parser.root);
+			//Compiler c(source);
+			//c.compile(parser.root);
 			parser.root->table->print();
 		}
         cout << "Finished" << endl;
