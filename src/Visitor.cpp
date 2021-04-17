@@ -494,8 +494,10 @@ void SizeSetterVisitor::visit(VariableNode *node) {
 	while (parent != nullptr && parent->get_type() != "funcdef")
 		parent = parent->parent;
 	// here we assume the variable was declared
-	node->record = parent->table->has_name(id->val);
-	cout << node->record->type << "<<<<<" << endl;
+	VariableSymbolTableRecord *matching_vardecl = dynamic_cast<VariableSymbolTableRecord*>(parent->table->has_name(id->val));
+	node->record = matching_vardecl;
+	node->record->type = matching_vardecl->type;
+	node->size = matching_vardecl->node->size;
 }
 
 
@@ -555,14 +557,13 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 }
 
 void CodeGenerationVisitor::visit(MultOpNode *node) {
-	/*
 	string op_type = node->leftmost_child->right->get_type();
 	string moon_op_code = "";
-	if (op_type == "plus") {
-		moon_op_code = "add";
+	if (op_type == "mult") {
+		moon_op_code = "mul";
 	}
-	else if (op_type == "minus") {
-		moon_op_code = "sub";
+	else if (op_type == "div") {
+		moon_op_code = "div";
 	} else {
 		// TODO
 	}
@@ -587,7 +588,6 @@ void CodeGenerationVisitor::visit(MultOpNode *node) {
 	this->registers.push_back(right_op_reg);
 	this->registers.push_back(left_op_reg);
 	this->registers.push_back(result_reg);
-	*/
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {
