@@ -27,7 +27,7 @@ void SemanticAnalyzer::analyze(ASTNode *root) {
 	// phase 1: symbol table creation
 	
 	root->accept(&create);
-	//root->accept(&check);
+	root->accept(&check);
 	// phase 2: semantic actions processing
 }
 

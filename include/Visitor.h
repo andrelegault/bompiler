@@ -30,13 +30,10 @@ class Visitor {
 		virtual void visit(IdNode *node);
 		virtual void visit(VarDeclNode *node);
 		virtual void visit(VarDeclListNode *node);
-		virtual void visit(TypeNode *node);
 		virtual void visit(IntegerNode *node);
 		virtual void visit(FloatNode *node);
 		virtual void visit(StringNode *node);
 		virtual void visit(DimListNode *node);
-		virtual void visit(NumIntNode *node);
-		virtual void visit(StatementNode *node);
 		virtual void visit(StatBlockNode *node);
 		virtual void visit(VariableNode *node);
 		virtual void visit(AssignStmtNode *node);
@@ -70,7 +67,6 @@ class Visitor {
 		virtual void visit(DotNode *node);
 		virtual void visit(EpsilonNode *node);
 		virtual void visit(ScopeSpecNode *node);
-		virtual void visit(TermNode *node);
 		virtual void visit(IndiceListNode *node);
 		virtual void visit(PrivateNode *node);
 		virtual void visit(PublicNode *node);
@@ -92,7 +88,6 @@ class CreatingVisitor : public Visitor {
 		void visit(IntLitNode *node);
 		void visit(FloatLitNode *node);
 		void visit(StringLitNode *node);
-		void visit(StatementNode *node);
 		void visit(AddOpNode *node);
 		void visit(MultOpNode *node);
 };

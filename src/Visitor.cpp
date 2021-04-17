@@ -35,13 +35,10 @@ void Visitor::visit(MemberDeclNode *node) { }
 void Visitor::visit(IdNode *node) { }
 void Visitor::visit(VarDeclNode *node) { }
 void Visitor::visit(VarDeclListNode *node) { }
-void Visitor::visit(TypeNode *node) { }
 void Visitor::visit(IntegerNode *node) { }
 void Visitor::visit(FloatNode *node) { }
 void Visitor::visit(StringNode *node) { }
 void Visitor::visit(DimListNode *node) { }
-void Visitor::visit(NumIntNode *node) { }
-void Visitor::visit(StatementNode *node) { }
 void Visitor::visit(StatBlockNode *node) { }
 void Visitor::visit(VariableNode *node) { }
 void Visitor::visit(AssignStmtNode *node) { }
@@ -75,7 +72,6 @@ void Visitor::visit(FloatLitNode *node) { }
 void Visitor::visit(DotNode *node) { }
 void Visitor::visit(EpsilonNode *node) { }
 void Visitor::visit(ScopeSpecNode *node) { }
-void Visitor::visit(TermNode *node) { }
 void Visitor::visit(IndiceListNode *node) { }
 void Visitor::visit(PrivateNode *node) { }
 void Visitor::visit(PublicNode *node) { }
@@ -144,7 +140,7 @@ void CreatingVisitor::visit(FuncDefNode *node) {
 			node->table->insert(fparam->record);
 			fparam = fparam->right;
 		}
-		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->leftmost_child->get_type();
+		dynamic_cast<FunctionSymbolTableRecord*>(node->record)->return_type = type->get_type() == "id" ? type->val : type->get_type();
 		node->record->name = id_val;
 		node->table->name = id_val;
 	} else {
@@ -221,7 +217,7 @@ void CreatingVisitor::visit(FParamNode *node) {
 	ASTNode *dimlist = id->right;
 
 	DimListNode *dim = dynamic_cast<DimListNode*>(dimlist);
-	string types_str = type->leftmost_child->get_type() == "id" ? type->leftmost_child->val : type->leftmost_child->get_type();
+	string types_str = type->get_type() == "id" ? type->val : type->get_type();
 	types_str += dim->get_dims_str();
 
 	node->record = new ParamSymbolTableRecord(node);
@@ -256,8 +252,7 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 	ASTNode *id = type->right;
 	ASTNode *dimlist = id->right;
 
-	ASTNode *actual_type = type->leftmost_child;
-	string type_val = actual_type->get_type() == "id" ? actual_type->val : actual_type->get_type();
+	string type_val = type->get_type() == "id" ? type->val : type->get_type();
 
 	type_val += dynamic_cast<DimListNode*>(dimlist)->get_dims_str();
 
@@ -269,52 +264,37 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 void CreatingVisitor::visit(IntLitNode *node) {
 	// fixed for reordering
 	ASTNode *parent = node->parent;
-	while (parent != nullptr && parent->get_type() != "statement") {
-		parent = parent->parent;
-	}
-	if (parent != nullptr) {
-		ASTNode *funcdef = parent->parent->parent->parent;
+	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
 		node->size = 4;
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
 		node->record->type = "integer";
-	}
+	//}
 }
 
 void CreatingVisitor::visit(FloatLitNode *node) {
 	// fixed for reordering
 	ASTNode *parent = node->parent;
-	while (parent != nullptr && parent->get_type() != "statement") {
-		parent = parent->parent;
-	}
-	if (parent != nullptr) {
-		ASTNode *funcdef = parent->parent->parent->parent;
+	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
 		node->size = 8;
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
 		node->record->type = "float";
-	}
+	//}
 }
 
 void CreatingVisitor::visit(StringLitNode *node) {
 	// fixed for reordering
 	ASTNode *parent = node->parent;
-	while (parent != nullptr && parent->get_type() != "statement") {
-		parent = parent->parent;
-	}
-	if (parent != nullptr) {
-		ASTNode *funcdef = parent->parent->parent->parent;
+	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
 		node->size = 4;
 		node->record = new SymbolTableRecord(node);
 		node->record->name = "t" + to_string(this->temp_count++);
 		node->record->kind = "temp";
 		node->record->type = "string";
-	}
-}
-
-void CreatingVisitor::visit(StatementNode *node) {
+	//}
 }
 
 void CreatingVisitor::visit(AddOpNode *node) {
@@ -434,7 +414,7 @@ void SizeSetterVisitor::visit(VarDeclNode *node) {
 		}
 	}
 
-	node->size = total_cells * type->leftmost_child->size;
+	node->size = total_cells * type->size;
 }
 
 void SizeSetterVisitor::visit(FuncDefNode *node) {
@@ -515,6 +495,7 @@ void SizeSetterVisitor::visit(VariableNode *node) {
 		parent = parent->parent;
 	// here we assume the variable was declared
 	node->record = parent->table->has_name(id->val);
+	cout << node->record->type << "<<<<<" << endl;
 }
 
 
@@ -574,7 +555,39 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 }
 
 void CodeGenerationVisitor::visit(MultOpNode *node) {
+	/*
+	string op_type = node->leftmost_child->right->get_type();
+	string moon_op_code = "";
+	if (op_type == "plus") {
+		moon_op_code = "add";
+	}
+	else if (op_type == "minus") {
+		moon_op_code = "sub";
+	} else {
+		// TODO
+	}
+	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
+	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
 
+	string result_reg = this->registers.back(); this->registers.pop_back();
+	string left_op_reg = this->registers.back(); this->registers.pop_back();
+	string right_op_reg = this->registers.back(); this->registers.pop_back();
+
+	Compiler::moon_code << "% load left operand of type " << left_op->get_type() << endl;
+	Compiler::moon_code << "lw " << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "% load right operand of type " << left_op->get_type() << endl;
+	Compiler::moon_code << "lw " << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
+
+	// assume each register contains the required data
+	
+	Compiler::moon_code << "% perform action (add, sub, or)" << endl;
+	Compiler::moon_code << moon_op_code << " " << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
+	Compiler::moon_code << "% store result of action" << endl;
+	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << result_reg << endl;
+	this->registers.push_back(right_op_reg);
+	this->registers.push_back(left_op_reg);
+	this->registers.push_back(result_reg);
+	*/
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {

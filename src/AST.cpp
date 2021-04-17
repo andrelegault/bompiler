@@ -125,16 +125,13 @@ string DimListNode::get_dims_str() const {
 }
 vector<int> DimListNode::get_dims() const {
 	vector<int> dimensions;
-	ASTNode *numint = this->leftmost_child;
-	if (!numint->is_epsilon()) {
-		while (numint != nullptr) {
-			if (!numint->is_epsilon()) {
-				ASTNode *intlit = numint->leftmost_child;
-				int dimval = stoi(intlit->val);
-				dimensions.push_back(dimval);
-			}
-			numint = numint->right;
+	ASTNode *intlit = this->leftmost_child;
+	while (intlit != nullptr) {
+		if (!intlit->is_epsilon()) {
+			int dimval = stoi(intlit->val);
+			dimensions.push_back(dimval);
 		}
+		intlit = intlit->right;
 	}
 	return dimensions;
 }
@@ -179,8 +176,6 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new VarDeclNode();
 	else if (type == "vardecllist")
 		result = new VarDeclListNode();
-	else if (type == "type")
-		result = new TypeNode();
 	else if (type == "dimlist")
 		result = new DimListNode();
 	else if (type == "integer")
@@ -189,10 +184,6 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new FloatNode();
 	else if (type == "string")
 		result = new StringNode();
-	else if (type == "numint")
-		result = new NumIntNode();
-	else if (type == "statement")
-		result = new StatementNode();
 	else if (type == "statblock")
 		result = new StatBlockNode();
 	else if (type == "variable")
@@ -259,8 +250,6 @@ ASTNode *ASTNode::make_node(const string &type, const string &val) {
 		result = new EpsilonNode();
 	else if (type == "scopespec")
 		result = new ScopeSpecNode();
-	else if (type == "term")
-		result = new TermNode();
 	else if (type == "indicelist")
 		result = new IndiceListNode();
 	else if (type == "private")
@@ -297,13 +286,10 @@ MemberDeclNode::MemberDeclNode() { }
 IdNode::IdNode(string val) : ASTNode(val) { }
 VarDeclNode::VarDeclNode() { }
 VarDeclListNode::VarDeclListNode() { }
-TypeNode::TypeNode() { }
 IntegerNode::IntegerNode() { }
 FloatNode::FloatNode() { }
 StringNode::StringNode() { }
 DimListNode::DimListNode() { }
-NumIntNode::NumIntNode() { }
-StatementNode::StatementNode() { }
 StatBlockNode::StatBlockNode() { }
 VariableNode::VariableNode() { }
 AssignStmtNode::AssignStmtNode() { }
@@ -337,7 +323,6 @@ FloatLitNode::FloatLitNode(string val) : ASTNode(val) { }
 DotNode::DotNode() { }
 EpsilonNode::EpsilonNode() { }
 ScopeSpecNode::ScopeSpecNode() { }
-TermNode::TermNode() { }
 IndiceListNode::IndiceListNode() { }
 PrivateNode::PrivateNode() { }
 PublicNode::PublicNode() { }
@@ -363,13 +348,10 @@ string MemberDeclNode::get_type() {return "memberdecl"; }
 string IdNode::get_type() {return "id"; }
 string VarDeclNode::get_type() {return "vardecl"; }
 string VarDeclListNode::get_type() {return "vardecllist"; }
-string TypeNode::get_type() {return "type"; }
 string IntegerNode::get_type() {return "integer"; }
 string FloatNode::get_type() {return "float"; }
 string StringNode::get_type() {return "string"; }
 string DimListNode::get_type() {return "dimlist"; }
-string NumIntNode::get_type() {return "numint"; }
-string StatementNode::get_type() {return "statement"; }
 string StatBlockNode::get_type() {return "statblock"; }
 string VariableNode::get_type() {return "variable"; }
 string AssignStmtNode::get_type() {return "assignstmt"; }
@@ -403,7 +385,6 @@ string FloatLitNode::get_type() {return "floatlit"; }
 string DotNode::get_type() {return "dot"; }
 string EpsilonNode::get_type() {return "epsilon"; }
 string ScopeSpecNode::get_type() {return "scopespec"; }
-string TermNode::get_type() {return "term"; }
 string IndiceListNode::get_type() {return "indicelist"; }
 string PrivateNode::get_type() {return "private"; }
 string PublicNode::get_type() {return "public"; }
@@ -581,15 +562,6 @@ void VarDeclListNode::accept(Visitor *v) {
 	v->visit(this);
 }
 
-void TypeNode::accept(Visitor *v) {
-	ASTNode *left = this->leftmost_child;
-	while (left != nullptr) {
-		left->accept(v);
-		left = left->right;
-	}
-	v->visit(this);
-}
-
 void IntegerNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
@@ -618,24 +590,6 @@ void StringNode::accept(Visitor *v) {
 }
 
 void DimListNode::accept(Visitor *v) {
-	ASTNode *left = this->leftmost_child;
-	while (left != nullptr) {
-		left->accept(v);
-		left = left->right;
-	}
-	v->visit(this);
-}
-
-void NumIntNode::accept(Visitor *v) {
-	ASTNode *left = this->leftmost_child;
-	while (left != nullptr) {
-		left->accept(v);
-		left = left->right;
-	}
-	v->visit(this);
-}
-
-void StatementNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
 		left->accept(v);
@@ -933,15 +887,6 @@ void EpsilonNode::accept(Visitor *v) {
 }
 
 void ScopeSpecNode::accept(Visitor *v) {
-	ASTNode *left = this->leftmost_child;
-	while (left != nullptr) {
-		left->accept(v);
-		left = left->right;
-	}
-	v->visit(this);
-}
-
-void TermNode::accept(Visitor *v) {
 	ASTNode *left = this->leftmost_child;
 	while (left != nullptr) {
 		left->accept(v);

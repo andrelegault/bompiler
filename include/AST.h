@@ -183,13 +183,6 @@ class VarDeclListNode : public ASTNode {
 		virtual void accept(Visitor *v) override;
 
 };
-class TypeNode : public ASTNode {
-	public:
-		TypeNode();
-		virtual string get_type() override;
-		virtual void accept(Visitor *v) override;
-
-};
 class IntegerNode : public ASTNode {
 	public:
 		IntegerNode();
@@ -218,20 +211,6 @@ class DimListNode : public ASTNode {
 		virtual void accept(Visitor *v);
 		vector<int> get_dims() const;
 		string get_dims_str() const;
-};
-class NumIntNode : public ASTNode {
-	public:
-		NumIntNode();
-		virtual string get_type() override;
-		virtual void accept(Visitor *v) override;
-
-};
-class StatementNode : public ASTNode {
-	public:
-		StatementNode();
-		virtual string get_type() override;
-		virtual void accept(Visitor *v) override;
-
 };
 class StatBlockNode : public ASTNode {
 	public:
@@ -461,13 +440,6 @@ class EpsilonNode : public ASTNode {
 class ScopeSpecNode : public ASTNode {
 	public:
 		ScopeSpecNode();
-		virtual string get_type() override;
-		virtual void accept(Visitor *v) override;
-
-};
-class TermNode : public ASTNode {
-	public:
-		TermNode();
 		virtual string get_type() override;
 		virtual void accept(Visitor *v) override;
 

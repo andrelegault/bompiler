@@ -5,10 +5,10 @@
 <AddOp> ::= 'plus' node,plus
 <AddOp> ::= 'minus' node,minus
 <AddOp> ::= 'or' node,or
-<ArithExpr> ::= <Term> tree,term,1 <ArithExprTail>
-<ArithExprTail> ::= <AddOp> <Term> tree,term,1 tree,addop,3 <ArithExprTail>
+<ArithExpr> ::= <Term> <ArithExprTail>
+<ArithExprTail> ::= <AddOp> <Term> tree,addop,3 <ArithExprTail>
 <ArithExprTail> ::= EPSILON
-<ArraySizeRept> ::= 'lsqbr' <NumInt> tree,numint,1 'rsqbr' <ArraySizeRept> 
+<ArraySizeRept> ::= 'lsqbr' <NumInt> 'rsqbr' <ArraySizeRept> 
 <ArraySizeRept> ::= EPSILON
 <AssignOp> ::= 'assign'
 <AssignStatTail> ::= <AssignOp> <Expr> tree,assignstmt,2
@@ -21,9 +21,9 @@
 <Expr> ::= node,e <ArithExpr> tree,arithexpr,e <ExprTail>
 <ExprTail> ::= <RelOp> node,e <ArithExpr> tree,arithexpr,e tree,relexpr,3
 <ExprTail> ::= EPSILON
-<FParams> ::= <Type> tree,type,1 'id' node,id node,e <ArraySizeRept> tree,dimlist,e tree,fparam,3 <FParamsTail>
+<FParams> ::= <Type> 'id' node,id node,e <ArraySizeRept> tree,dimlist,e tree,fparam,3 <FParamsTail>
 <FParams> ::= EPSILON
-<FParamsTail> ::= 'comma' <Type> tree,type,1 'id' node,id node,e <ArraySizeRept> tree,dimlist,e tree,fparam,3 <FParamsTail>
+<FParamsTail> ::= 'comma' <Type> 'id' node,id node,e <ArraySizeRept> tree,dimlist,e tree,fparam,3 <FParamsTail>
 <FParamsTail> ::= EPSILON
 <Factor> ::= <FuncOrVar> 
 <Factor> ::= 'intlit' node,intlit
@@ -39,7 +39,7 @@
 <FuncDeclTail> ::= 'void' node,void
 <FuncDef> ::= <Function> <FuncDef> 
 <FuncDef> ::= EPSILON
-<FuncHead> ::= 'func' 'id' node,id <ClassMethod> tree,scopespec,1 'lpar' node,e <FParams> tree,fparamlist,e 'rpar' 'colon' <FuncDeclTail> tree,type,1 tree,funchead,4
+<FuncHead> ::= 'func' 'id' node,id <ClassMethod> tree,scopespec,1 'lpar' node,e <FParams> tree,fparamlist,e 'rpar' 'colon' <FuncDeclTail> tree,funchead,4
 <FuncOrAssignStat> ::= 'id' node,id <FuncOrAssignStatIdnest> 
 <FuncOrAssignStatIdnest> ::= node,e <IndiceRep> tree,indicelist,e tree,variable,2 <FuncOrAssignStatIdnestVarTail>
 <FuncOrAssignStatIdnest> ::= 'lpar' node,e <AParams> tree,aparamlist,e tree,fcall,2 'rpar' <FuncOrAssignStatIdnestFuncTail>
@@ -83,7 +83,7 @@
 <Sign> ::= 'plus' node,plus
 <Sign> ::= 'minus' node,minus
 <StatBlock> ::= 'lcurbr' <StatementList> 'rcurbr'
-<StatBlock> ::= <Statement> tree,statement,1
+<StatBlock> ::= <Statement>
 <StatBlock> ::= EPSILON
 <Statement> ::= <FuncOrAssignStat> 'semi' 
 <Statement> ::= 'if' 'lpar' <Expr> 'rpar' 'then' node,e <StatBlock> tree,statblock,e 'else' node,e <StatBlock> tree,statblock,e 'semi' tree,ifstmt,3
@@ -93,7 +93,7 @@
 <Statement> ::= 'return' 'lpar' <Expr> 'rpar' 'semi' tree,returnstmt,1
 <Statement> ::= 'break' 'semi' node,break
 <Statement> ::= 'continue' 'semi' node,continue
-<StatementList> ::= <Statement> tree,statement,1 <StatementList> 
+<StatementList> ::= <Statement> <StatementList> 
 <StatementList> ::= EPSILON
 <Term> ::= <Factor> <TermTail> 
 <TermTail> ::= <MultOp> <Factor> tree,multop,3 <TermTail> 
@@ -102,7 +102,7 @@
 <Type> ::= 'float' node,float
 <Type> ::= 'string' node,string
 <Type> ::= 'id' node,id
-<VarDecl> ::= <Type> tree,type,1 'id' node,id node,e <ArraySizeRept> tree,dimlist,e 'semi' tree,vardecl,3
+<VarDecl> ::= <Type> 'id' node,id node,e <ArraySizeRept> tree,dimlist,e 'semi' tree,vardecl,3
 <VarDeclRep> ::= <VarDecl> <VarDeclRep> 
 <VarDeclRep> ::= EPSILON
 <Variable> ::= 'id' node,id <VariableIdnest> 
