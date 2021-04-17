@@ -411,7 +411,10 @@ void SizeSetterVisitor::visit(FloatNode *node) {
 }
 
 void SizeSetterVisitor::visit(VarDeclNode *node) {
-	DimListNode *dims = dynamic_cast<DimListNode*>(node->leftmost_child);
+	ASTNode *type = node->leftmost_child;
+	ASTNode *id = type->right;
+	ASTNode *dimlist = id->right;
+	DimListNode *dims = dynamic_cast<DimListNode*>(dimlist);
 	vector<int> dimensions = dims->get_dims();
 	int total_cells = 1;
 	if (dimensions.size() >= 1) {
@@ -420,17 +423,10 @@ void SizeSetterVisitor::visit(VarDeclNode *node) {
 		}
 	}
 
-	node->size = total_cells * node->leftmost_child->right->right->leftmost_child->size;
+	node->size = total_cells * type->leftmost_child->size;
 }
 
 void SizeSetterVisitor::visit(FuncDefNode *node) {
-	ASTNode *func_body = node->leftmost_child;
-	ASTNode *statblock = func_body->leftmost_child;
-	ASTNode *vardecllist = statblock->right;
-
-	ASTNode *stmt = statblock->leftmost_child;
-	ASTNode *vardecl = vardecllist->leftmost_child;
-
 	// set offsets
 	int total = 0;
 	for(const auto &record : node->table->records) {
@@ -438,21 +434,34 @@ void SizeSetterVisitor::visit(FuncDefNode *node) {
 		total -= record->node->size;
 	}
 
-	if (node->record->name != "main") {
-		// jump
-		node->size -= 4;
-		// return
-		FunctionSymbolTableRecord *record = dynamic_cast<FunctionSymbolTableRecord*>(node->record);
-		if (record->return_type != "" && record->return_type != "void") {
-			node->size -= 4;
+
+	ASTNode *funcbodyorfunchead = node->leftmost_child;
+	if (funcbodyorfunchead->right == nullptr) { // main b/c funchead doesnt exists
+		ASTNode *funcbody = funcbodyorfunchead;
+		ASTNode *vardecllist = funcbody->leftmost_child;
+		ASTNode *statblock = vardecllist->right;
+
+		ASTNode *vardecl = vardecllist->leftmost_child;
+		ASTNode *stmt = statblock->leftmost_child;
+
+		while (vardecl != nullptr) {
+			node->size += vardecl->size;
+			vardecl = vardecl->right;
 		}
 		while (stmt != nullptr) {
 			node->size += stmt->size;
 			stmt = stmt->right;
 		}
-		while (vardecl != nullptr) {
-			node->size += vardecl->size;
-			vardecl = vardecl->right;
+	} else {
+		// TODO: include param for offset calculation
+
+		// jump
+		node->size -= 4;
+		// return
+		FunctionSymbolTableRecord *record = dynamic_cast<FunctionSymbolTableRecord*>(node->record);
+		if (record->return_type != "" && record->return_type != "void") {
+			// TODO: doesnt support classes
+			node->size -= 4;
 		}
 	}
 }
@@ -493,11 +502,9 @@ void CodeGenerationVisitor::visit(VarDeclNode *node) {
 	
 }
 void CodeGenerationVisitor::visit(FuncDefNode *node) {
-	cout << "gta be doin somethin" << endl;
 }
 
 void CodeGenerationVisitor::visit(AddOpNode *node) {
-	cout << "in app op node!" << endl;
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {

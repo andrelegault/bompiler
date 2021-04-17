@@ -23,6 +23,7 @@ void Compiler::compile(ASTNode *root) {
 
 
 	root->accept(&size_setter);
+
 	Compiler::moon_code << "entry" << endl;
 	Compiler::moon_code << "addi r14,r0,topaddr\n" << endl;
 	root->accept(&code_generator);
