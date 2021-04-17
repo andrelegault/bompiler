@@ -487,13 +487,14 @@ void SizeSetterVisitor::visit(VarDeclListNode *node) {
 
 CodeGenerationVisitor::CodeGenerationVisitor() {
 	cout << "initialized" << endl;
+	// r0 isnt in this list because it always contains 0
 	for(int i = REGISTER_COUNT; i > 0; --i) {
 		registers.push_back("r" + to_string(i));
 	}
 }
 
 void CodeGenerationVisitor::visit(ProgNode *node) {
-	Compiler::moon_code << "hlt" << endl;
+	Compiler::moon_code << endl << "hlt" << endl;
 	Compiler::moon_code << "buf res 20" << endl;
 }
 void CodeGenerationVisitor::visit(ClassDeclNode *node) {
@@ -510,8 +511,12 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 void CodeGenerationVisitor::visit(IntLitNode *node) {
 	// loads the int into a register
 	string &reg = this->registers.back();
+	this->registers.pop_back();
+	Compiler::moon_code << "% setting register value" << endl;
 	Compiler::moon_code << "addi " << reg << ",r0," << node->val << endl;
+	Compiler::moon_code << "% storing into temp var" << endl;
 	Compiler::moon_code << "sw " << node->record->offset << "(r14)," << reg << endl;
+	this->registers.push_back(reg);
 }
 void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 	//ASTNode *thing = node->leftmost_child;
@@ -520,10 +525,6 @@ void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	/*
 	ASTNode *parent = node->parent;
-	while (parent->table == nullptr) {
-		parent = parent->parent;
-	}
-	Compiler::moon_code << "addi r14,r14," << to_string(parent->table->compute_size()) << endl; 
 
 	Compiler::moon_code << "addi " << registers.back(), << "r0,buf" << endl; 
 
