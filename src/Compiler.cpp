@@ -25,6 +25,8 @@ void Compiler::compile(ASTNode *root) {
 	root->accept(&size_setter);
 
 	Compiler::moon_code << "entry" << endl;
-	Compiler::moon_code << "addi r14,r0,topaddr\n" << endl;
+	Compiler::moon_code << "addi r14,r0,topaddr" << endl;
+	Compiler::moon_code << "% needed otherwise sw 0(...) changes r0" << endl;
+	Compiler::moon_code << "subi r14,r14,4\n" << endl;
 	root->accept(&code_generator);
 }
