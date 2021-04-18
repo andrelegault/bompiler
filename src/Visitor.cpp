@@ -608,10 +608,17 @@ void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	string param_reg = this->registers.back(); this->registers.pop_back();
 	string buf_reg = this->registers.back(); this->registers.pop_back();
-	SymbolTableRecord *child_record = node->get_first_child_with_record()->record;
-	int table_size = child_record->link->compute_size();
+	ASTNode *child = node->get_first_child_with_record();
+	int table_size = child->record->link->compute_size();
+	int child_rel_offset = child->record->offset;
+	cout << child->get_type() << endl;
+	if (child->get_type() == "variable") { // most likely
+		child_rel_offset -= dynamic_cast<VariableNode*>(child)->get_cell_index() * 4;
+	}
+
+	// TODO: youre using the offset of the whole variable, not the array
 	// put whatever u wanna print in a register
-	Compiler::moon_code << "lw\t" << param_reg << "," << child_record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << param_reg << "," << child_rel_offset << "(r14)" << endl;
 	// increment stack frame
 	Compiler::moon_code << "addi\tr14,r14," << table_size << endl;
 	// put whatever u wanna print onto stack @ -8(r14), has to be -8... (using register from previous step)
