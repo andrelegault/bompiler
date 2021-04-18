@@ -252,36 +252,24 @@ void CreatingVisitor::visit(VarDeclNode *node) {
 }
 
 void CreatingVisitor::visit(IntLitNode *node) {
-	ASTNode *parent = node->parent;
-	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
-		node->size = 4;
-		node->record = new SymbolTableRecord(node);
-		node->record->name = "t" + to_string(this->temp_count++);
-		node->record->kind = "temp";
-		node->record->type = "integer";
-	//}
+	// if its used to set a dimension, it doesnt need moon code
+	// true for fparam or vardecl
+	if (node->parent->get_type() == "dimlist" || node->parent->parent->get_type() == "indicelist")
+		return;
+	node->size = 4;
+	node->record = new SymbolTableRecord(node);
+	node->record->name = "t" + to_string(this->temp_count++);
+	node->record->kind = "temp";
+	node->record->type = "integer";
 }
 
 void CreatingVisitor::visit(FloatLitNode *node) {
 	ASTNode *parent = node->parent;
-	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
-		node->size = 8;
-		node->record = new SymbolTableRecord(node);
-		node->record->name = "t" + to_string(this->temp_count++);
-		node->record->kind = "temp";
-		node->record->type = "float";
-	//}
-}
-
-void CreatingVisitor::visit(StringLitNode *node) {
-	ASTNode *parent = node->parent;
-	//if (parent->get_type() != "dimlist") { // no need to create intlit if its in a dimlist
-		node->size = 4;
-		node->record = new SymbolTableRecord(node);
-		node->record->name = "t" + to_string(this->temp_count++);
-		node->record->kind = "temp";
-		node->record->type = "string";
-	//}
+	node->size = 8;
+	node->record = new SymbolTableRecord(node);
+	node->record->name = "t" + to_string(this->temp_count++);
+	node->record->kind = "temp";
+	node->record->type = "float";
 }
 
 void CreatingVisitor::visit(AddOpNode *node) {
@@ -474,8 +462,10 @@ void SizeSetterVisitor::visit(VarDeclListNode *node) {
 void SizeSetterVisitor::visit(AddOpNode *node) {
 	// should have a record from the creatingvisitor, assumes both operands are of the same type (and therefore have the same size)
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
-	node->size = left_op->size;
-	node->record->type = left_op->record->type;
+	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
+	ASTNode *smallest_size = left_op->size > right_op->size ? right_op : left_op;
+	node->size = smallest_size->size;
+	node->record->type = smallest_size->record->type;
 }
 
 void SizeSetterVisitor::visit(MultOpNode *node) {
@@ -517,35 +507,37 @@ void CodeGenerationVisitor::visit(ProgNode *node) {
 void CodeGenerationVisitor::visit(ClassDeclNode *node) {
 }
 void CodeGenerationVisitor::visit(VarDeclNode *node) {
-	
+	// no need to do anything even if indices, because of offset
+	// akin to reserving its memory
 }
 void CodeGenerationVisitor::visit(FuncDefNode *node) {
 }
 
 void CodeGenerationVisitor::visit(AddOpNode *node) {
-	string op_type = node->leftmost_child->right->get_type();
-	string moon_op_code = "";
-	if (op_type == "plus") {
-		moon_op_code = "add";
-	}
-	else if (op_type == "minus") {
-		moon_op_code = "sub";
-	} else {
-		// TODO
-	}
+	string instruction = node->get_instruction();
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
 	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
+
+	int left_rel_offset = left_op->record->offset;
+	int right_rel_offset = right_op->record->offset;
+
+	if (left_op->get_type() == "variable") {
+		left_rel_offset += dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
+	}
+	if (right_op->get_type() == "variable") {
+		right_rel_offset += dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
+	}
 
 	string result_reg = this->registers.back(); this->registers.pop_back();
 	string left_op_reg = this->registers.back(); this->registers.pop_back();
 	string right_op_reg = this->registers.back(); this->registers.pop_back();
 
-	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
-	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_rel_offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_rel_offset << "(r14)" << endl;
 
 	// assume each register contains the required data
 	
-	Compiler::moon_code << moon_op_code << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
+	Compiler::moon_code << instruction << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
 	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << result_reg << endl;
 	this->registers.push_back(right_op_reg);
 	this->registers.push_back(left_op_reg);
@@ -553,29 +545,30 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 }
 
 void CodeGenerationVisitor::visit(MultOpNode *node) {
-	string op_type = node->leftmost_child->right->get_type();
-	string moon_op_code = "";
-	if (op_type == "mult") {
-		moon_op_code = "mul";
-	}
-	else if (op_type == "div") {
-		moon_op_code = "div";
-	} else {
-		// TODO
-	}
+	string instruction = node->get_instruction();
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
 	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
+
+	int left_rel_offset = left_op->record->offset;
+	int right_rel_offset = right_op->record->offset;
+
+	if (left_op->get_type() == "variable") {
+		left_rel_offset += dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
+	}
+	if (right_op->get_type() == "variable") {
+		right_rel_offset += dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
+	}
 
 	string result_reg = this->registers.back(); this->registers.pop_back();
 	string left_op_reg = this->registers.back(); this->registers.pop_back();
 	string right_op_reg = this->registers.back(); this->registers.pop_back();
 
-	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_op->record->offset << "(r14)" << endl;
-	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_op->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_rel_offset << "(r14)" << endl;
+	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_rel_offset << "(r14)" << endl;
 
 	// assume each register contains the required data
 	
-	Compiler::moon_code << moon_op_code << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
+	Compiler::moon_code << instruction << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
 	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << result_reg << endl;
 	this->registers.push_back(right_op_reg);
 	this->registers.push_back(left_op_reg);
@@ -583,7 +576,9 @@ void CodeGenerationVisitor::visit(MultOpNode *node) {
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {
-	// loads the int into a register
+	// if its used to set a dimension, it doesnt need moon code
+	if (node->parent->get_type() == "dimlist" || node->parent->parent->get_type() == "indicelist")
+		return;
 	string &reg = this->registers.back();
 	this->registers.pop_back();
 	Compiler::moon_code << "addi\t" << reg << ",r0," << node->val << endl;
@@ -599,10 +594,15 @@ void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 		exit(0);
 	}
 
+	int left_rel_offset = left_op->record->offset;
+	if (left_op->get_type() == "variable") { // most likely
+		left_rel_offset += dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
+	}
+
 	string reg = this->registers.back(); this->registers.pop_back();
 
 	Compiler::moon_code << "lw\t" << reg << "," << right_op->record->offset << "(r14)" << endl;
-	Compiler::moon_code << "sw\t" << left_op->record->offset << "(r14)," << reg << endl;
+	Compiler::moon_code << "sw\t" << left_rel_offset << "(r14)," << reg << endl;
 	this->registers.push_back(reg);
 }
 void CodeGenerationVisitor::visit(WriteStmtNode *node) {

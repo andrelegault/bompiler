@@ -87,7 +87,6 @@ class CreatingVisitor : public Visitor {
 		void visit(VarDeclNode *node);
 		void visit(IntLitNode *node);
 		void visit(FloatLitNode *node);
-		void visit(StringLitNode *node);
 		void visit(AddOpNode *node);
 		void visit(MultOpNode *node);
 		void visit(FCallNode *node);

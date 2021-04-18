@@ -55,7 +55,6 @@ ASTNode* ASTNode::get_first_child_with_record() {
 	nodes.push(this);
 	while(!nodes.empty()) {
 		ASTNode *current = nodes.front();
-		cout << current->get_type() << endl;
 		if (current->record != nullptr)
 			return current;
 		nodes.pop();
@@ -114,6 +113,57 @@ string ASTNode::to_str() {
 	return "";
 }
 
+string AddOpNode::get_instruction() const {
+	string op_type = this->leftmost_child->right->get_type();
+	if (op_type == "plus") {
+		return "add";
+	}
+	else if (op_type == "minus") {
+		return "sub";
+	} else {
+		return "unsupported";
+	}
+}
+
+string MultOpNode::get_instruction() const {
+	string op_type = this->leftmost_child->right->get_type();
+	if (op_type == "mult") {
+		return "mul";
+	}
+	else if (op_type == "div") {
+		return "div";
+	} else {
+		return "unsupported";
+	}
+}
+
+vector<int> IndiceListNode::get_indices() const {
+	vector<int> indices;
+	ASTNode *child = this->leftmost_child;
+	while (child != nullptr) {
+		if (child->get_type() == "arithexpr" && child->leftmost_child->right->get_type() == "intlit") {
+			int indiceval = stoi(child->leftmost_child->right->val);
+			indices.push_back(indiceval);
+		}
+		child = child->right;
+	}
+	return indices;
+}
+
+int VariableNode::get_cell_index() const {
+	vector<int> dimensions = dynamic_cast<DimListNode*>(this->record->node->leftmost_child->right->right)->get_dims();
+	int cell_index = 0;
+	int dim_prod = 1;
+	for(const auto &dimension : dimensions)
+		dim_prod *= dimension;
+	IndiceListNode *indice_node = dynamic_cast<IndiceListNode*>(this->leftmost_child->right);
+	vector<int> indices = indice_node->get_indices();
+	for(int i = 0; i < indices.size(); ++i) {
+		dim_prod /= dimensions[i];
+		cell_index += indices[i] * dim_prod;
+	}
+	return cell_index;
+}
 
 string DimListNode::get_dims_str() const {
 	string dims_str = "";

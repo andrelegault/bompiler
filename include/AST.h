@@ -223,6 +223,7 @@ class VariableNode : public ASTNode {
 	public:
 		VariableNode();
 		virtual string get_type() override;
+		int get_cell_index() const;
 		virtual void accept(Visitor *v) override;
 
 };
@@ -328,6 +329,7 @@ class MultOpNode : public ASTNode {
 	public:
 		MultOpNode();
 		virtual string get_type() override;
+		string get_instruction() const;
 		virtual void accept(Visitor *v) override;
 
 };
@@ -335,6 +337,7 @@ class AddOpNode : public ASTNode {
 	public:
 		AddOpNode();
 		virtual string get_type() override;
+		string get_instruction() const;
 		virtual void accept(Visitor *v) override;
 
 };
@@ -447,6 +450,7 @@ class ScopeSpecNode : public ASTNode {
 class IndiceListNode : public ASTNode {
 	public:
 		IndiceListNode();
+		vector<int> get_indices() const;
 		virtual string get_type() override;
 		virtual void accept(Visitor *v) override;
 
