@@ -90,6 +90,16 @@ string ASTNode::to_dot_notation() {
 	return str;
 }
 
+ASTNode::~ASTNode() {
+	ASTNode *child = this->leftmost_child, *temp = nullptr;
+	// propagate
+	while (child != nullptr) {
+		temp = child->right;
+		delete child;
+		child = temp;
+	}
+}
+
 ASTNode *ASTNode::make_family(string &op, const vector<ASTNode*> &children) {
 	ASTNode *node = ASTNode::make_node(op);
 	node->num_children = children.size();

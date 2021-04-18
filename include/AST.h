@@ -35,6 +35,7 @@ class ASTNode {
 		int size = 0;
 
 		ASTNode(string val = "");
+		~ASTNode();
 		ASTNode* make_siblings(ASTNode *y);
 		static ASTNode* make_family(string &op, const vector<ASTNode*> &children);
 		void adopt_children(ASTNode *y);
