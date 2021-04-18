@@ -30,11 +30,9 @@ string SymbolTableRecord::to_str() const {
 }
 string FunctionSymbolTableRecord::to_str() const {
 	stringstream ss;
-	cout << params.size() << endl;
 	string types_str = "";
 	for(const auto &str : params) {
 		types_str += str + ", ";
-		cout << str << endl;
 	}
 	if (this->visibility == "")
 		ss << setw(15) << name << " | " << setw(10) << "function" << " | " << setw(20) << types_str;

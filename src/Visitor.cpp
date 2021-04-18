@@ -463,7 +463,6 @@ void SizeSetterVisitor::visit(AddOpNode *node) {
 	// should have a record from the creatingvisitor, assumes both operands are of the same type (and therefore have the same size)
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
 	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
-	ASTNode *smallest_size = left_op->size > right_op->size ? right_op : left_op;
 	node->size = 4;
 	node->record->type = "integer";
 }
@@ -471,8 +470,8 @@ void SizeSetterVisitor::visit(AddOpNode *node) {
 void SizeSetterVisitor::visit(MultOpNode *node) {
 	// should have a record from the creatingvisitor, assumes both operands are of the same type (and therefore have the same size)
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
-	node->size = left_op->size;
-	node->record->type = left_op->record->type;
+	node->size = 4;
+	node->record->type = "integer";
 }
 
 void SizeSetterVisitor::visit(VariableNode *node) {
@@ -576,7 +575,7 @@ void CodeGenerationVisitor::visit(MultOpNode *node) {
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {
-	// if its used to set a dimension, it doesnt need moon code
+	// if its used to set a dimension, it doesnt need a temp var
 	if (node->parent->get_type() == "dimlist" || node->parent->parent->get_type() == "indicelist")
 		return;
 	string &reg = this->registers.back();
