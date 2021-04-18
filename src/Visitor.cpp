@@ -488,6 +488,10 @@ void SizeSetterVisitor::visit(VariableNode *node) {
 	node->size = matching_vardecl->node->size;
 }
 
+void SizeSetterVisitor::visit(FCallNode *node) {
+	// TODO: set the type depending on associated record
+}
+
 /**************************************
 * Code Generation Visitor Definitions *
 **************************************/
@@ -543,7 +547,7 @@ void CodeGenerationVisitor::process_arith_op(ASTNode *node) {
 	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_rel_offset << "(r14)" << endl;
 
 	// assume each register contains the required data
-	
+
 	Compiler::moon_code << instruction << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
 	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << result_reg << endl;
 	this->registers.push_back(right_op_reg);
@@ -594,7 +598,6 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 		child_rel_offset -= dynamic_cast<VariableNode*>(child)->get_cell_index() * 4;
 	}
 
-	// TODO: youre using the offset of the whole variable, not the array
 	// put whatever u wanna print in a register
 	Compiler::moon_code << "lw\t" << param_reg << "," << child_rel_offset << "(r14)" << endl;
 	// increment stack frame
@@ -602,7 +605,7 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	// put whatever u wanna print onto stack @ -8(r14), has to be -8... (using register from previous step)
 	Compiler::moon_code << "sw\t-8(r14)," << param_reg << endl;
 	// put buffer address in a register
-	Compiler::moon_code << "addi\t" << buf_reg << "," << buf_reg << ",buf" << endl;
+	Compiler::moon_code << "addi\t" << buf_reg << "," << "r0,buf" << endl;
 	// put buffer address on stack @ -12(r14), has to be -12...
 	Compiler::moon_code << "sw\t-12(r14)," << buf_reg << endl;
 	// convert what's @ -8(r14) into a string, result will be in r13
@@ -618,6 +621,27 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	this->registers.push_back(param_reg);
 }
 
-void SizeSetterVisitor::visit(FCallNode *node) {
-	// TODO: set the type depending on associated record
+void CodeGenerationVisitor::visit(ReadStmtNode *node) {
+	ASTNode *child = node->get_first_child_with_record();
+	if (child->get_type() != "variable") { // must read into a variable
+		return;
+	}
+	int child_rel_offset = child->record->offset - (dynamic_cast<VariableNode*>(child)->get_cell_index() * 4);
+	string reg = this->registers.back(); this->registers.pop_back();
+	int table_size = child->record->link->compute_size();
+	// load address of buffer into register
+	Compiler::moon_code << "addi\t" << reg << ",r0,buf" << endl;
+	// increase stack frame
+	Compiler::moon_code << "addi\tr14,r14," << table_size << endl;
+	// store address of buffer into -8(r14), required by getstr
+	Compiler::moon_code << "sw\t" << "-8(r14)," << reg << endl;
+	// jump to function, result will be in address that was in -8(r14)
+	Compiler::moon_code << "jl\tr15, getstr" << endl;
+	Compiler::moon_code << "jl\tr15, strint" << endl;
+	// decrease stack frame
+	Compiler::moon_code << "subi\tr14,r14," << table_size << endl;
+	// get contents of buffer
+	Compiler::moon_code << "sw\t" << child_rel_offset << "(r14)," << "r13" << endl;
+	this->registers.push_back(reg);
 }
+

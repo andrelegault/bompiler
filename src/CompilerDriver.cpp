@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
 			parser.root->table->print();
 		}
         cout << "Finished" << endl;
+		delete parser.root;
 		delete g;
     }
 	return 0;

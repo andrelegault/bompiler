@@ -22,6 +22,8 @@ using std::unordered_set;
 
 class Visitor;
 
+static int i = 0;
+
 class ASTNode {
 	public:
 		ASTNode *parent = nullptr, *leftmost_child = nullptr, *leftmost_sibling = nullptr, *right = nullptr;
