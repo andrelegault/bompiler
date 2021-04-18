@@ -513,7 +513,15 @@ void CodeGenerationVisitor::visit(FuncDefNode *node) {
 }
 
 void CodeGenerationVisitor::visit(AddOpNode *node) {
-	string instruction = node->get_instruction();
+	this->process_arith_op(node);
+}
+
+void CodeGenerationVisitor::process_arith_op(ASTNode *node) {
+	string instruction = "";
+	if (dynamic_cast<AddOpNode*>(node) != nullptr)
+		instruction = dynamic_cast<AddOpNode*>(node)->get_instruction();
+	else
+		instruction = dynamic_cast<MultOpNode*>(node)->get_instruction();
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
 	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
 
@@ -544,34 +552,7 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 }
 
 void CodeGenerationVisitor::visit(MultOpNode *node) {
-	string instruction = node->get_instruction();
-	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
-	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
-
-	int left_rel_offset = left_op->record->offset;
-	int right_rel_offset = right_op->record->offset;
-
-	if (left_op->get_type() == "variable") {
-		left_rel_offset -= dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
-	}
-	if (right_op->get_type() == "variable") {
-		right_rel_offset -= dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
-	}
-
-	string result_reg = this->registers.back(); this->registers.pop_back();
-	string left_op_reg = this->registers.back(); this->registers.pop_back();
-	string right_op_reg = this->registers.back(); this->registers.pop_back();
-
-	Compiler::moon_code << "lw\t" << left_op_reg << "," << left_rel_offset << "(r14)" << endl;
-	Compiler::moon_code << "lw\t" << right_op_reg << "," << right_rel_offset << "(r14)" << endl;
-
-	// assume each register contains the required data
-	
-	Compiler::moon_code << instruction << "\t" << result_reg << "," << left_op_reg << "," << right_op_reg << endl;
-	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << result_reg << endl;
-	this->registers.push_back(right_op_reg);
-	this->registers.push_back(left_op_reg);
-	this->registers.push_back(result_reg);
+	this->process_arith_op(node);
 }
 
 void CodeGenerationVisitor::visit(IntLitNode *node) {
@@ -590,7 +571,6 @@ void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 	if (left_op == nullptr || right_op == nullptr) {
 		string null_node = left_op == nullptr ? "left" : "right";
 		cout << null_node << " is null " << endl;
-		exit(0);
 	}
 
 	int left_rel_offset = left_op->record->offset;
@@ -610,7 +590,6 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	ASTNode *child = node->get_first_child_with_record();
 	int table_size = child->record->link->compute_size();
 	int child_rel_offset = child->record->offset;
-	cout << child->get_type() << endl;
 	if (child->get_type() == "variable") { // most likely
 		child_rel_offset -= dynamic_cast<VariableNode*>(child)->get_cell_index() * 4;
 	}
