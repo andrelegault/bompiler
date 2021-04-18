@@ -522,10 +522,10 @@ void CodeGenerationVisitor::visit(AddOpNode *node) {
 	int right_rel_offset = right_op->record->offset;
 
 	if (left_op->get_type() == "variable") {
-		left_rel_offset += dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
+		left_rel_offset -= dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
 	}
 	if (right_op->get_type() == "variable") {
-		right_rel_offset += dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
+		right_rel_offset -= dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
 	}
 
 	string result_reg = this->registers.back(); this->registers.pop_back();
@@ -553,10 +553,10 @@ void CodeGenerationVisitor::visit(MultOpNode *node) {
 	int right_rel_offset = right_op->record->offset;
 
 	if (left_op->get_type() == "variable") {
-		left_rel_offset += dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
+		left_rel_offset -= dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
 	}
 	if (right_op->get_type() == "variable") {
-		right_rel_offset += dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
+		right_rel_offset -= dynamic_cast<VariableNode*>(right_op)->get_cell_index() * node->size;
 	}
 
 	string result_reg = this->registers.back(); this->registers.pop_back();
@@ -596,7 +596,7 @@ void CodeGenerationVisitor::visit(AssignStmtNode *node) {
 
 	int left_rel_offset = left_op->record->offset;
 	if (left_op->get_type() == "variable") { // most likely
-		left_rel_offset += dynamic_cast<VariableNode*>(left_op)->get_cell_index() * node->size;
+		left_rel_offset -= dynamic_cast<VariableNode*>(left_op)->get_cell_index() * 4;
 	}
 
 	string reg = this->registers.back(); this->registers.pop_back();
