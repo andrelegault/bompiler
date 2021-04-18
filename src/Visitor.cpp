@@ -464,8 +464,8 @@ void SizeSetterVisitor::visit(AddOpNode *node) {
 	ASTNode *left_op = node->leftmost_child->get_first_child_with_record();
 	ASTNode *right_op = node->leftmost_child->right->right->get_first_child_with_record();
 	ASTNode *smallest_size = left_op->size > right_op->size ? right_op : left_op;
-	node->size = smallest_size->size;
-	node->record->type = smallest_size->record->type;
+	node->size = 4;
+	node->record->type = "integer";
 }
 
 void SizeSetterVisitor::visit(MultOpNode *node) {
