@@ -134,12 +134,7 @@ bool SymbolTable::search(const string &target_name, const string &target_type) {
 }
 
 int SymbolTable::compute_size() const {
-	//cout << "in " << this << " which, again, has " << records.size() << " children" << endl;
-	int sz = 0;
-	for(const auto &it : records) {
-		sz -= it->node->size;
-	}
-	return sz;
+	return node->size;
 }
 
 string SymbolTable::print() {

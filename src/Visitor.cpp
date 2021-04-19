@@ -592,7 +592,7 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	string param_reg = this->registers.back(); this->registers.pop_back();
 	string buf_reg = this->registers.back(); this->registers.pop_back();
 	ASTNode *child = node->get_first_child_with_record();
-	int table_size = child->record->link->compute_size();
+	int table_size = child->record->link->compute_size() * -1;
 	int child_rel_offset = child->record->offset;
 	if (child->get_type() == "variable") { // most likely
 		child_rel_offset -= dynamic_cast<VariableNode*>(child)->get_cell_index() * 4;
@@ -628,7 +628,7 @@ void CodeGenerationVisitor::visit(ReadStmtNode *node) {
 	}
 	int child_rel_offset = child->record->offset - (dynamic_cast<VariableNode*>(child)->get_cell_index() * 4);
 	string reg = this->registers.back(); this->registers.pop_back();
-	int table_size = child->record->link->compute_size();
+	int table_size = child->record->link->compute_size() * -1;
 	// load address of buffer into register
 	Compiler::moon_code << "addi\t" << reg << ",r0,buf" << endl;
 	// increase stack frame
