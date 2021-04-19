@@ -141,4 +141,6 @@ class CodeGenerationVisitor : public Visitor {
 		void visit(IntLitNode *node);
 		void visit(WriteStmtNode *node);
 		void visit(ReadStmtNode *node);
+		void visit(FCallNode *node);
+		void visit(ReturnStmtNode *node);
 };

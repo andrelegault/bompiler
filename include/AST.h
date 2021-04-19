@@ -147,6 +147,7 @@ class FParamNode : public ASTNode {
 class FCallNode : public ASTNode {
 	public:
 		FCallNode();
+		FuncHeadNode* funchead = nullptr;
 		virtual string get_type() override;
 		virtual void accept(Visitor *v) override;
 

@@ -133,6 +133,27 @@ bool SymbolTable::search(const string &target_name, const string &target_type) {
 	return found;
 }
 
+SymbolTableRecord* SymbolTable::find_record(const string &target_name, const string &target_type) {
+	ASTNode *current = this->node;
+	do {
+		if (current->table != nullptr) {
+			//for (const auto &what : current->record->link->records)
+				//cout << what.first << endl;
+
+			auto result = current->table->has_name(target_name);
+			if (result != nullptr) {
+				//cout << result->node->get_type() << " == " << target_type << ", " << result->name << " == " << target_name << endl;
+				if (result->node->get_type() == target_type && result->name == target_name)
+					return result;
+				// doesn't take into account the `types` vector of parameters, return types, etc.
+			}
+		}
+		current = current->parent;
+	}
+	while (current != nullptr);
+	return nullptr;
+}
+
 int SymbolTable::compute_size() const {
 	return node->size;
 }

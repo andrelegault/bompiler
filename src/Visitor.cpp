@@ -263,7 +263,6 @@ void CreatingVisitor::visit(IntLitNode *node) {
 }
 
 void CreatingVisitor::visit(FloatLitNode *node) {
-	ASTNode *parent = node->parent;
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
@@ -285,7 +284,7 @@ void CreatingVisitor::visit(MultOpNode *node) {
 }
 
 void CreatingVisitor::visit(FCallNode *node) {
-	ASTNode *parent = node->parent;
+	// holds the result of the fcall
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
@@ -392,7 +391,15 @@ void SizeSetterVisitor::visit(FloatLitNode *node) {
 
 void SizeSetterVisitor::visit(FCallNode *node) {
 	// TODO: search for funcdef using id to get its return type's size
-	node->size = 4;
+	ASTNode *id = node->leftmost_child;
+		// match function's actual size and return type
+		SymbolTableRecord* rec = node->record->link->find_record(id->val, "funcdef");
+		FuncHeadNode *funchead = dynamic_cast<FuncHeadNode*>(rec->node->leftmost_child);
+		// set for future use
+		node->funchead = funchead;
+		ASTNode *return_type = funchead->leftmost_child->right->right->right;
+		node->record->type = return_type->get_type() == "id" ? return_type->val : return_type->get_type();
+		node->size = return_type->size;
 }
 
 
@@ -431,9 +438,13 @@ void SizeSetterVisitor::visit(VarDeclNode *node) {
 
 void SizeSetterVisitor::visit(FuncHeadNode *node) {
 	// main function doesnt have a funchead
+	string id = node->leftmost_child->val;
 	int return_size = node->leftmost_child->right->right->right->size;
 	// update the funcdef's size to include the return value + jump
 	node->parent->size += 4 + return_size; // jl/jr return
+	// declare function
+	Compiler::moon_code << "\t% load address to jump back to (to be used once done)" << endl;
+	Compiler::moon_code << id << "\tsw\t" << "-4(r14),r15" << endl;
 }
 
 void SizeSetterVisitor::visit(FuncDefNode *node) {
@@ -561,6 +572,7 @@ void CodeGenerationVisitor::visit(IntLitNode *node) {
 		return;
 	string &reg = this->registers.back();
 	this->registers.pop_back();
+	Compiler::moon_code << "\t%load int literal into register" << endl;
 	Compiler::moon_code << "addi\t" << reg << ",r0," << node->val << endl;
 	Compiler::moon_code << "sw\t" << node->record->offset << "(r14)," << reg << endl;
 	this->registers.push_back(reg);
@@ -594,9 +606,8 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 		child_rel_offset -= dynamic_cast<VariableNode*>(child)->get_cell_index() * 4;
 	}
 
-	// put whatever u wanna print in a register
 	Compiler::moon_code << "lw\t" << param_reg << "," << child_rel_offset << "(r14)" << endl;
-	// increment stack frame
+	Compiler::moon_code << "\t%increase stack frame" << endl;
 	Compiler::moon_code << "addi\tr14,r14," << table_size << endl;
 	// put whatever u wanna print onto stack @ -8(r14), has to be -8... (using register from previous step)
 	Compiler::moon_code << "sw\t-8(r14)," << param_reg << endl;
@@ -604,13 +615,13 @@ void CodeGenerationVisitor::visit(WriteStmtNode *node) {
 	Compiler::moon_code << "addi\t" << buf_reg << "," << "r0,buf" << endl;
 	// put buffer address on stack @ -12(r14), has to be -12...
 	Compiler::moon_code << "sw\t-12(r14)," << buf_reg << endl;
-	// convert what's @ -8(r14) into a string, result will be in r13
+	Compiler::moon_code << "\t%convert what's @ -8(r14) into a string, result will be in r13" << endl;
 	Compiler::moon_code << "jl\tr15, intstr" << endl;
-	// put what's in r13 in -8(r14) due to call to putstr
+	Compiler::moon_code << "\t%put what's in r13 in -8(r14) due to call to putstr" << endl;
 	Compiler::moon_code << "sw\t-8(r14),r13" << endl;
-	// print what's @ -8(r14)
+	Compiler::moon_code << "\t%print what's @ -8(r14)" << endl;
 	Compiler::moon_code << "jl\tr15, putstr" << endl;
-	// decrement stack
+	Compiler::moon_code << "\t%decrease stack frame" << endl;
 	Compiler::moon_code << "subi\tr14,r14," << table_size << endl;
 	
 	this->registers.push_back(buf_reg);
@@ -625,19 +636,73 @@ void CodeGenerationVisitor::visit(ReadStmtNode *node) {
 	int child_rel_offset = child->record->offset - (dynamic_cast<VariableNode*>(child)->get_cell_index() * 4);
 	string reg = this->registers.back(); this->registers.pop_back();
 	int table_size = child->record->link->compute_size() * -1;
-	// load address of buffer into register
+	Compiler::moon_code << "\t%load address of buffer into register" << endl;
 	Compiler::moon_code << "addi\t" << reg << ",r0,buf" << endl;
-	// increase stack frame
+	Compiler::moon_code << "\t%increase stack frame" << endl;
 	Compiler::moon_code << "addi\tr14,r14," << table_size << endl;
-	// store address of buffer into -8(r14), required by getstr
+	Compiler::moon_code << "\t%store address of buffer into -8(r14), required by getstr" << endl;
 	Compiler::moon_code << "sw\t" << "-8(r14)," << reg << endl;
-	// jump to function, result will be in address that was in -8(r14)
+	Compiler::moon_code << "\t%jump to function, result will be in address that was in -8(r14)" << endl;
 	Compiler::moon_code << "jl\tr15, getstr" << endl;
 	Compiler::moon_code << "jl\tr15, strint" << endl;
-	// decrease stack frame
+	Compiler::moon_code << "\t%decrease stack frame" << endl;
 	Compiler::moon_code << "subi\tr14,r14," << table_size << endl;
-	// get contents of buffer
+	Compiler::moon_code << "\t%get contents of buffer" << endl;
 	Compiler::moon_code << "sw\t" << child_rel_offset << "(r14)," << "r13" << endl;
 	this->registers.push_back(reg);
 }
 
+void CodeGenerationVisitor::visit(FCallNode *node) {
+	// what do i need to make this function call? i need to get the offsets of the params im going to pass, how do i get those? i need the funchead
+	vector<SymbolTableRecord*> temp_args;
+	vector<SymbolTableRecord*> head_args;
+
+	ASTNode *param = node->funchead->leftmost_child->right->right->leftmost_child;
+	ASTNode *arg = node->leftmost_child->right->leftmost_child;
+	int funcdef_size = node->record->link->compute_size() * -1;
+	while (param != nullptr && arg != nullptr) {
+		if (!param->is_epsilon() && !arg->is_epsilon()) {
+			ASTNode *temp_arg = arg->get_first_child_with_record();
+			SymbolTableRecord *param_record = param->record;
+			int target_offset = funcdef_size + param_record->offset;
+			cout << target_offset << endl;
+			string reg = this->registers.back(); this->registers.pop_back();
+			Compiler::moon_code << "\t%load value argument into register" << endl;
+			Compiler::moon_code << "lw\t" << reg << "," << temp_arg->record->offset << "(r14)" << endl;
+			Compiler::moon_code << "sw\t" << to_string(target_offset) << "(r14)," << reg << endl;
+			this->registers.push_back(reg);
+		}
+		param = param->right;
+		arg = arg->right;
+	}
+
+	int return_type_size = node->funchead->leftmost_child->right->right->right->size;
+	int return_offset = funcdef_size - return_type_size;
+	string reg = this->registers.back(); this->registers.pop_back();
+	cout << return_type_size << endl;
+	Compiler::moon_code << "\t%increase stack frame" << endl;
+	Compiler::moon_code << "addi\tr14,r14," << to_string(funcdef_size) << endl;
+	Compiler::moon_code << "\t%jump and link to function" << endl;
+	Compiler::moon_code << "jl\tr15," << node->funchead->leftmost_child->val << endl;
+	Compiler::moon_code << "\t%function done, decrease stack frame" << endl;
+	Compiler::moon_code << "subi\tr14,r14," << to_string(funcdef_size) << endl;
+	Compiler::moon_code << "\t%get return value from f" << endl;
+	Compiler::moon_code << "lw\t" << reg << "," << to_string(return_offset) << "(r14)" << endl;
+	Compiler::moon_code << "sw\t" << to_string(node->record->offset) << "(r14)," << reg << endl;
+	this->registers.push_back(reg);
+}
+
+void CodeGenerationVisitor::visit(ReturnStmtNode *node) {
+	ASTNode *retval = node->get_first_child_with_record();
+
+	string reg = this->registers.back(); this->registers.pop_back();
+	Compiler::moon_code << "\t%load the return value into register" << endl;
+	Compiler::moon_code << "lw\t" << reg << "," << retval->record->offset << "(r14)" << endl;
+	Compiler::moon_code << "\t%put return value at first cell of function" << endl;
+	Compiler::moon_code << "sw\t" << "0(r14)," << reg << endl;
+	Compiler::moon_code << "\t%load return address" << endl;
+	Compiler::moon_code << "lw\t" "r15,-4(r14)" << endl;
+	Compiler::moon_code << "\t%jump to return address" << endl;
+	Compiler::moon_code << "jr\tr15" << endl << endl;
+	this->registers.push_back(reg);
+}

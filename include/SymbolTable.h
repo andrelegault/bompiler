@@ -16,6 +16,7 @@ class SymbolTable {
 		string name;
 		const string type;
 		int compute_size() const;
+		SymbolTableRecord* find_record(const string &target_name, const string &target_type);
 
 		SymbolTable(ASTNode *node, const string &type);
 
