@@ -208,9 +208,9 @@ void CreatingVisitor::visit(FParamNode *node) {
 	ASTNode *id = type->right;
 	ASTNode *dimlist = id->right;
 
-	DimListNode *dim = dynamic_cast<DimListNode*>(dimlist);
+	DimListNode *dims = dynamic_cast<DimListNode*>(dimlist);
 	string types_str = type->get_type() == "id" ? type->val : type->get_type();
-	types_str += dim->get_dims_str();
+	types_str += dims->get_dims_str();
 
 	node->record = new ParamSymbolTableRecord(node);
 	node->record->name = id->val;
@@ -256,7 +256,6 @@ void CreatingVisitor::visit(IntLitNode *node) {
 	// true for fparam or vardecl
 	if (node->parent->get_type() == "dimlist" || node->parent->parent->get_type() == "indicelist")
 		return;
-	node->size = 4;
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
@@ -265,7 +264,6 @@ void CreatingVisitor::visit(IntLitNode *node) {
 
 void CreatingVisitor::visit(FloatLitNode *node) {
 	ASTNode *parent = node->parent;
-	node->size = 8;
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
@@ -276,17 +274,18 @@ void CreatingVisitor::visit(AddOpNode *node) {
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
+	node->record->type = "integer";
 }
 
 void CreatingVisitor::visit(MultOpNode *node) {
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
+	node->record->type = "integer";
 }
 
 void CreatingVisitor::visit(FCallNode *node) {
 	ASTNode *parent = node->parent;
-	node->size = 4;
 	node->record = new SymbolTableRecord(node);
 	node->record->name = "t" + to_string(this->temp_count++);
 	node->record->kind = "temp";
@@ -381,11 +380,38 @@ SizeSetterVisitor::SizeSetterVisitor() {
 void SizeSetterVisitor::visit(IntegerNode *node) {
 	node->size = 4;
 }
-
-
 void SizeSetterVisitor::visit(FloatNode *node) {
 	node->size = 8;
 }
+void SizeSetterVisitor::visit(IntLitNode *node) {
+	node->size = 4;
+}
+void SizeSetterVisitor::visit(FloatLitNode *node) {
+	node->size = 8;
+}
+
+void SizeSetterVisitor::visit(FCallNode *node) {
+	// TODO: search for funcdef using id to get its return type's size
+	node->size = 4;
+}
+
+
+void SizeSetterVisitor::visit(FParamNode *node) {
+	ASTNode *type = node->leftmost_child;
+	ASTNode *id = type->right;
+	ASTNode *dimlist = id->right;
+
+	DimListNode *dims = dynamic_cast<DimListNode*>(dimlist);
+	vector<int> dimensions = dims->get_dims();
+	int total_cells = 1;
+	if (dimensions.size() >= 1) {
+		for (const auto &dim : dimensions) {
+			total_cells *= dim;
+		}
+	}
+	node->size = total_cells * type->size;
+}
+
 
 void SizeSetterVisitor::visit(VarDeclNode *node) {
 	ASTNode *type = node->leftmost_child;
@@ -403,59 +429,20 @@ void SizeSetterVisitor::visit(VarDeclNode *node) {
 	node->size = total_cells * type->size;
 }
 
+void SizeSetterVisitor::visit(FuncHeadNode *node) {
+	// main function doesnt have a funchead
+	int return_size = node->leftmost_child->right->right->right->size;
+	// update the funcdef's size to include the return value + jump
+	node->parent->size += 4 + return_size; // jl/jr return
+}
+
 void SizeSetterVisitor::visit(FuncDefNode *node) {
-	// set offsets
-	int total = 0;
+	// if its main, it doesnt have a returnval and params
+	int total = node->size * -1;
 	for(const auto &record : node->table->records) {
 		record->offset = total;
+		node->size += record->node->size;
 		total -= record->node->size;
-	}
-
-
-	ASTNode *funcbodyorfunchead = node->leftmost_child;
-	if (funcbodyorfunchead->right == nullptr) { // main b/c funchead doesnt exists
-		ASTNode *funcbody = funcbodyorfunchead;
-		ASTNode *vardecllist = funcbody->leftmost_child;
-		ASTNode *statblock = vardecllist->right;
-
-		ASTNode *vardecl = vardecllist->leftmost_child;
-		ASTNode *stmt = statblock->leftmost_child;
-
-		while (vardecl != nullptr) {
-			node->size += vardecl->size;
-			vardecl = vardecl->right;
-		}
-		while (stmt != nullptr) {
-			node->size += stmt->size;
-			stmt = stmt->right;
-		}
-	} else {
-		// TODO: include param for offset calculation
-
-		// jump
-		node->size -= 4;
-		// return
-		FunctionSymbolTableRecord *record = dynamic_cast<FunctionSymbolTableRecord*>(node->record);
-		if (record->return_type != "" && record->return_type != "void") {
-			// TODO: doesnt support classes
-			node->size -= 4;
-		}
-	}
-}
-
-void SizeSetterVisitor::visit(StatBlockNode *node) {
-	ASTNode *stmt = node->leftmost_child;
-	while (stmt != nullptr) {
-		node->size -= stmt->size;
-		stmt = stmt->right;
-	}
-}
-
-void SizeSetterVisitor::visit(VarDeclListNode *node) {
-	ASTNode *vardecl = node->leftmost_child;
-	while (vardecl != nullptr) {
-		node->size -= vardecl->size;
-		vardecl = vardecl->right;
 	}
 }
 
@@ -481,15 +468,24 @@ void SizeSetterVisitor::visit(VariableNode *node) {
 	while (parent != nullptr && parent->get_type() != "funcdef")
 		parent = parent->parent;
 	// here we assume the variable was declared
-	VariableSymbolTableRecord *matching_vardecl = dynamic_cast<VariableSymbolTableRecord*>(parent->table->has_name(id->val));
-	node->record = matching_vardecl;
-	node->record->type = matching_vardecl->type;
-	node->record->link = matching_vardecl->link;
-	node->size = matching_vardecl->node->size;
-}
-
-void SizeSetterVisitor::visit(FCallNode *node) {
-	// TODO: set the type depending on associated record
+	SymbolTableRecord *record = parent->table->has_name(id->val);
+	if (record == nullptr) {
+		cout << "error";
+		return;
+	}
+	if (record->node->get_type() == "vardecl") {
+		VariableSymbolTableRecord *matching_vardecl = dynamic_cast<VariableSymbolTableRecord*>(record);
+		node->record = matching_vardecl;
+		node->record->type = matching_vardecl->type;
+		node->record->link = matching_vardecl->link;
+		node->size = matching_vardecl->node->size;
+	} else if (record->node->get_type() == "fparam") {
+		ParamSymbolTableRecord *matching_fparam = dynamic_cast<ParamSymbolTableRecord*>(record);
+		node->record = matching_fparam;
+		node->record->type = matching_fparam->type;
+		node->record->link = matching_fparam->link;
+		node->size = matching_fparam->node->size;
+	}
 }
 
 /**************************************

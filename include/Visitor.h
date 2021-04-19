@@ -115,12 +115,14 @@ class SizeSetterVisitor : public Visitor {
 		void visit(FloatNode *node);
 		void visit(FuncDefNode *node);
 		void visit(VarDeclNode *node);
-		void visit(StatBlockNode *node);
-		void visit(VarDeclListNode *node);
 		void visit(AddOpNode *node);
 		void visit(MultOpNode *node);
 		void visit(VariableNode *node);
 		void visit(FCallNode *node);
+		void visit(FParamNode *node);
+		void visit(FuncHeadNode *node);
+		void visit(IntLitNode *node);
+		void visit(FloatLitNode *node);
 };
 
 class CodeGenerationVisitor : public Visitor {

@@ -61,7 +61,7 @@ string ClassSymbolTableRecord::to_str() const {
 }
 string ParamSymbolTableRecord::to_str() const {
 	stringstream ss;
-	ss << setw(15) << name << " | " << setw(10) << "param" << " | " << setw(20) << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
+	ss << setw(15) << name << " | " << setw(10) << "param" << " | " << setw(20) << type << " | " << setw(3) << node->size << setw(5) << SymbolTableRecord::offset;
 	return ss.str();
 }
 
