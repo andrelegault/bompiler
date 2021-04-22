@@ -376,6 +376,10 @@ void CheckingVisitor::visit(DotNode *node) {
 SizeSetterVisitor::SizeSetterVisitor() {
 }
 
+void SizeSetterVisitor::visit(ClassDeclNode *node) {
+	for(const auto &record : node->table->records)
+		node->size += record->node->size;
+}
 void SizeSetterVisitor::visit(IntegerNode *node) {
 	node->size = 4;
 }

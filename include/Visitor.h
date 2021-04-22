@@ -114,6 +114,7 @@ class SizeSetterVisitor : public Visitor {
 		void visit(IntegerNode *node);
 		void visit(FloatNode *node);
 		void visit(FuncDefNode *node);
+		void visit(ClassDeclNode *node);
 		void visit(VarDeclNode *node);
 		void visit(AddOpNode *node);
 		void visit(MultOpNode *node);
